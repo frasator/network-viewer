@@ -1,0 +1,187 @@
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="nv-configure-force-directed">
+    <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
+        :host {
+            display: block;
+            box-sizing: border-box;
+            width: 350px;
+        }
+
+        #main {
+            padding: 5px;
+        }
+
+        #main .horizontal.layout > div,
+        stv-select {
+            margin: 0 0 4px 4px;
+        }
+
+        .title {
+            margin: 0 0 10px 0;
+            padding-bottom: 2px;
+            border-bottom: 1px solid var(--divider-color);
+        }
+
+        label {
+            width: 100px;
+        }
+
+        .footer {
+            padding: 4px 5px 4px 12px;
+            border-top: 1px solid var(--divider-color);
+            background-color: var(--light-secondary-color);
+        }
+
+        .footer > * {
+            margin-left: 5px;
+        }
+    </style>
+    <template>
+        <div id="main">
+            <div class="title">Node related settings</div>
+
+            <div class="horizontal layout">
+                <label class="stv">Charge:</label>
+
+                <div class="flex">
+                    <input class="stv" type="number" value="{{charge::input}}">
+                </div>
+
+                <stv-select style="width:114px;">
+                    <stv-option value="none">None</stv-option>
+                    <template is="dom-repeat" items="{{vertexColumns}}" as="column">
+                        <stv-option value="{{column.name}}">{{column.title}}</stv-option>
+                    </template>
+                </stv-select>
+            </div>
+            <br>
+
+            <div class="title">Edge related settings</div>
+            <div class="horizontal layout">
+                <label class="stv">Link distance:</label>
+
+                <div class="flex">
+                    <input class="stv" type="number" min="0" value="{{linkDistance::input}}">
+                </div>
+
+                <stv-select style="width:114px;">
+                    <stv-option value="none">None</stv-option>
+                    <template is="dom-repeat" items="{{edgeColumns}}" as="column">
+                        <stv-option value="{{column.name}}">{{column.title}}</stv-option>
+                    </template>
+                </stv-select>
+            </div>
+
+            <div class="horizontal layout">
+                <label class="stv">Link strength:</label>
+
+                <div class="flex">
+                    <input class="stv" type="number" min="0" max="1" step="0.1" value="{{linkStrength::input}}">
+                </div>
+
+                <stv-select style="width:114px;">
+                    <stv-option style="width:11" value="none">None</stv-option>
+                    <template is="dom-repeat" items="{{edgeColumns}}" as="column">
+                        <stv-option value="{{column.name}}">{{column.title}}</stv-option>
+                    </template>
+                </stv-select>
+            </div>
+            <br>
+
+            <div class="title">Global settings</div>
+
+            <div class="horizontal layout">
+                <label class="stv">Friction:</label>
+
+                <div class="flex">
+                    <input class="stv" type="number" min="0" max="1" step="0.1" value="{{friction::input}}">
+                </div>
+            </div>
+            <div class="horizontal layout">
+                <label class="stv">Gravity:</label>
+
+                <div class="flex">
+                    <input class="stv" type="number" min="0" step="0.1" value="{{gravity::input}}">
+                </div>
+            </div>
+            <div class="horizontal layout">
+                <label class="stv">Charge distance:</label>
+
+                <div class="flex">
+                    <input class="stv" type="number" min="0" value="{{chargeDistance::input}}">
+                </div>
+            </div>
+        </div>
+
+        <div class="footer horizontal layout center">
+            <div class="flex"></div>
+            <div class="stv-btn stv-btn-shdw" style="width: 100px;" on-click="handleOk">OK</div>
+        </div>
+
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: "nv-configure-force-directed",
+        properties: {
+            edgeColumns: {
+                type: Array
+            },
+            vertexColumns: {
+                type: Array
+            },
+            charge: {
+                type: Number,
+                value: -300
+            },
+            linkDistance: {
+                type: Number,
+                value: 20
+            },
+            linkStrength: {
+                type: Number,
+                value: 1
+            },
+            friction: {
+                type: Number,
+                value: 0.9
+            },
+            gravity: {
+                type: Number,
+                value: 0.1
+            },
+            chargeDistance: {
+                type: Number,
+                value: 500
+            },
+            chargeAttribute: {
+                type: String,
+                value: 'none'
+            },
+            linkDistanceAttribute: {
+                type: String,
+                value: 'none'
+            },
+            linkStrengthAttribute: {
+                type: String,
+                value: 'none'
+            },
+
+        },
+        handleOk: function() {
+            this.fire('ok', {
+                charge: this.charge,
+                linkDistance: this.linkDistance,
+                linkStrength: this.linkStrength,
+                friction: this.friction,
+                gravity: this.gravity,
+                chargeDistance: this.chargeDistance,
+                chargeAttribute: this.chargeAttribute,
+                linkDistanceAttribute: this.linkDistanceAttribute,
+                linkStrengthAttribute: this.linkStrengthAttribute
+            });
+        }
+    });
+</script>

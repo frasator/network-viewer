@@ -1,0 +1,80 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="nv-status-bar">
+    <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
+        :host {
+            display: block;
+            position: relative;
+            box-sizing: border-box;
+            height: 32px;
+            background-color: #FAFAFA;
+            border-top: 1px solid #D9D9D9;
+        }
+
+        #bar {
+            height: 31px;
+            padding-left: 5px;
+            padding-right: 15px;
+        }
+
+        .grey {
+            color: #666;
+        }
+    </style>
+    <template>
+        <div id="bar" class="horizontal layout center">
+            <div class="stv-txt horizontal layout">
+                <div class="grey">Nodes:&nbsp;</div>
+                <span>{{selectedVertices.length}}</span>
+                <span class="grey"> &nbsp;of&nbsp;</span>
+                <span>{{vertices.length}}</span>
+            </div>
+            <div class="stv-txt horizontal layout">
+                <div class="grey">Edges:&nbsp;</div>
+                <span>{{selectedEdges.length}}</span>
+                <span class="grey"> &nbsp;of&nbsp;</span>
+
+                <span>{{edges.length}}</span>
+            </div>
+            <div class="flex"></div>
+            <template is="dom-if" if="{{checkFileName(lastLoadedFileName)}}">
+                <div class="text">
+                    <span class="grey">File: </span>
+                    <span>{{lastLoadedFileName}}</span>
+                </div>
+            </template>
+        </div>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'nv-status-bar',
+        properties: {
+            lastLoadedFileName: {
+                type: String
+            },
+            vertices: {
+                type: Array
+            },
+            edges: {
+                type: Array
+            },
+            selectedVertices: {
+                type: Array
+            },
+            selectedEdges: {
+                type: Array
+            },
+            selectionColor: {
+                value: String
+            }
+        },
+        checkFileName: function(lastLoadedFileName) {
+            return lastLoadedFileName != '';
+        },
+        computeColor: function(selectionColor) {
+            return "color:" + selectionColor + ";";
+        }
+    });
+</script>

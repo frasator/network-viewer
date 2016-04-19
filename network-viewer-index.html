@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Network Viewer</title>
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+        <!-- Chrome for Android theme color -->
+        <!--<meta name="theme-color" content="#303F9F">-->
+        <meta name="theme-color" content="#000000">
+
+        <!-- Web Application Manifest -->
+        <link rel="manifest" href="manifest.json">
+
+        <!-- Windows Theme color -->
+        <meta name="msapplication-TileColor" content="#3372DF">
+
+        <!-- Add to homescreen for Chrome on Android -->
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="application-name" content="Network Viewer">
+
+        <!-- Add to homescreen for Safari on iOS -->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="Network Viewer">
+
+        <!-- Force Microsoft use latest web tech -->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+        <!-- END meta -->
+
+        <!--Config-->
+        <script src="conf/config.js"></script>
+
+        <!--Fonts-->
+        <link href='../stevia-components/fonts/fonts.css' rel='stylesheet' type='text/css'>
+        <link href='../fontawesome/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
+
+        <!--CSS-->
+        <link href='../stevia-components/css/global.css' rel='stylesheet' type='text/css'>
+        <link href='../stevia-components/css/form.css' rel='stylesheet' type='text/css'>
+        <link href='../stevia-components/css/dropdown.css' rel='stylesheet' type='text/css'>
+
+
+        <!--Web Components-->
+        <script src="../webcomponentsjs/webcomponents-lite.min.js"></script>
+
+        <script src="../stevia-components/src/manager/stevia-manager.js"></script>
+
+        <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+        <style is="custom-style" include="iron-positioning"></style>
+
+        <link rel="import" href="network-viewer.html">
+
+        <link rel="import" href="conf/theme.html">
+
+    </head>
+
+    <body unresolved class="fullbleed">
+        <network-viewer></network-viewer>
+        <!-- <network-viewer lite></network-viewer> -->
+        <!-- <network-viewer lite hide-node-render hide-edge-render></network-viewer> -->
+        <!-- <network-viewer hide-bar hide-tool-bar hide-edition-bar hide-status-bar hide-node-render hide-edge-render></network-viewer> -->
+        <script>
+            var networkViewer = document.querySelector('network-viewer');
+        </script>
+    </body>
+
+</html>

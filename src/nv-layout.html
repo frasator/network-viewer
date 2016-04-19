@@ -1,0 +1,738 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="nv-layout">
+    <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
+        :host {
+            display: block;
+            position: relative;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+    <template>
+        <div id="svgDiv" style="height:100%;width:100%;">
+            <svg xmlns="http://www.w3.org/2000/svg" id="svg" on-wheel="handleWheel" on-mousedown="mouseDownHandler" on-mouseup="mouseUpHandler" on-mouseover="mouseHoverHandler" on-contextmenu="mouseContextMenuHandler" width="100%" height="100%">
+                <rect id="backgroundColor" width="100%" height="100%" fill$="{{backgroundColor}}" x="0" y="0"></rect>
+                <svg id="drawArea">
+                    <svg id="backSvg" x="0" y="0">
+                        <g id="scaleBackGroup" transform$="{{computeTransform(tx,ty,scale)}}"></g>
+                    </svg>
+                    <svg id="frontSvg" x="0" y="0">
+                        <line id="linkHelp" x1="0" y1="0" x2="0" y2="0" stroke="slategray" opacity="1" stroke-width="2" cursor="pointer"></line>
+                        <rect id="selectHelp" x="0" y="0" width="0" height="0" stroke-width="2" stroke="#ff6500" opacity="0.5" fill="#fff0e7"></rect>
+
+                        <g id="scaleFrontGroup" font-family$="{{computeFontFamily()}}" transform$="{{computeTransform(tx,ty,scale)}}">
+                            <!--<g id="scaleFrontGroup" font-family="Ubuntu Mono">-->
+                        </g>
+                    </svg>
+                </svg>
+            </svg>
+        </div>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'nv-layout',
+        properties: {
+            backgroundColor: {
+                type: String
+            },
+            mode: {
+                type: String,
+                observer: 'modeChanged'
+            },
+            zoom: {
+                type: Number,
+                notify: true,
+                observer: 'zoomChanged'
+            },
+            scale: {
+                type: Number,
+                value: 1,
+                notify: true
+            },
+            tx: {
+                type: Number,
+                value: 0,
+                notify: true
+            },
+            ty: {
+                type: Number,
+                value: 0,
+                notify: true
+            },
+            x: {
+                type: Number,
+                value: 0
+            },
+            y: {
+                type: Number,
+                value: 0
+            },
+            moveHandlers: {
+                type: Array,
+                value: function() {
+                    return []
+                }
+            },
+            mx: {
+                type: Number,
+                value: 0
+            },
+            my: {
+                type: Number,
+                value: 0
+            },
+            rmx: {
+                type: Number,
+                value: 0
+            },
+            rmy: {
+                type: Number,
+                value: 0
+            },
+            last_rmx: {
+                type: Number,
+                value: 0
+            },
+            last_rmy: {
+                type: Number,
+                value: 0
+            },
+            isMouseIn: {
+                type: Boolean,
+                value: false
+            }
+        },
+        listeners: {
+            'mousemove': 'handleMouseMove',
+            'mouseleave': 'handleMouseLeave',
+            'mouseenter': 'handleMouseEnter',
+        },
+        handleMouseLeave: function(e) {
+            this.set('isMouseIn', false);
+        },
+        handleMouseEnter: function(e) {
+            this.set('isMouseIn', true);
+        },
+        handleMouseMove: function(e) {
+            var clientRect = this.$.svg.getBoundingClientRect();
+            this.set('mx', (e.clientX - clientRect.left));
+            this.set('my', (e.clientY - clientRect.top));
+            // console.log('mousePos: ' + this.mx + ' , ' + this.my);
+
+            this.set('rmx', (this.mx - this.tx) / this.scale);
+            this.set('rmy', (this.my - this.ty) / this.scale);
+            // console.log('mousePss: ' + this.rmx + ' , ' + this.rmy);
+            // console.log('--------------------------');
+        },
+        computeFontFamily: function() {
+            if (navigator.appVersion.indexOf("Win") != -1) return "'Courier New', Courier";
+            if (navigator.appVersion.indexOf("Mac") != -1) return "Monaco, 'Courier New', Courier";
+            if (navigator.appVersion.indexOf("Linux") != -1) return "monospace, 'Courier New', Courier";
+            if (navigator.appVersion.indexOf("X11") != -1) return "monospace, 'Courier New', Courier";
+            return "'Courier New', Courier";
+        },
+        created: function() {},
+        ready: function() {},
+        computeTransform: function(tx, ty, scale) {
+            return 'translate(' + tx + ',' + ty + ') scale(' + scale + ')';
+        },
+        removeDom: function() {
+            this.$.frontSvg.removeChild(this.$.scaleFrontGroup);
+        },
+        appendDom: function() {
+            this.$.frontSvg.appendChild(this.$.scaleFrontGroup);
+            this.zoomChanged();
+        },
+        clean: function(keepTranslate) {
+            if (keepTranslate !== true) {
+                this.tx = 0;
+                this.ty = 0;
+                this.x = 0;
+                this.y = 0;
+            }
+
+            while (this.$.scaleFrontGroup.firstChild) {
+                this.$.scaleFrontGroup.removeChild(this.$.scaleFrontGroup.firstChild);
+            }
+            while (this.$.scaleBackGroup.firstChild) {
+                this.$.scaleBackGroup.removeChild(this.$.scaleBackGroup.firstChild);
+            }
+        },
+        handleWheel: function(e) {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                this.zoom = Math.min(100, this.zoom + 1);
+            } else {
+                this.zoom = Math.max(0, this.zoom - 1);
+            }
+        },
+        modeChanged: function(neo, old) {
+            switch (neo) {
+                case "add":
+                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    break;
+                case "join":
+                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    break;
+                case "delete":
+                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    break;
+                case "selectbackground":
+                    this.$.drawArea.appendChild(this.$.backSvg);
+                    break;
+                case "select":
+                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    break;
+                case "move":
+                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    break;
+                default:
+                    break;
+            }
+        },
+        zoomChanged: function(neo, old) {
+            // console.log(this.rmx + ',' + this.rmy);
+            // console.log(this.last_rmx + ',' + this.last_rmy);
+            if (old != null && neo != null) {
+                if (this.zoom === 0) {
+                    this.scale = 0.04;
+                } else {
+                    this.scale = this.zoom / 25;
+                }
+                var inc = (neo - old) / 25; // sign included
+                if (this.isMouseIn === true) {
+                    this.tx += (-this.rmx) * inc;
+                    this.ty += (-this.rmy) * inc;
+
+                    this.last_rmx = this.rmx;
+                    this.last_rmy = this.rmx;
+                } else {
+                    this.tx += (-this.last_rmx) * inc;
+                    this.ty += (-this.last_rmy) * inc;
+                }
+            }
+        },
+        centerNetwork: function() {
+            var lbcr = this.getBoundingClientRect();
+            var scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
+
+            var newScale = lbcr.width / (scalebcr.width / this.scale);
+            var newScale2 = lbcr.height / (scalebcr.height / this.scale);
+
+            var finalScale = Math.min(newScale, newScale2);
+            this.zoom = Math.min(Math.floor(finalScale * 25), 100);
+            scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
+            this.tx += (-scalebcr.left) + ((lbcr.width - scalebcr.width) / 2);
+            this.ty += -(scalebcr.top - lbcr.top) + ((lbcr.height - scalebcr.height) / 2);
+        },
+        mouseHoverHandler: function(e) {
+            var targetEl = e.target;
+            var targetElNetworkType = targetEl.getAttribute('network-type');
+            var br = this.getBoundingClientRect();
+            var x = e.clientX - br.left;
+            var y = e.clientY - br.top;
+            switch (targetElNetworkType) {
+                case 'vertex':
+                case 'vertex-label':
+                    this.fire('hoververtex', {
+                        vertexId: this.getVertexId(targetEl),
+                        x: x,
+                        y: y,
+                        e: e
+                    });
+                    break;
+                case 'edge':
+                case 'edge-label':
+                    break;
+                default:
+                    this.fire('hoverleave');
+            }
+        },
+        mouseDownHandler: function(e) {
+            switch (e.which) {
+                case 1: //left click
+                    if (e.shiftKey == true && e.ctrlKey == true) {
+                        this._handleDownMoveCanvas(e);
+                    } else {
+                        this.leftMouseDown(e);
+                    }
+                    break;
+                case 2: //middle click
+                    this.middleMouseDown(e);
+                    break;
+                case 3: //right click
+                    break;
+            }
+        },
+        mouseUpHandler: function(e) {
+            switch (e.which) {
+                case 1: //left click
+                    if (e.shiftKey == true && e.ctrlKey == true) {
+                        this._handleUp(e);
+                    } else {
+                        this.leftMouseUp(e);
+                    }
+                    break;
+                case 2: //middle click
+                    this.middleMouseUp(e);
+                    break;
+                case 3: //right click
+                    break;
+            }
+        },
+        mouseContextMenuHandler: function(e) {
+            e.preventDefault();
+            switch (e.which) {
+                case 3: //right click
+                    this.contextMenu(e);
+                    break;
+            }
+        },
+        leftMouseDown: function(e) {
+            var me = this;
+            var targetEl = e.target;
+            var targetElNetworkType = targetEl.getAttribute('network-type');
+            var br = this.getBoundingClientRect();
+            var downX = e.clientX - br.left;
+            var downY = e.clientY - br.top;
+            switch (this.mode) {
+                case "add":
+                    /* event coordinates */
+                    if (targetElNetworkType !== 'vertex' && targetElNetworkType !== 'vertex-label') {
+                        this.fire('createvertex', {
+                            x: downX,
+                            y: downY
+                        });
+                    }
+                    break;
+                case "move":
+                    switch (targetElNetworkType) {
+                        case 'vertex':
+                        case 'vertex-label':
+                            this._handleDownSelectVertex(e);
+                            break;
+                        case 'edge':
+                        case 'edge-label':
+                            break;
+                        default:
+                            this._handleDownMoveCanvas(e);
+                    }
+                    break;
+                case "select":
+                    switch (targetElNetworkType) {
+                        case 'vertex':
+                        case 'vertex-label':
+                            this._handleDownSelectVertex(e);
+                            break;
+                        case 'edge':
+                        case 'edge-label':
+                            this._handleDownSelectEdge(e);
+                            break;
+                        default:
+                            this.selectArea = true;
+                            /* background clicked */
+                            var lastX = 0,
+                                lastY = 0;
+                            var handler = function(moveEvent) {
+                                moveEvent.preventDefault();
+                                var moveX = moveEvent.clientX - br.left;
+                                var moveY = moveEvent.clientY - br.top;
+                                var dispX = moveX - downX;
+                                var dispY = moveY - downY;
+                                var x = (dispX >= 0) ? downX : downX - Math.abs(dispX);
+                                var y = (dispY >= 0) ? downY : downY - Math.abs(dispY);
+                                // Update selectRect size and position
+                                me.$.selectHelp.setAttribute('x', x);
+                                me.$.selectHelp.setAttribute('y', y);
+                                me.$.selectHelp.setAttribute('width', Math.abs(dispX));
+                                me.$.selectHelp.setAttribute('height', Math.abs(dispY));
+                            };
+                            this.$.svg.addEventListener('mousemove', handler);
+                            this.moveHandlers.push(handler);
+                    }
+                    break;
+                case "join":
+                    /* vertex clicked */
+                    if (targetElNetworkType === 'vertex' || targetElNetworkType === 'vertex-label') {
+                        var vertexId = this.getVertexId(targetEl);
+                        // first time vertex click
+                        if (this.joinSourceVertex == null) {
+                            this.joinSourceVertex = vertexId;
+                            this.$.linkHelp.setAttribute('x1', downX);
+                            this.$.linkHelp.setAttribute('y1', downY);
+                            this.$.linkHelp.setAttribute('x2', downX);
+                            this.$.linkHelp.setAttribute('y2', downY);
+                            var handler = function(moveEvent) {
+                                moveEvent.preventDefault();
+                                var moveX = moveEvent.clientX - br.left;
+                                var moveY = moveEvent.clientY - br.top;
+                                me.$.linkHelp.setAttribute('x2', moveX);
+                                me.$.linkHelp.setAttribute('y2', moveY);
+                            };
+                            this.$.svg.addEventListener('mousemove', handler);
+                            this.moveHandlers.push(handler);
+                            // second vertex click
+                        } else if (this.joinSourceVertex !== vertexId) {
+                            this.fire('createedge', {
+                                sourceId: this.joinSourceVertex,
+                                targetId: vertexId
+                            });
+                            this.joinSourceVertex = null;
+                        }
+                    }
+                    break;
+                case "delete":
+                    if (targetElNetworkType === 'vertex' || targetElNetworkType === 'vertex-label') {
+                        var vertexId = this.getVertexId(targetEl);
+                        this.fire('removevertex', {
+                            vertexId: vertexId
+                        });
+                    }
+                    if (targetElNetworkType === 'edge' || targetElNetworkType === 'edge-label') {
+                        var edgeId = this.getEdgeId(targetEl);
+                        this.fire('removeedge', {
+                            edgeId: edgeId
+                        });
+                    }
+                    break;
+                case "selectbackground":
+                    if (targetElNetworkType === 'background-image') {
+                        targetEl.parentNode.appendChild(targetEl);
+                        var lastX = downX;
+                        var lastY = downY;
+                        var handler = function(moveEvent) {
+                            moveEvent.preventDefault();
+                            var moveX = moveEvent.clientX - br.left;
+                            var moveY = moveEvent.clientY - br.top;
+                            var dispX = moveX - lastX;
+                            var dispY = moveY - lastY;
+
+                            dispX /= me.scale;
+                            dispY /= me.scale;
+
+                            var x = parseInt(targetEl.getAttribute('x'));
+                            var y = parseInt(targetEl.getAttribute('y'));
+
+                            x += dispX;
+                            y += dispY;
+
+                            targetEl.setAttribute('x', x);
+                            targetEl.setAttribute('y', y);
+
+                            lastX = moveX;
+                            lastY = moveY;
+                        };
+                        this.$.svg.addEventListener('mousemove', handler);
+                        this.moveHandlers.push(handler);
+                    }
+                    break;
+            }
+        },
+        leftMouseUp: function(event) {
+            this.style.cursor = "";
+            var me = this;
+            var targetEl = event.target;
+            var targetElNetworkType = targetEl.getAttribute('network-type');
+
+            switch (this.mode) {
+                case "add":
+                    this._removeMouseMoveHandlers();
+                    break;
+                case "move":
+                case "select":
+                    if (this.selectArea && !event.ctrlKey) {
+                        var x = parseFloat(this.$.selectHelp.getAttribute('x'));
+                        var y = parseFloat(this.$.selectHelp.getAttribute('y'));
+                        var width = parseFloat(this.$.selectHelp.getAttribute('width'));
+                        var height = parseFloat(this.$.selectHelp.getAttribute('height'));
+
+                        if (width == 0 && height == 0) {
+                            this.fire('selectback');
+                        }
+                        this.fire('selectarea', {
+                            x: x,
+                            y: y,
+                            width: width,
+                            height: height
+                        });
+                        this.selectArea = false;
+                    } else {
+                        switch (targetElNetworkType) {
+                            case 'vertex':
+                            case 'vertex-label':
+                                this._handleUpSelectVertex(event);
+                                break;
+                            case 'edge':
+                            case 'edge-label':
+                                this._handleUpSelectEdge(event);
+                                break;
+                            default:
+                        }
+                    }
+                    this._removeMouseMoveHandlers();
+                    break;
+                case "selectbackground":
+                    this._removeMouseMoveHandlers();
+                    break;
+                case "join":
+                    if (!(targetElNetworkType === 'vertex' || targetElNetworkType === 'vertex-label')) {
+                        this.joinSourceVertex = null;
+                    }
+                    if (this.joinSourceVertex == null) {
+                        this.$.linkHelp.setAttribute('x1', 0);
+                        this.$.linkHelp.setAttribute('y1', 0);
+                        this.$.linkHelp.setAttribute('x2', 0);
+                        this.$.linkHelp.setAttribute('y2', 0);
+                        this._removeMouseMoveHandlers();
+                    }
+
+                    break;
+                case "delete":
+                    if (targetElNetworkType !== 'vertex') {
+
+                    }
+                    this._removeMouseMoveHandlers();
+                    break;
+            }
+            this.$.selectHelp.setAttribute('x', 0);
+            this.$.selectHelp.setAttribute('y', 0);
+            this.$.selectHelp.setAttribute('width', 0);
+            this.$.selectHelp.setAttribute('height', 0);
+        },
+        middleMouseDown: function(e) {
+            switch (this.mode) {
+                case "add":
+                case "move":
+                case "join":
+                case "delete":
+                case "select":
+                case "selectbackground":
+                    this._handleDownMoveCanvas(e);
+                    break;
+                default:
+            }
+        },
+        middleMouseUp: function(e) {
+            switch (this.mode) {
+                case "add":
+                case "move":
+                case "join":
+                case "delete":
+                case "select":
+                case "selectbackground":
+                    this._handleUp(e);
+                    break;
+                default:
+            }
+        },
+        contextMenu: function(e) {
+            //        console.log('metaKey ' + event.metaKey);
+            //        console.log('ctrlKey ' + event.ctrlKey);
+            //        console.log('shiftKey ' + event.shiftKey);
+            //        console.log('altKey ' + event.altKey);
+            //        console.log(event);
+
+            var me = this;
+            var targetEl = e.target;
+            var targetElNetworkType = targetEl.getAttribute('network-type');
+            var br = this.getBoundingClientRect();
+            var downX = e.clientX - br.left;
+            var downY = e.clientY - br.top;
+            switch (this.mode) {
+                case "add":
+                case "move":
+                case "join":
+                case "delete":
+                case "select":
+                    if (targetElNetworkType === 'vertex' || targetElNetworkType === 'vertex-label') {
+                        var vertexId = this.getVertexId(targetEl);
+                        this.fire('rightclickvertex', {
+                            vertexId: vertexId,
+                            x: downX,
+                            y: downY
+                        });
+                    }
+                    if (targetElNetworkType === 'edge' || targetElNetworkType === 'edge-label') {
+                        var edgeId = this.getEdgeId(targetEl);
+                        this.fire('rightclickedge', {
+                            edgeId: edgeId,
+                            x: downX,
+                            y: downY
+                        });
+                    }
+                    break;
+                case "selectbackground":
+                    if (targetElNetworkType === 'background-image') {
+                        this.fire('rightclickbackgroundimage', {
+                            targetEl: targetEl,
+                            x: downX,
+                            y: downY
+                        });
+                    }
+                    break;
+                default:
+            }
+        },
+        _removeMouseMoveHandlers: function() {
+            for (var i = 0; i < this.moveHandlers.length; i++) {
+                this.$.svg.removeEventListener('mousemove', this.moveHandlers[i]);
+            }
+            this.moveHandlers = [];
+        },
+
+        /* NEW HANDLERS */
+        /**/
+        _handleUp: function(e) {
+            this.style.cursor = "";
+            this._removeMouseMoveHandlers();
+        },
+        _handleDownMoveCanvas: function(e) {
+            var me = this;
+            var targetEl = e.target;
+            var targetElNetworkType = targetEl.getAttribute('network-type');
+            var br = this.getBoundingClientRect();
+            var downX = e.clientX - br.left;
+            var downY = e.clientY - br.top;
+
+            this.style.cursor = "all-scroll";
+            var lastX = downX;
+            var lastY = downY;
+            var handler = function(moveEvent) {
+                moveEvent.preventDefault();
+                var moveX = moveEvent.clientX - br.left;
+                var moveY = moveEvent.clientY - br.top;
+                var dispX = moveX - lastX;
+                var dispY = moveY - lastY;
+
+                me.tx += dispX;
+                me.ty += dispY;
+                me.x += dispX;
+                me.y += dispY;
+
+                lastX = moveX;
+                lastY = moveY;
+            };
+            this.$.svg.addEventListener('mousemove', handler);
+            this.moveHandlers.push(handler);
+        },
+
+        _handleDownSelectVertex: function(e) {
+            var me = this;
+            var targetEl = e.target;
+            var targetElNetworkType = targetEl.getAttribute('network-type');
+            var br = this.getBoundingClientRect();
+            var downX = e.clientX - br.left;
+            var downY = e.clientY - br.top;
+
+            var vertexId = this.getVertexId(targetEl);
+            this.fire('selectvertex', {
+                vertexId: vertexId,
+                addToSelection: e.ctrlKey
+            });
+            var lastX = downX;
+            var lastY = downY;
+            var handler = function(moveEvent) {
+                moveEvent.preventDefault();
+                var moveX = moveEvent.clientX - br.left;
+                var moveY = moveEvent.clientY - br.top;
+                var dispX = moveX - lastX;
+                var dispY = moveY - lastY;
+
+                me.fire('moveselectedvertices', {
+                    dispX: dispX,
+                    dispY: dispY
+                });
+
+                lastX = moveX;
+                lastY = moveY;
+            };
+            this.$.svg.addEventListener('mousemove', handler);
+            this.moveHandlers.push(handler);
+        },
+        _handleDownSelectEdge: function(e) {
+            var targetEl = e.target;
+            var edgeId = this.getEdgeId(targetEl);
+            var edgeId = this.getEdgeId(targetEl);
+            this.fire('selectedge', {
+                edgeId: edgeId,
+                addToSelection: e.ctrlKey
+            });
+        },
+        _handleUpSelectVertex: function(e) {
+            var me = this;
+            var targetEl = e.target;
+            var br = this.getBoundingClientRect();
+            var downX = e.clientX - br.left;
+            var downY = e.clientY - br.top;
+
+            var vertexId = this.getVertexId(targetEl);
+            this.fire('leftclickvertex', {
+                vertexId: vertexId,
+                x: downX,
+                y: downY
+            });
+            this._handleUp();
+        },
+        _handleUpSelectEdge: function(e) {
+            var me = this;
+            var targetEl = e.target;
+            var br = this.getBoundingClientRect();
+            var downX = e.clientX - br.left;
+            var downY = e.clientY - br.top;
+
+            var edgeId = this.getEdgeId(targetEl);
+            this.fire('leftclickedge', {
+                edgeId: edgeId,
+                x: downX,
+                y: downY
+            });
+            this._handleUp();
+        },
+
+        /**/
+        /**/
+
+        getVertexId: function(targetEl) {
+            return Utils.closest(targetEl, '[network-type=vertex-g]').getAttribute('id');
+        },
+        getEdgeId: function(targetEl) {
+            return Utils.closest(targetEl, '[network-type=edge-g]').getAttribute('id');
+        },
+        addBackgroundImage: function(image) {
+            SVG.addChildImage(this.$.scaleBackGroup, {
+                "x": image.x,
+                "y": image.y,
+                "xlink:href": image.src,
+                "width": image.width,
+                "height": image.height,
+                "network-type": "background-image"
+            });
+        },
+        addBackgroundImages: function(images) {
+            for (var i = 0, li = images.length; i < li; i++) {
+                this.addBackgroundImage(images[i]);
+            }
+        },
+        getBackgroundImages: function() {
+            var images = [];
+            var imageElements = this.$.scaleBackGroup.querySelectorAll('image[network-type="background-image"]');
+            for (var i = 0; i < imageElements.length; i++) {
+                images.push({
+                    src: imageElements[i].getAttribute('href'),
+                    width: imageElements[i].getAttribute('width'),
+                    height: imageElements[i].getAttribute('height'),
+                    x: imageElements[i].getAttribute('x'),
+                    y: imageElements[i].getAttribute('y')
+                });
+            }
+            return images;
+        }
+    });
+</script>

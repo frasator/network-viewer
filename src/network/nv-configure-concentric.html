@@ -1,0 +1,172 @@
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="nv-configure-concentric">
+    <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
+        :host {
+            display: block;
+            box-sizing: border-box;
+            width: 350px;
+        }
+
+        #main {
+            padding: 5px;
+        }
+
+        #main .horizontal.layout > div,
+        stv-select {
+            margin: 0 0 4px 4px;
+        }
+
+        .title {
+            margin: 0 0 10px 0;
+            padding-bottom: 2px;
+            border-bottom: 1px solid var(--divider-color);
+        }
+
+        label {
+            width: 120px;
+        }
+
+        .footer {
+            padding: 4px 5px 4px 12px;
+            border-top: 1px solid var(--divider-color);
+            background-color: var(--light-secondary-color);
+        }
+
+        .footer > * {
+            margin-left: 5px;
+        }
+
+        .gray {
+            color: #666;
+        }
+    </style>
+    <template>
+        <div id="main">
+            <div class="title">Node related settings</div>
+
+            <div class="horizontal layout">
+                <label class="stv">Concentric:</label>
+
+                <stv-select class="flex" style="width:114px;" id="concentricSelect">
+                    <stv-option value="none">None</stv-option>
+                    <template is="dom-repeat" items="{{vertexColumns}}" as="column">
+                        <stv-option value="{{column.name}}">{{column.title}}</stv-option>
+                    </template>
+                </stv-select>
+            </div>
+            <br>
+
+            <div class="title">Global settings</div>
+
+            <div class="horizontal layout">
+                <label class="stv">Start angle:</label>
+
+                <div class="flex">
+                    <input class="stv" type="number" step="0.1" value="{{startAngle::input}}">
+                </div>
+                <div> * &Pi;
+                    <span class="gray">radians</span>
+                </div>
+            </div>
+            <div class="horizontal layout">
+                <label class="stv">Sweep:</label>
+
+                <div class="flex">
+                    <input class="stv" type="number" step="0.1" value="{{sweep::input}}">
+                </div>
+                <div> * &Pi;
+                    <span class="gray">radians</span>
+                </div>
+            </div>
+            <div class="horizontal layout">
+                <label class="stv">Min. node spacing:</label>
+
+                <div class="flex">
+                    <input class="stv" type="number" value="{{minNodeSpacing::input}}">
+                </div>
+            </div>
+            <div class="horizontal layout">
+                <label class="stv">Clockwise:</label>
+
+                <label class="stv-control flex">
+                    <input class="stv" type="checkbox" checked="{{gravity::change}}">
+                    <span></span>
+                </label>
+            </div>
+            <div class="horizontal layout">
+                <label class="stv">Equidistant:</label>
+
+                <label class="stv-control flex">
+                    <input class="stv" type="checkbox" checked="{{equidistant::change}}">
+                    <span></span>
+                </label>
+            </div>
+            <div class="horizontal layout">
+                <label class="stv">Avoid overlap:</label>
+
+                <label class="stv-control flex">
+                    <input class="stv" type="checkbox" checked="{{avoidOverlap::change}}">
+                    <span></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="footer horizontal layout center">
+            <div class="flex"></div>
+            <div class="stv-btn stv-btn-shdw" style="width: 100px;" on-click="handleOk">OK</div>
+        </div>
+
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: "nv-configure-concentric",
+        properties: {
+            edgeColumns: {
+                type: Array
+            },
+            vertexColumns: {
+                type: Array
+            },
+            concentric: {
+                type: Number
+            },
+            startAngle: {
+                type: Number,
+                value: 3 / 2
+            },
+            sweep: {
+                type: Number
+            },
+            minNodeSpacing: {
+                type: Number,
+                value: 30
+            },
+            clockwise: {
+                type: Boolean,
+                value: true
+            },
+            equidistant: {
+                type: Boolean,
+                value: false
+            },
+            avoidOverlap: {
+                type: Boolean,
+                value: true
+            }
+        },
+        handleOk: function() {
+            this.fire('ok', {
+                concentricAttribute: this.$.concentricSelect.value,
+                startAngle: this.startAngle,
+                sweep: this.sweep,
+                minNodeSpacing: this.minNodeSpacing,
+                clockwise: this.clockwise,
+                equidistant: this.equidistant,
+                avoidOverlap: this.avoidOverlap
+            });
+        }
+    });
+</script>

@@ -1,0 +1,515 @@
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="nv-session-manager">
+    <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
+        :host {
+            display: block;
+            box-sizing: border-box;
+        }
+
+        .selbox {
+            box-sizing: border-box;
+            overflow-y: auto;
+            border: 1px solid var(--divider-color);
+            background-color: #FFF;
+        }
+
+        .selitem {
+            padding: 2px 5px;
+        }
+
+        .selitem:hover {
+            background-color: var(--hover-color);
+        }
+
+        .selitem[data-checked] {
+            background-color: var(--selected-color);
+        }
+
+        .container {
+            margin: 5px;
+        }
+
+        .container div {
+            margin: 2px;
+        }
+
+        .light {
+            color: #666;
+        }
+
+        .footer {
+            border-top: 1px solid var(--divider-color);
+            padding: 4px 5px;
+        }
+
+        .footer > * {
+            margin-left: 5px;
+        }
+    </style>
+    <template>
+        <div class="container">
+
+            <label class="stv">Save current session:</label>
+
+            <div class="horizontal layout">
+                <div class="flex">
+                    <input class="stv" type="text" value="{{sessionName::input}}" placeholder="Session name">
+                </div>
+                <div class="stv-btn stv-btn-shdw" on-click="handleAddSession">
+                    Add session
+                </div>
+            </div>
+
+
+            <label class="stv horizontal layout">
+                <div>Saved sessions:</div>
+                <div class="flex"></div>
+                <div><i hidden$="{{isMessageEmpty(message)}}" class="fa fa-circle-o-notch fa-spin"></i>
+                    <span>{{message}}</span>
+                </div>
+            </label>
+
+            <div class="selbox" style="height: 200px;">
+                <template is="dom-if" if="{{!logged}}">
+                    <div class="selitem">You must be logged in to save your sessions.</div>
+                </template>
+                <template is="dom-if" if="{{hasSessions(logged, sessions.length)}}">
+                    <div class="selitem">No sessions found.</div>
+                </template>
+                <template is="dom-repeat" items="{{sessions}}" as="session">
+                    <div class="selitem" on-click="handleSelectSession" data-checked$="{{isSessionChecked(selectedSessionKey,session.key)}}">
+                        <div>{{session.name}}</div>
+                        <div class="light">{{session.dateString}}</div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="horizontal layout">
+                <div class="horizontal layout flex">
+                    <div class="stv-btn stv-btn-shdw" on-click="handleLoadSession">
+                        Load session
+                    </div>
+                    <div class="stv-btn stv-btn-shdw" on-click="handleRemoveSession">
+                        Delete session
+                    </div>
+                </div>
+                <div horizontal layout>
+                    <div class="stv-btn stv-btn-shdw" on-click="handleRemoveAllSessions">
+                        Delete all sessions
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'nv-session-manager',
+        properties: {
+            userData: {
+                type: Object,
+                observer: 'userDataChanged'
+            },
+            serializeVersion: {
+                type: String
+            },
+            sessions: {
+                type: Array,
+                value: function() {
+                    return []
+                }
+            },
+            sessionMap: {
+                type: Object,
+                value: function() {
+                    return {}
+                }
+            },
+            selectedSession: {
+                type: Object
+            },
+            selectedSessionKey: {
+                type: String
+            },
+            sessionName: {
+                type: String,
+                value: ''
+            },
+            logged: {
+                type: Boolean,
+                value: false
+            },
+            selectedStudy: {
+                type: Object
+            },
+            message: {
+                type: String,
+                value: ''
+            }
+        },
+        ready: function() {
+            var me = this;
+            this.keyPrefix = 'NV_SESSION_MANAGER' + this.serializeVersion;
+            this.networkViewer = this.domHost;
+            this.cellMaps = this.networkViewer.domHost;
+
+            if (this.cellMaps) {
+                if (this.cellMaps.$.header) {
+                    this.cellMaps.$.header.addEventListener('login', function(e) {
+                        me.handleLogin();
+                    });
+                    this.cellMaps.$.header.addEventListener('logout', function(e) {
+                        me.handleLogout();
+                    });
+                }
+            }
+        },
+        hasSessions: function(logged, length) {
+            return logged && length == 0;
+        },
+        isSessionChecked: function(selectedSessionKey, key) {
+            return selectedSessionKey === key;
+        },
+        isMessageEmpty: function(message) {
+            return message === '';
+        },
+        handleLogin: function() {
+            this.logged = true;
+            this._updateSessionsFromUserData();
+        },
+        handleLogout: function() {
+            this.sessions = [];
+            this.sessionMap = {};
+            this.selectedSession = undefined;
+            this.selectedSessionKey = undefined;
+            this.sessionName = '';
+            this.logged = false;
+            this.selectedStudy = undefined;
+            this.message = '';
+        },
+        userDataChanged: function(neo, old) {
+            var me = this;
+            if (this.userData) {
+
+                this.selectedProject = this.userData.projects[0];
+
+                SteviaManager.projects.studies({
+                    id: this.selectedProject.id,
+                    query: {
+                        sid: Cookies("bioinfo_sid")
+                    },
+                    request: {
+                        success: function(response) {
+                            if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
+                                me.studies = response.response[0].result;
+                                me.selectedStudy = me.studies[0];
+                                me.handleLogin();
+                            } else {
+                                console.log(response.error);
+                                console.log(response.response[0].errorMsg);
+                            }
+                        },
+                        error: function() {
+                            console.log('Server error, try again later.');
+                        }
+                    }
+                })
+            }
+        },
+        selectedStudyChanged: function(o, n) {
+            // console.log("selected study changed")
+            this.logged = true;
+            this._updateSessionsFromUserData();
+        },
+        handleAddSession: function(e) {
+            var me = this;
+            this.saveSession(this.networkViewer, this.sessionName, function() {
+                me.message = '';
+                me._updateSessionsFromUserData();
+            });
+        },
+        saveSession: function(networkViewer, name, callback) {
+            if (this.logged) {
+                if (name != '') {
+                    name = name.replace(/--/gi, "");
+                    name = name.replace(/ /gi, "_");
+                    var sessionKey = this.keyPrefix + '--' + Date.now() + '--' + name;
+                    if (!this.sessionMap[sessionKey]) {
+                        this.message = 'saving session...';
+                        var fileContent = pako.gzip(JSON.stringify(networkViewer), {
+                            to: 'string'
+                        });
+                        this.uploadFile(fileContent, sessionKey, callback);
+                    }
+                }
+            }
+        },
+        handleRemoveSession: function() {
+            var me = this;
+            if (this.logged) {
+                this.message = 'deleting session...';
+                this.deleteFile(this.selectedSession.file, function(deleteMsg) {
+                    me.message = '';
+                    me._updateSessionsFromUserData();
+                    me.selectedSessionKey = null;
+                    me.selectedSession = null;
+                });
+            }
+        },
+        handleRemoveAllSessions: function() {
+            var me = this;
+            if (this.logged) {
+                if (this.sessions.length > 0 && confirm('Are you sure you want to permanently delete all the saved sessions?')) {
+                    this.message = 'deleting all sessions...';
+                    for (var i = 0; i < this.sessions.length; i++) {
+                        var session = this.sessions[i];
+                        this.deleteFile(session.file, function(deleteMsg) {
+                            //TODO deleteFiles
+                            me.message = '';
+                            me.sessions = [];
+                            me.sessionMap = {};
+                            me.selectedSessionKey = null;
+                            me.selectedSession = null;
+                        });
+                    }
+                }
+            }
+        },
+        handleLoadSession: function() {
+            var me = this;
+            if (this.logged) {
+                this.message = 'loading session...';
+                if (this.selectedSessionKey) {
+                    var file = this.selectedSession.file;
+                    var content = this._getFileContent(file, function(content) {
+                        me.message = '';
+                        me.networkViewer.loadJSON(JSON.parse(pako.ungzip(content, {
+                            to: 'string'
+                        })));
+                    });
+                }
+            }
+        },
+        handleSelectSession: function(e) {
+            this.selectedSessionKey = e.model.session.key;
+            this.selectedSession = e.model.session;
+        },
+        _updateSessionsFromUserData: function() {
+            this.message = 'updating list..'
+            var me = this;
+            if (this.selectedStudy != null) {
+                var studyId = this.selectedStudy.id;
+                this._getSessionsFolder(studyId, function(sessionsFolder) {
+                    if (sessionsFolder == null) {
+                        me._createSessionsFolder(studyId, function(sessionsFolder) {
+                            me._processSessionsFiles(sessionsFolder);
+                        });
+                    } else {
+                        me._processSessionsFiles(sessionsFolder);
+                    }
+                });
+            }
+        },
+        _processSessionsFiles: function(sessionsFolder) {
+            var me = this;
+            this._getSessionsFiles(sessionsFolder, function(sessionsFiles) {
+                if (sessionsFiles != null) {
+                    var sessions = [];
+                    me.sessionMap = {};
+                    for (var i = 0; i < sessionsFiles.length; i++) {
+                        var sessionFile = sessionsFiles[i];
+                        if (sessionFile.status != "DELETED" && sessionFile.status != "DELETING") {
+                            var keySplit = sessionFile.name.split('--');
+                            if (keySplit[0] == me.keyPrefix) {
+                                var timeStamp = parseInt(keySplit[1]);
+                                sessions.push({
+                                    file: sessionFile,
+                                    key: sessionFile.name,
+                                    name: keySplit[2],
+                                    timeStamp: timeStamp,
+                                    dateString: new Date(timeStamp).toString()
+                                });
+                                me.sessionMap[sessionFile.name] = true;
+                            }
+                        }
+                    }
+                    sessions.sort(function(a, b) {
+                        return b.timeStamp - a.timeStamp;
+                    });
+                    me.sessions = sessions;
+                }
+                me.message = ''
+            });
+        },
+
+        _getFileContent: function(file, callback) {
+            var content;
+            SteviaManager.files.content({
+                id: file.id,
+                query: {
+                    sid: Cookies('bioinfo_sid')
+                },
+                request: {
+                    success: function(response) {
+                        content = response;
+                        callback(content);
+                    },
+                    error: function() {
+                        //                            me.message = 'Server error, try again later.';
+                        callback(content);
+                    }
+                }
+            });
+        },
+        _getSessionsFolder: function(studyId, callback) {
+            var me = this;
+            var folder;
+            SteviaManager.files.search({
+                query: {
+                    sid: Cookies('bioinfo_sid'),
+                    studyId: studyId,
+                    name: '.cellmaps_sessions'
+                },
+                request: {
+                    success: function(response) {
+                        // console.log(response);
+                        if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
+                            folder = response.response[0].result[0];
+                        } else {
+                            //                                me.message = response.response[0].errorMsg;
+                        }
+                        callback(folder);
+                    },
+                    error: function() {
+                        //                            me.message = 'Server error, try again later.';
+                        callback(folder);
+                    }
+                }
+            });
+        },
+        _createSessionsFolder: function(studyId, callback) {
+            var me = this;
+            var folder;
+            SteviaManager.files.createFolder({
+                query: {
+                    sid: Cookies('bioinfo_sid'),
+                    folder: '.cellmaps_sessions',
+                    studyId: studyId
+                },
+                request: {
+                    success: function(response) {
+                        if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
+                            folder = response.response[0].result[0];
+                        } else {
+                            //                                me.message = response.response[0].errorMsg;
+                        }
+                        callback(folder);
+                    },
+                    error: function() {
+                        //                             me.message = 'Server error, try again later.';
+                        callback(folder);
+                    }
+                }
+            });
+        },
+        _getSessionsFiles: function(folder, callback) {
+            var me = this;
+            var files;
+            SteviaManager.files.list({
+                id: folder.id,
+                query: {
+                    sid: Cookies('bioinfo_sid'),
+                    studyId: this.selectedStudy.id
+                },
+                request: {
+                    success: function(response) {
+                        // console.log(response);
+                        if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
+                            files = response.response[0].result;
+                        } else {
+                            me.message = response.response[0].errorMsg;
+                        }
+                        callback(files);
+                    },
+                    error: function() {
+                        me.message = 'Server error, try again later.';
+                        callback(files);
+                    }
+                }
+            });
+            return files
+        },
+        deleteFile: function(file, callback) {
+            var me = this;
+            SteviaManager.files.delete({
+                id: file.id,
+                query: {
+                    sid: Cookies('bioinfo_sid')
+                },
+                request: {
+                    success: function(response) {
+                        me.fire('need-refresh');
+                        callback('success');
+                    },
+                    error: function() {
+                        me.fire('need-refresh');
+                        callback('error');
+                        //                            me.message = 'Server error, try again later.';
+                    }
+                }
+            });
+        },
+        uploadFile: function(fileContent, fileName, callback) {
+            var me = this;
+            var url = SteviaManager.files.upload({
+                query: {
+                    sid: Cookies("bioinfo_sid")
+                },
+                request: {
+                    url: true
+                }
+            });
+
+            var blob = new Blob([fileContent], {
+                type: 'text/plain'
+            });
+
+            var formData = new FormData();
+            var userId = Cookies("bioinfo_user");
+            var studyId = this.selectedStudy.id;
+            var relativeFilePath = '.cellmaps_sessions/' + fileName;
+            var fileFormat = 'GZIP';
+            var bioFormat = 'NONE';
+            var description = '';
+            var chunkId = 0;
+
+            formData.append('chunk_content', blob);
+            formData.append('chunk_id', chunkId);
+            formData.append('chunk_size', blob.size);
+            /*formData.append('chunk_hash', hash);*/
+            formData.append("filename", fileName);
+            formData.append('userId', userId);
+            formData.append('studyId', studyId);
+            formData.append('relativeFilePath', relativeFilePath);
+            /*formData.append('chunk_gzip', );*/
+
+            formData.append("last_chunk", true);
+            formData.append("total_size", blob.size);
+            formData.append("fileFormat", fileFormat);
+            formData.append("bioFormat", bioFormat);
+            formData.append("description", description);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.onloadend = function(e) {
+                console.log('upload Done!');
+                me.fire('need-refresh');
+                callback();
+            };
+            xhr.send(formData);
+        }
+    });
+</script>

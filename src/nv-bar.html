@@ -1,0 +1,266 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+
+<link rel="import" href="../../stevia-components/src/dropdown/stv-dropdown.html">
+
+<dom-module id="nv-bar">
+    <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
+        :host {
+            display: block;
+            position: relative;
+            box-sizing: border-box;
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #D9D9D9;
+            height: 30px;
+        }
+
+        #bar {
+            width: 860px;
+            height: 30px;
+            margin-left: 10px;
+        }
+
+        stv-dropdown > [data-button]::after {
+            font-family: 'FontAwesome';
+            content: '\f0d7';
+            margin-left: 3px;
+        }
+
+        stv-dropdown > [data-button] {
+            padding: 5px 10px;
+        }
+
+        .tool {
+            color: var(--secondary-text-color);
+        }
+    </style>
+    <template>
+        <div id="bar" class="horizontal layout center">
+            <stv-dropdown>
+                <div data-button id="fileButton" style="border-width:0;">
+                    File
+                </div>
+                <ul id="fileMenu" data-menu>
+                    <li hidden$="{{lite}}" on-click="handleClick" data-value="session-start">New session...</li>
+                    <li hidden$="{{lite}}" on-click="handleClick" data-value="session-save">Download session...</li>
+                    <li hidden$="{{lite}}" on-click="handleOpenSession">Open session...</li>
+                    <input type="file" style="position: fixed; top: -100em" id="openSessionInput" on-change="handleOpenSessionInputChange">
+                    <li hidden$="{{lite}}" on-click="handleClick" data-value="session-manage" id="manageSessionOption">Manage user sessions...</li>
+                    <li hidden$="{{lite}}" data-divider></li>
+                    <li hidden$="{{lite}}" data-sub>Import
+                        <ul on-click="handleClick">
+                            <li data-value="import-sif">Network from SIF...</li>
+                            <li data-value="import-xlsx">Network from XLSX...</li>
+                            <li data-value="import-text">Network from Text...</li>
+                            <li data-divider></li>
+                            <li data-value="import-node-attributes">Node attributes ...</li>
+                            <li data-value="import-edge-attributes">Edge attributes ...</li>
+                        </ul>
+                    </li>
+                    <li hidden$="{{lite}}" data-divider></li>
+                    <li data-sub>Export
+                        <ul on-click="handleClick">
+                            <li data-value="export-sif">Network as SIF</li>
+                            <li data-divider></li>
+                            <li data-value="export-svg">Network as SVG</li>
+                            <!--<li data-value="export-png">Network as PNG</li>-->
+                            <li data-divider></li>
+                            <li data-value="export-node-attributes">Node attributes as file</li>
+                            <li data-value="export-edge-attributes">Edge attributes as file</li>
+                        </ul>
+                    </li>
+                </ul>
+            </stv-dropdown>
+            <stv-dropdown>
+                <div data-button id="networkButton">
+                    Network
+                </div>
+                <ul data-menu id="networkMenu" on-click="handleClick">
+                    <li data-value="network-edit">Edit network...</li>
+                    <li data-sub hidden$="{{lite}}">Import network
+                        <ul>
+                            <li data-value="reactome">Reactome...</li>
+                            <li data-value="kegg">Kegg...</li>
+                            <li data-value="intact">Intact...</li>
+                        </ul>
+                    </li>
+                    <!--<li data-value="network-edit">Edit network...</li>-->
+                    <li data-sub>Select
+                        <ul>
+                            <li data-value="nodes-filter">Nodes by attributes...</li>
+                            <li data-value="edges-filter">Edges by attributes...</li>
+                            <li data-divider>
+                                <li data-value="nodes-select-all">All nodes</li>
+                                <li data-value="nodes-select-first-neighbourhood">First neighbourhood nodes</li>
+                                <li data-value="nodes-select-invert">Invert node selection</li>
+                                <li data-divider></li>
+                                <li data-value="edges-select-all">All edges</li>
+                                <li data-value="edges-select-adjacent">Adjacent edges</li>
+                                <li data-divider></li>
+                                <li data-value="network-select-all">Everything</li>
+                        </ul>
+                        </li>
+                        <li data-sub>Layout
+                            <ul>
+                                <li data-value="layout-force-directed" data-sub>Force directed
+                                    <!--<li data-value="layout-force-directed">Force directed-->
+                                    <ul>
+                                        <li data-value="layout-force-directed">Default</li>
+                                        <li data-value="layout-configure-force-directed">Configure...</li>
+                                    </ul>
+                                </li>
+                                <li hidden data-value="layout-tree">Tree</li>
+                                <li data-value="layout-circle" data-sub>Circle
+                                    <ul id="circleAttributesMenu">
+                                        <li data-value="layout-circle">Unsorted</li>
+                                        <li data-divider></li>
+                                        <template is="dom-repeat" items="{{columns}}" as="column">
+                                            <li data-value="layout-circle" data-subvalue$="{{column.name}}">{{column.title}}</li>
+                                        </template>
+                                    </ul>
+                                </li>
+                                <li data-value="layout-random">Random</li>
+                                <li data-value="layout-grid">Grid</li>
+                                <li data-value="layout-concentric" data-sub>Concentric
+                                    <ul>
+                                        <li data-value="layout-concentric">Default</li>
+                                        <li data-value="layout-configure-concentric">Configure...</li>
+                                    </ul>
+                                </li>
+                                <li data-value="layout-breadthfirst">Breadthfirst</li>
+                                <li data-value="layout-cose" data-sub>Compound Spring Embedder
+                                    <ul>
+                                        <li data-value="layout-cose">Default</li>
+                                        <li data-value="layout-configure-cose">Configure...</li>
+                                    </ul>
+                                </li>
+                                <!--<li data-value="layout-attribute">Attribute layout...</li>-->
+                            </ul>
+                        </li>
+                </ul>
+            </stv-dropdown>
+            <stv-dropdown>
+                <div data-button id="attributesButton">
+                    Attributes
+                </div>
+                <ul data-menu id="attributesMenu" on-click="handleClick">
+                    <li data-value="nodes-edit">Edit node attributes...</li>
+                    <li data-value="edges-edit">Edit edge attributes...</li>
+                    <li data-divider>
+                        <li data-value="node-simple-rendering">Node visualization settings...</li>
+                        <li data-value="edge-simple-rendering">Edge visualization settings...</li>
+                        <li hidden$="{{lite}}" data-divider></li>
+                        <li data-value="cellbase" hidden$="{{lite}}"> Import external references...</li>
+                        <li hidden$="{{lite}}" data-divider></li>
+                        <li data-value="functionalities" hidden$="{{lite}}"> Import functional annotations...</li>
+                        <li data-value="drugs" hidden$="{{lite}}"> Import drugs by gene...</li>
+                        <li data-value="diseases" hidden$="{{lite}}"> Import diseases by gene...</li>
+                </ul>
+            </stv-dropdown>
+            <!--<div class="">-->
+            <!--<div tabindex="-1" id="renderingButton">-->
+            <!--Rendering-->
+            <!--</div>-->
+            <!--<ul id="renderingMenu" on-click="handleClick">-->
+            <!--&lt;!&ndash;<li data-value="node-list-rendering">Complex node attribute rendering</li>&ndash;&gt;-->
+            <!--&lt;!&ndash;<li data-divider>&ndash;&gt;-->
+            <!--</ul>-->
+            <!--</div>-->
+            <stv-dropdown hidden$="{{lite}}">
+                <div data-button id="pluginsButton">
+                    Analysis
+                </div>
+                <ul data-menu id="pluginsMenu" on-click="handleClick">
+                    <li data-value="intact">Find interactions...</li>
+                    <li data-sub>Network analysis
+                        <ul>
+                            <li data-value="communities-structure-detection">Community structure detection...</li>
+                            <li data-value="topological-study">Topological study...</li>
+                        </ul>
+                    </li>
+                    <!--<li data-sub>Expression analysis-->
+                    <!--<ul>-->
+                    <!--<li data-value="reactome-fi-microarray">Reactome FI microarray</li>-->
+                    <!--</ul>-->
+                    <!--</li>-->
+                    <li data-sub>Functional enrichment
+                        <ul>
+                            <li data-value="snow">Network enrichment...
+                                <span class="tool"> SNOW</span>
+                            </li>
+                            <li data-value="network-miner">Gene set network enrichment...
+                                <span class="tool"> Network Miner</span>
+                            </li>
+                            <li data-value="fatigo">Single enrichment...
+                                <span class="tool"> Fatigo</span>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </stv-dropdown>
+            <stv-dropdown hidden$="{{lite}}">
+                <div data-button id="examplesButton">
+                    Examples
+                </div>
+                <ul data-menu id="examplesMenu" on-click="handleClick">
+                    <li data-value="example" data-subvalue="1">PPIs related to histone exchange and removal during nucleosome assembly and disassembly
+                    </li>
+                    <li data-value="example" data-subvalue="2">RAF MAK kinase cascade</li>
+                    <li data-value="example" data-subvalue="3">Mutational landscape oncogenes and tumor suppressors</li>
+                    <li data-value="example" data-subvalue="4">PPI network with attributes</li>
+                </ul>
+            </stv-dropdown>
+            <div hidden class="stv-btn" data-value="save" on-click="handleClick">
+                Save
+            </div>
+            <div hidden id="configureButton" class="stv-btn" style="margin-right:10px;float:right;border-width:0;" on-click="handleConfigureClick">
+                Configure
+            </div>
+        </div>
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'nv-bar',
+        properties: {
+            lite: {
+                type: Boolean,
+                value: false
+            },
+            columns: {
+                type: Array,
+            }
+        },
+        ready: function() {
+            this.networkViewer = this.domHost;
+            this.cellMaps = this.networkViewer.domHost;
+            if (this.cellMaps == null) {
+                this.$.manageSessionOption.setAttribute('hidden', '');
+            }
+        },
+        handleClick: function(e) {
+            if ('value' in e.target.dataset) {
+                if (e.target.dataset.value.indexOf("layout-") === 0) {
+                    this.fire('layout', e.target.dataset);
+                } else {
+                    this.fire(e.target.dataset.value, e.target.dataset);
+                }
+            }
+        },
+        handleOpenSession: function(e) {
+            this.$.openSessionInput.click();
+        },
+        handleOpenSessionInputChange: function(e) {
+            var file = e.currentTarget.files[0];
+            if (file != null) {
+                this.fire('session-open', {
+                    file: file,
+                    inputChangeEvent: e
+                });
+            }
+        },
+        handleConfigureClick: function(e) {
+            this.fire('configure');
+        }
+    });
+</script>

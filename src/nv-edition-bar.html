@@ -1,0 +1,395 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+
+<link rel="import" href="../../stevia-components/src/dropdown/stv-dropdown.html">
+
+<dom-module id="nv-edition-bar">
+    <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
+        :host {
+            display: block;
+            position: relative;
+            box-sizing: border-box;
+            background-color: #FAFAFA;
+            border-bottom: 1px solid #D9D9D9;
+            height: 32px;
+        }
+
+        #bar {
+            width: 900px;
+            height: 32px;
+                        margin-left: 10px;
+        }
+
+        stv-dropdown > [data-button] {
+            margin-left: 5px;
+        }
+    </style>
+    <template>
+        <div id="bar" class="horizontal layout center">
+            <div title="Show node controls" class="stv-btn" data-checked$="{{isVertexBarSelected(selectedBar)}}" data-bar="vertex" on-click="handleSelectedBar" style="border-right: none;">
+                Nodes
+            </div>
+            <div title="Show edge controls" class="stv-btn" data-checked$="{{isEdgeBarSelected(selectedBar)}}" data-bar="edge" on-click="handleSelectedBar">
+                Edges
+            </div>
+            <div id="vertexToolbar" class="horizontal layout center" hidden$="{{!isVertexBarSelected(selectedBar)}}">
+                <input hidden value="{{vertexNameField}}" id="vertexNameField" class="stv" type="text" placeholder="name" on-keypress="handleVertexNameField" style="width: 70px; margin-left: 5px;">
+
+                <stv-dropdown title="Change the shape of the selected node(s)">
+                    <div data-button id="vertexShapeButton" class="stv-btn">
+                        <i class="fa fa-star"></i>
+                    </div>
+                    <ul data-menu id="vertexShapeMenu">
+                        <li on-mousedown="handleVertexShape" data-value="circle">Circle</li>
+                        <li on-mousedown="handleVertexShape" data-value="square">Square</li>
+                        <li on-mousedown="handleVertexShape" data-value="ellipse">Ellipse</li>
+                        <li on-mousedown="handleVertexShape" data-value="rectangle">Rectangle</li>
+                    </ul>
+                </stv-dropdown>
+
+                <stv-dropdown title="Change the opacity of the selected node(s)">
+                    <div data-button id="vertexOpacityButton" class="stv-btn">
+                        <i class="fa fa-adjust"></i>
+                    </div>
+                    <ul data-menu id="vertexOpacityMenu">
+                        <li on-mousedown="handleVertexOpacity" data-value="1">None</li>
+                        <li on-mousedown="handleVertexOpacity" data-value="0.75">Low</li>
+                        <li on-mousedown="handleVertexOpacity" data-value="0.5">Medium</li>
+                        <li on-mousedown="handleVertexOpacity" data-value="0.25">High</li>
+                        <li on-mousedown="handleVertexOpacity" data-value="0">Invisible</li>
+                    </ul>
+                </stv-dropdown>
+
+                <stv-dropdown title="Change the size of the selected node(s)" style="margin-left: 10px">
+                    <div data-button id="vertexSizeButton" class="stv-btn" style="border-right: none">
+                        <i class="fa fa-circle"></i>
+                    </div>
+                    <ul data-menu id="vertexSizeMenu">
+                        <li on-mousedown="handleVertexSize" data-value="10">10</li>
+                        <li on-mousedown="handleVertexSize" data-value="20">20</li>
+                        <li on-mousedown="handleVertexSize" data-value="30">30</li>
+                        <li on-mousedown="handleVertexSize" data-value="40">40</li>
+                        <li on-mousedown="handleVertexSize" data-value="50">50</li>
+                        <li on-mousedown="handleVertexSize" data-value="60">60</li>
+                        <li on-mousedown="handleVertexSize" data-value="70">70</li>
+                        <li on-mousedown="handleVertexSize" data-value="80">80</li>
+                        <li on-mousedown="handleVertexSize" data-value="90">90</li>
+                        <li on-mousedown="handleVertexSize" data-value="100">100</li>
+                        <li on-mousedown="handleVertexSize" data-value="120">120</li>
+                        <li on-mousedown="handleVertexSize" data-value="140">140</li>
+                        <li on-mousedown="handleVertexSize" data-value="160">160</li>
+                    </ul>
+                </stv-dropdown>
+                <input value="{{vertexSizeField::input}}" on-input="handleVertexSizeField" id="vertexSizeField" class="stv" type="text" style="width: 50px;border-right-width:0">
+
+                <stv-color-picker ctitle="Change the color of the selected node(s)" id="vertexColorPicker" color="{{vertexColor}}" on-color-click="handleVertexColor" style="float:left;width:90px;"></stv-color-picker>
+
+                <stv-dropdown title="Change the stroke size of the selected node(s)" style="margin-left: 10px">
+                    <div data-button id="vertexStrokeSizeButton" class="stv-btn" style="border-right: none">
+                        <i class="fa fa-circle-o"></i>
+                    </div>
+                    <ul data-menu id="vertexStrokeSizeMenu">
+                        <li on-mousedown="handleVertexStrokeSize" data-value="1">1</li>
+                        <li on-mousedown="handleVertexStrokeSize" data-value="2">2</li>
+                        <li on-mousedown="handleVertexStrokeSize" data-value="3">3</li>
+                        <li on-mousedown="handleVertexStrokeSize" data-value="4">4</li>
+                        <li on-mousedown="handleVertexStrokeSize" data-value="5">5</li>
+                        <li on-mousedown="handleVertexStrokeSize" data-value="6">6</li>
+                        <li on-mousedown="handleVertexStrokeSize" data-value="7">7</li>
+                        <li on-mousedown="handleVertexStrokeSize" data-value="8">8</li>
+                        <li on-mousedown="handleVertexStrokeSize" data-value="9">9</li>
+                        <li on-mousedown="handleVertexStrokeSize" data-value="10">10</li>
+                    </ul>
+                </stv-dropdown>
+                <input value="{{vertexStrokeSizeField::input}}" on-input="handleVertexStrokeSizeField" id="vertexStrokeSizeField" class="stv" type="text" style="width: 50px;border-right-width:0">
+
+                <stv-color-picker ctitle="Change the stroke color of the selected node(s)" id="vertexStrokeColorPicker" color="{{vertexStrokeColor}}" on-color-click="handleVertexStrokeColor" style="float:left;width:90px;"></stv-color-picker>
+
+
+                <stv-dropdown title="Change the label size of the selected node(s)" style="margin-left: 10px">
+                    <div data-button id="vertexLabelSizeButton" class="stv-btn">
+                        <i class="fa fa-text-height"></i>
+                    </div>
+                    <ul data-menu id="vertexLabelSizeMenu">
+                        <li on-mousedown="handleVertexLabelSize" data-value="0">None</li>
+                        <li on-mousedown="handleVertexLabelSize" data-value="8">8</li>
+                        <li on-mousedown="handleVertexLabelSize" data-value="10">10</li>
+                        <li on-mousedown="handleVertexLabelSize" data-value="12">12</li>
+                        <li on-mousedown="handleVertexLabelSize" data-value="14">14</li>
+                        <li on-mousedown="handleVertexLabelSize" data-value="16">16</li>
+                        <li on-mousedown="handleVertexLabelSize" data-value="18">18</li>
+                    </ul>
+                </stv-dropdown>
+
+
+                <!--<div  style="margin-left: 10px">-->
+                <!--<div tabindex="-1" id="vertexSearchButton" class="stv-btn" style="border-right: none;">-->
+                <!--<i class="fa fa-search"></i></div>-->
+                <!--<ul id="vertexSearchMenu"></ul>-->
+                <!--</div>-->
+                <!-- <div class="stv-select" title="Select nodes by attribute" style="width:70px;margin-left: 5px;border-right-width: 0;"> -->
+                <stv-select style="width:100px;margin-left: 5px;border-right-width: 0;" id="nodeSearchSelect" title="Select nodes by attribute">
+                    <stv-option value="all">All</stv-option>
+                    <template is="dom-repeat" items={{vertexColumns}} as="column">
+                        <stv-option value="{{column.name}}">{{column.title}}</stv-option>
+                    </template>
+                </stv-select>
+                <!-- </div> -->
+                <input on-keypress="handleVertexSearch" id="vertexSearchField" class="stv" type="text" placeholder="Search" style="width: 100px; margin-right:3px;">
+
+                <div style="width:90px;" title="Selection color">
+                    <stv-color-picker ctitle="Select node selection color" color="{{selectionColor}}">
+                    </stv-color-picker>
+                </div>
+            </div>
+
+            <!--Edges -->
+            <div id="edgeToolbar" class="flex horizontal layout" hidden$="{{!isEdgeBarSelected(selectedBar)}}">
+                <input hidden id="edgeNameField" class="stv" type="text" placeholder="name" on-keypress="handleEdgeNameField" style="width: 70px;margin-left: 5px;">
+
+                <stv-dropdown title="Change the shape of the selected edge(s)" style="margin-left: 5px">
+                    <div data-button id="edgeShapeButton" class="stv-btn">
+                        <i class="fa fa-location-arrow"></i>
+                    </div>
+                    <ul data-menu id="edgeShapeMenu">
+                        <li on-mousedown="handleEdgeShape" data-value="directed">Directed</li>
+                        <li on-mousedown="handleEdgeShape" data-value="undirected">Undirected</li>
+                        <li on-mousedown="handleEdgeShape" data-value="inhibited">Inhibited</li>
+                        <li on-mousedown="handleEdgeShape" data-value="dot">Dot</li>
+                        <li on-mousedown="handleEdgeShape" data-value="odot">Dot o</li>
+                    </ul>
+                </stv-dropdown>
+
+                <stv-dropdown title="Change the size of the selected edges(s)" style="margin-left: 5px">
+                    <div data-button id="edgeSizeButton" class="stv-btn" style="border-right: none">
+                        <i class="fa fa-minus"></i>
+                    </div>
+                    <ul data-menu id="edgeSizeMenu">
+                        <li on-mousedown="handleEdgeSize" data-value="1">1</li>
+                        <li on-mousedown="handleEdgeSize" data-value="2">2</li>
+                        <li on-mousedown="handleEdgeSize" data-value="3">3</li>
+                        <li on-mousedown="handleEdgeSize" data-value="4">4</li>
+                        <li on-mousedown="handleEdgeSize" data-value="5">5</li>
+                        <li on-mousedown="handleEdgeSize" data-value="6">6</li>
+                        <li on-mousedown="handleEdgeSize" data-value="7">7</li>
+                        <li on-mousedown="handleEdgeSize" data-value="8">8</li>
+                        <li on-mousedown="handleEdgeSize" data-value="9">9</li>
+                        <li on-mousedown="handleEdgeSize" data-value="10">10</li>
+                    </ul>
+                </stv-dropdown>
+                <input value="{{edgeSizeField::input}}" on-input="handleEdgeSizeField" id="edgeSizeField" class="stv" type="text" style="width: 50px;border-right-width: 0">
+
+                <stv-color-picker ctitle="Change the color of the selected edges(s)" id="edgeColorPicker" style="float:left;width:90px;" on-color-click="handleEdgeColor" color="#888888"></stv-color-picker>
+
+
+                <stv-dropdown title="Change the label size of the selected edges(s)" style="margin-left: 5px">
+                    <div data-button id="edgeLabelSizeButton" class="stv-btn">
+                        <i class="fa fa-text-height"></i>
+                    </div>
+                    <ul data-menu id="edgeLabelSizeMenu">
+                        <li on-mousedown="handleEdgeLabelSize" data-value="0">None</li>
+                        <li on-mousedown="handleEdgeLabelSize" data-value="8">8</li>
+                        <li on-mousedown="handleEdgeLabelSize" data-value="10">10</li>
+                        <li on-mousedown="handleEdgeLabelSize" data-value="12">12</li>
+                        <li on-mousedown="handleEdgeLabelSize" data-value="14">14</li>
+                        <li on-mousedown="handleEdgeLabelSize" data-value="16">16</li>
+                        <li on-mousedown="handleEdgeLabelSize" data-value="18">18</li>
+                    </ul>
+                </stv-dropdown>
+
+                <!--<div  style="margin-left: 10px">-->
+                <!--<div tabindex="-1" id="edgeSearchButton" class="stv-btn" style="border-right: none;">-->
+                <!--<i class="fa fa-search"></i>-->
+                <!--</div>-->
+                <!--<ul id="edgeSearchMenu"></ul>-->
+                <!--</div>-->
+
+                <div hidden class="stv-select">
+                    <select id="edgeSearchSelect" style="width:70px;margin-left: 10px;border-right-width: 0;">
+                        <template is="dom-repeat" items={{edgeColumns}} as="column">
+                            <option value="{{column.name}}">{{column.title}}</option>
+                        </template>
+                    </select>
+                </div>
+                <input hidden on-keypress="handleEdgeSearch" id="edgeSearchField" class="stv" type="text" placeholder="Search" style="width: 80px;">
+            </div>
+
+        </div>
+
+
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'nv-edition-bar',
+        properties: {
+            vAttr: {
+                type: Object
+            },
+            eAttr: {
+                type: Object
+            },
+            selectionColor: {
+                type: String,
+                notify: true
+            },
+            selectedBar: {
+                type: String,
+                value: 'vertex'
+            },
+
+            vertexColor: {
+                type: String,
+                value: '#FFFFFF'
+            },
+            vertexStrokeColor: {
+                type: String,
+                value: '#888888'
+            },
+            vertexNameField: {
+                type: String,
+                value: ''
+            },
+            vertexSizeField: {
+                type: String,
+                value: ''
+            },
+            vertexStrokeSizeField: {
+                type: String,
+                value: ''
+            },
+            edgeSizeField: {
+                type: String,
+                value: ''
+            },
+        },
+        created: function() {},
+        isVertexBarSelected: function(selectedBar) {
+            return selectedBar == 'vertex';
+        },
+        isEdgeBarSelected: function(selectedBar) {
+            return selectedBar == 'edge';
+        },
+
+        handleSelectedBar: function(e) {
+            this.selectedBar = e.currentTarget.dataset.bar;
+        },
+        handleVertexShape: function(e) {
+            this.fire('vertexshape', {
+                value: e.currentTarget.dataset.value
+            });
+        },
+        handleVertexOpacity: function(e) {
+            this.fire('vertexopacity', {
+                value: e.currentTarget.dataset.value
+            });
+        },
+        handleVertexSize: function(e) {
+            var v = e.currentTarget.dataset.value;
+            this.set('vertexSizeField', v)
+            this.fire('vertexsize', {
+                value: v
+            });
+        },
+        handleVertexSizeField: function(e) {
+            var v = e.currentTarget.value;
+            this.fire('vertexsize', {
+                value: v
+            });
+        },
+        handleVertexColor: function(e) {
+            this.fire('vertexcolor', {
+                value: e.detail.color
+            });
+        },
+        handleVertexStrokeSize: function(e) {
+            var v = e.currentTarget.dataset.value;
+            this.set('vertexStrokeSizeField', v)
+            this.fire('vertexstrokesize', {
+                value: v
+            });
+        },
+        handleVertexStrokeSizeField: function(e) {
+            var v = e.currentTarget.value;
+            this.fire('vertexstrokesize', {
+                value: v
+            });
+        },
+        handleVertexStrokeColor: function(e) {
+            this.fire('vertexstrokecolor', {
+                value: e.detail.color
+            });
+        },
+        handleVertexLabelSize: function(e) {
+            this.fire('vertexlabelsize', {
+                value: e.currentTarget.dataset.value
+            });
+        },
+        handleVertexSearch: function(e) {
+            var input = e.currentTarget;
+            input.style.color = '';
+            if (e.which == 13) {
+                this.fire('vertexsearch', {
+                    value: e.currentTarget.value,
+                    columnName: this.$.nodeSearchSelect.value,
+                    inputEl: input
+                });
+            }
+        },
+        handleVertexNameField: function(e) {
+            if (e.which == 13) {
+                this.fire('vertexnamefield', {
+                    value: e.currentTarget.value
+                });
+            }
+        },
+
+
+        handleEdgeShape: function(e) {
+            this.fire('edgeshape', {
+                value: e.currentTarget.dataset.value
+            });
+        },
+        handleEdgeSize: function(e) {
+            var v = e.currentTarget.dataset.value;
+            this.set('edgeSizeField', v);
+            this.fire('edgesize', {
+                value: v
+            });
+        },
+        handleEdgeSizeField: function(e) {
+            var v = e.currentTarget.value;
+            this.fire('edgesize', {
+                value: v
+            });
+        },
+        handleEdgeColor: function(e) {
+            this.fire('edgecolor', {
+                value: e.detail.color
+            });
+        },
+        handleEdgeLabelSize: function(e) {
+            this.fire('edgelabelsize', {
+                value: e.currentTarget.dataset.value
+            });
+        },
+        handleEdgeSearch: function(e) {
+            var input = e.currentTarget;
+            input.style.color = '';
+            if (e.which == 13) {
+                this.fire('edgesearch', {
+                    value: e.currentTarget.value,
+                    columnName: this.$.edgeSearchSelect.value,
+                    inputEl: input
+                });
+            }
+        },
+        handleEdgeNameField: function(e) {
+            if (e.which == 13) {
+                this.fire('edgenamefield', {
+                    value: e.currentTarget.value
+                });
+            }
+        },
+    });
+</script>
