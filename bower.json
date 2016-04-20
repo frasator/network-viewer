@@ -27,12 +27,12 @@
     "cookies-js": "~1.1.0",
     "crypto-js": "3.1.6",
     "pako": "~0.2.8",
-    "stevia-components": "git@gitlab.bioinfo.cipf.es:stevia/stevia-components.git",
+    "stevia-components": "git@gitlab.bioinfo.cipf.es:stevia/stevia-components.git#develop",
     "iron-list": "^1.2.8",
     "d3": "3.5.3",
     "js-xlsx": "~0.7.11",
     "file-saver.js": "~1.20150507.2",
-    "highcharts-release": "~4.0.4",
+    "highcharts-release": "~4.1.10",
     "cytoscape": "~2.5.4"
   },
   "private": true
