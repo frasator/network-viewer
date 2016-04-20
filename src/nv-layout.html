@@ -229,7 +229,7 @@
             var finalScale = Math.min(newScale, newScale2);
             this.zoom = Math.min(Math.floor(finalScale * 25), 100);
             scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
-            this.tx += (-scalebcr.left) + ((lbcr.width - scalebcr.width) / 2);
+            this.tx += -(scalebcr.left - lbcr.left) + ((lbcr.width - scalebcr.width) / 2);
             this.ty += -(scalebcr.top - lbcr.top) + ((lbcr.height - scalebcr.height) / 2);
         },
         mouseHoverHandler: function(e) {
