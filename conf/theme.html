@@ -9,6 +9,22 @@
         font-size: 13px;
     }
 
+    body.fullbleed {
+        margin: 0;
+        height: 100vh;
+    }
+
+    body[unresolved] {
+        opacity: 0;
+        display: block;
+        overflow: hidden;
+        position: relative;
+    }
+
+    body {
+        transition: opacity ease-in 0.2s;
+    }
+
     a {
         transition: color 0.1s linear;
         text-decoration: none;
