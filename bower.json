@@ -27,7 +27,7 @@
     "cookies-js": "~1.1.0",
     "crypto-js": "3.1.6",
     "pako": "~0.2.8",
-    "stevia-components": "git@gitlab.bioinfo.cipf.es:stevia/stevia-components.git#develop",
+    "stevia-elements": "git@gitlab.bioinfo.cipf.es:stevia/stevia-elements.git#develop",
     "iron-list": "^1.2.8",
     "d3": "3.5.3",
     "js-xlsx": "~0.7.11",
