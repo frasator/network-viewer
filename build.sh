@@ -11,8 +11,8 @@ vulcanize --inline-scripts --inline-css --strip-comments $NAME.html > $BP/$NAME.
 
 cp -r $NAME-index.html $BP/index.html
 cp -r conf/ $BP/
-cp -r ../stevia-components/fonts/ $BP/
-cp -r ../stevia-components/css/ $BP/
+cp -r ../stevia-elements/fonts/ $BP/
+cp -r ../stevia-elements/css/ $BP/
 cp -r ../fontawesome/css $BP/fontawesome/
 cp -r ../fontawesome/fonts $BP/fontawesome/
 cp -r ../webcomponentsjs/*.min.js $BP/webcomponentsjs/
@@ -20,6 +20,6 @@ cp -r ../webcomponentsjs/*.min.js $BP/webcomponentsjs/
 #
 # fix index.html paths
 #
-sed -i s@"\.\./stevia-components/"@@g $BP/index.html
+sed -i s@"\.\./stevia-elements/"@@g $BP/index.html
 sed -i s@"\.\./"@@g $BP/index.html
 ## end fix paths
