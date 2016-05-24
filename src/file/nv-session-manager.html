@@ -142,9 +142,6 @@
                 type: Boolean,
                 value: false
             },
-            selectedStudy: {
-                type: Object
-            },
             message: {
                 type: String,
                 value: ''
@@ -193,30 +190,7 @@
         userDataChanged: function(neo, old) {
             var me = this;
             if (this.userData) {
-
-                this.selectedProject = this.userData.projects[0];
-
-                SteviaManager.projects.studies({
-                    id: this.selectedProject.id,
-                    query: {
-                        sid: Cookies("bioinfo_sid")
-                    },
-                    request: {
-                        success: function(response) {
-                            if (response.response[0].errorMsg === '' || response.response[0].errorMsg == null) {
-                                me.studies = response.response[0].result;
-                                me.selectedStudy = me.studies[0];
-                                me.handleLogin();
-                            } else {
-                                console.log(response.error);
-                                console.log(response.response[0].errorMsg);
-                            }
-                        },
-                        error: function() {
-                            console.log('Server error, try again later.');
-                        }
-                    }
-                })
+                me.handleLogin();
             }
         },
         selectedStudyChanged: function(o, n) {
