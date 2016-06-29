@@ -196,102 +196,128 @@
                 } else {
                     sif = this.graph.getAsSIFNoRelation();
                 }
-                console.log(sif)
+                // console.log(sif)
 
                 if (sif != "") {
-                    var formData = new FormData();
-                    formData.append("sif", sif);
-                    formData.append("directed", this.selectedDirected);
-                    formData.append("weighted", this.selectedWeighted);
-
-                    var request = new XMLHttpRequest();
-                    request.onload = function() {
-                        var response;
-                        var contentType = this.getResponseHeader('Content-Type');
-                        if (contentType === 'application/json') {
-                            response = JSON.parse(this.response);
-                        } else {
-                            response = this.response;
-                        }
-                        if (response.error === "" && response.response[0].error == null) {
-                            var results = response.response[0].global;
-                            results.avgNodesPerComponent = results['Average nodes per component'];
-                            results.avgShortestPathLength = results['Average shorthest path length'];
-                            results.clusteringCoeff = results['Clustering coefficient'];
-                            results.diameter = results['Diameter'];
-                            results.numComponents = results['Number of components'];
-                            results.numEdges = results['Number of edges'];
-                            results.numNodes = results['Number of nodes'];
-                            me.results = results;
-
-                            var attributes = [];
-                            var lines = response.response[0].local.split("\n");
-                            var line, fields;
-                            var row;
-                            for (var i = 0; i < lines.length; i++) {
-                                line = lines[i];
-                                if (line !== "" && line.charAt(0) !== '#') {
-                                    fields = line.split("\t");
-                                    attributes.push({
-                                        "id": fields[0],
-                                        "degree": fields[1],
-                                        "betweenness": fields[2],
-                                        "closeness": fields[3],
-                                        "clusteringCoefficient": fields[4]
-                                    });
-                                }
+                    var args = {
+                        tool: 'topological-study',
+                        execution: 'topological-study',
+                        executable: 'topological-study.sh',
+                        options: {
+                            "isdirected": {
+                                "type": "text",
+                                "value": this.selectedDirected
+                            },
+                            "isweighted": {
+                                "type": "text",
+                                "value": this.selectedWeighted
+                            },
+                            "infile": {
+                                "type": "file",
+                                "mode": "text",
+                                "value": sif
+                            },
+                            "outdir": {
+                                out: true
                             }
-
-                            var columns = [{
-                                name: "degree",
-                                title: "Degree",
-                                type: "text",
-                                formula: function(item) {
-                                    return item.attributes[this.name];
-                                }
-                            }, {
-                                name: "betweenness",
-                                title: "Betweenness",
-                                type: "text",
-                                formula: function(item) {
-                                    return item.attributes[this.name];
-                                }
-                            }, {
-                                name: "closeness",
-                                title: "Closeness",
-                                type: "text",
-                                formula: function(item) {
-                                    return item.attributes[this.name];
-                                }
-                            }, {
-                                name: "clusteringCoefficient",
-                                title: "Clustering coefficient",
-                                type: "text",
-                                formula: function(item) {
-                                    return item.attributes[this.name];
-                                }
-                            }];
-
-                            me.fire('topological', {
-                                attributes: attributes,
-                                columns: columns
-                            });
-                            me.message = "Done";
-                        } else {
-                            me.message = "Server error, try again later.";
-                        }
-                        me.loading = false;
-                        if (callback != null) {
-                            callback();
                         }
                     };
-                    request.onerror = function() {
-                        console.log("request error");
-                    };
-                    request.open("POST", 'http://ws.babelomics.org/TODO/rest/util/network/topological-study', true);
-                    request.send(formData);
+                    // # - isdirected: boolean (T,F) Indicates if the sif is directed or undirected
+                    // # - isweighted: boolean (T,F) Indicates if the edges are weighted
+                    // # - infile: string. Path to the sif infile
+                    // # - outdir: string. Path to the outdir
+
+                    SteviaManager.jobs.run({
+                        query: {},
+                        request: {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(args),
+                            success: function(response) {
+                                if (response.response[0].error == null) {
+                                    var results = JSON.parse(response.response[0].results[0].out.split('result.global.json')[1].trim());
+                                    results.avgNodesPerComponent = results['Average nodes per component'];
+                                    results.avgShortestPathLength = results['Average shorthest path length'];
+                                    results.clusteringCoeff = results['Clustering coefficient'];
+                                    results.diameter = results['Diameter'];
+                                    results.numComponents = results['Number of components'];
+                                    results.numEdges = results['Number of edges'];
+                                    results.numNodes = results['Number of nodes'];
+                                    me.results = results;
+
+                                    var localResults = response.response[0].results[0].out.split('result.local')[1].trim()
+                                    var attributes = [];
+                                    var lines = localResults.split("\n");
+                                    var line, fields;
+                                    var row;
+                                    for (var i = 0; i < lines.length; i++) {
+                                        line = lines[i];
+                                        if (line !== "" && line.charAt(0) !== '#') {
+                                            fields = line.split("\t");
+                                            attributes.push({
+                                                "id": fields[0],
+                                                "degree": fields[1],
+                                                "betweenness": fields[2],
+                                                "closeness": fields[3],
+                                                "clusteringCoefficient": fields[4]
+                                            });
+                                        }
+                                    }
+
+                                    var columns = [{
+                                        name: "degree",
+                                        title: "Degree",
+                                        type: "text",
+                                        formula: function(item) {
+                                            return item.attributes[this.name];
+                                        }
+                                    }, {
+                                        name: "betweenness",
+                                        title: "Betweenness",
+                                        type: "text",
+                                        formula: function(item) {
+                                            return item.attributes[this.name];
+                                        }
+                                    }, {
+                                        name: "closeness",
+                                        title: "Closeness",
+                                        type: "text",
+                                        formula: function(item) {
+                                            return item.attributes[this.name];
+                                        }
+                                    }, {
+                                        name: "clusteringCoefficient",
+                                        title: "Clustering coefficient",
+                                        type: "text",
+                                        formula: function(item) {
+                                            return item.attributes[this.name];
+                                        }
+                                    }];
+
+                                    me.fire('topological', {
+                                        attributes: attributes,
+                                        columns: columns
+                                    });
+                                    me.message = "Done";
+                                } else {
+                                    me.message = "Server error, try again later.";
+                                }
+                                me.loading = false;
+                                if (callback != null) {
+                                    callback();
+                                }
+                            },
+                            error: function() {
+                                me.loading = false;
+                                console.log('Server error, try again later.');
+                            }
+                        }
+                    });
                     this.loading = true;
                     this.message = "Loading...";
+
                 } else {
                     this.message = "Node list is empty";
                 }

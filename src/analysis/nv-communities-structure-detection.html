@@ -209,81 +209,115 @@
                 } else {
                     sif = this.graph.getAsSIFNoRelation();
                 }
-                console.log(sif)
+                // console.log(sif)
 
                 if (sif != "") {
-                    var formData = new FormData();
-                    formData.append("sif", sif);
-                    formData.append("directed", this.selectedDirected);
-                    formData.append("weighted", this.selectedWeighted);
-                    formData.append("method", this.selectedMethod);
-
-                    var request = new XMLHttpRequest();
-                    request.onload = function() {
-                        debugger
-                        var response;
-                        var contentType = this.getResponseHeader('Content-Type');
-                        if (contentType === 'application/json') {
-                            response = JSON.parse(this.response);
-                        } else {
-                            response = this.response;
-                        }
-                        if (response.error === "" && response.response[0].error == null) {
-                            var results = response.response[0].results;
-                            results.globalModularity = results['Global modularity'];
-                            results.numberCommunities = results['Number of communities with more than 2 nodes'];
-                            results.totalCommunities = results['Total number of communities'];
-                            me.results = results;
-
-                            var attributes = [];
-                            var lines = response.response[0].attributes.split("\n");
-                            var line, fields;
-                            for (var i = 0; i < lines.length; i++) {
-                                line = lines[i];
-                                if (line !== "") {
-                                    fields = line.split("\t");
-                                    attributes.push({
-                                        "id": fields[0],
-                                        "community": fields[1],
-                                        "communityColor": fields[2]
-                                    });
-                                }
+                    var args = {
+                        tool: 'communities-structure-detection',
+                        execution: 'communities-structure-detection',
+                        executable: 'communities-structure-detection.sh',
+                        options: {
+                            "method": {
+                                "type": "text",
+                                "value": this.selectedMethod
+                            },
+                            "isdirected": {
+                                "type": "text",
+                                "value": this.selectedDirected
+                            },
+                            "isweighted": {
+                                "type": "text",
+                                "value": this.selectedWeighted
+                            },
+                            "infile": {
+                                "type": "file",
+                                "mode": "text",
+                                "value": sif
+                            },
+                            "outdir": {
+                                out: true
                             }
-
-                            var columns = [{
-                                defaultValue: "",
-                                name: "community",
-                                title: "Community",
-                                type: "text",
-                                formula: function(item) {
-                                    return item.attributes[this.name];
-                                }
-                            }, {
-                                defaultValue: "",
-                                name: "communityColor",
-                                title: "Community color",
-                                type: "text",
-                                formula: function(item) {
-                                    return item.attributes[this.name];
-                                }
-                            }];
-                            me.fire('community', {
-                                attributes: attributes,
-                                columns: columns
-                            });
-                            me.message = "Done";
-                        } else {
-                            me.message = "Server error, try again later.";
                         }
-                        me.loading = false;
                     };
-                    request.onerror = function() {
-                        console.log("request error");
-                    };
-                    request.open("POST", 'http://ws.babelomics.org/TODO/rest/util/network/community', true);
-                    request.send(formData);
+
+                    // # - method: string (infomap, walktrap, edge.betweenness). Refers to the community detection method
+                    // # - isdirected: boolean (T,F) Indicates if the sif is directed or undirected
+                    // # - isweighted: boolean (T,F) Indicates if the edges are weighted
+                    // # - infile: string. Path to the sif infile
+                    // # - outdir: string. Path to the outdir
+
+                    SteviaManager.jobs.run({
+                        query: {},
+                        request: {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(args),
+                            success: function(response) {
+                                if (response.response[0].error == null) {
+                                    // console.log(response.response[0].results[0].out);
+                                    // console.log(response.response[0].results[0].err);
+
+                                    var results = JSON.parse(response.response[0].results[0].out.split('result.json')[1].trim());
+                                    results.globalModularity = results['Global modularity'];
+                                    results.numberCommunities = results['Number of communities with more than 2 nodes'];
+                                    results.totalCommunities = results['Total number of communities'];
+                                    me.results = results;
+
+                                    var comm = response.response[0].results[0].out.split('result.comm')[1].trim();
+
+                                    var attributes = [];
+                                    var lines = comm.split("\n");
+                                    var line, fields;
+                                    for (var i = 0; i < lines.length; i++) {
+                                        line = lines[i];
+                                        if (line !== "") {
+                                            fields = line.split("\t");
+                                            attributes.push({
+                                                "id": fields[0],
+                                                "community": fields[1],
+                                                "communityColor": fields[2]
+                                            });
+                                        }
+                                    }
+
+                                    var columns = [{
+                                        defaultValue: "",
+                                        name: "community",
+                                        title: "Community",
+                                        type: "text",
+                                        formula: function(item) {
+                                            return item.attributes[this.name];
+                                        }
+                                    }, {
+                                        defaultValue: "",
+                                        name: "communityColor",
+                                        title: "Community color",
+                                        type: "text",
+                                        formula: function(item) {
+                                            return item.attributes[this.name];
+                                        }
+                                    }];
+                                    me.fire('community', {
+                                        attributes: attributes,
+                                        columns: columns
+                                    });
+                                    me.message = "Done";
+                                } else {
+                                    me.message = "Server error, try again later.";
+                                }
+                                me.loading = false;
+                            },
+                            error: function() {
+                                me.loading = false;
+                                console.log('Server error, try again later.');
+                            }
+                        }
+                    });
                     this.loading = true;
                     this.message = "Loading...";
+
                 } else {
                     this.message = "Node list is empty";
                 }
