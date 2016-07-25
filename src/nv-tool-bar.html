@@ -20,7 +20,20 @@
             margin-left: 10px;
         }
 
-        .zoom-bar > div {
+        .zoom-bar {
+            position: relative;
+            width: 120px;
+            height: 23px;
+            box-sizing: border-box;
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            background-color: #FFFFFF;
+        }
+
+        #progressBar {
+            box-sizing: border-box;
+            height: 100%;
+            transition: all 0.2s;
             background-color: var(--accent-color);
         }
     </style>
@@ -115,7 +128,7 @@
             <div title="Zoom out" id="zoomOutButton" on-click="handleZoomOutButton" class="stv-btn" style="margin-left: 10px">
                 <i class="fa fa-minus"></i>
             </div>
-            <div on-click="handleZoomSlider" id="progressBarCont" class="zoom-bar">
+            <div on-click="handleZoomSlider" class="zoom-bar">
                 <div id="progressBar" style$={{computeZoomStyle(zoom)}}></div>
             </div>
             <div title="Zoom in" id="zoomInButton" on-click="handleZoomInButton" class="stv-btn">

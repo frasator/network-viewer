@@ -170,28 +170,16 @@
     </style>
     <template>
 
-        <nv-bar id="nvbar" lite="{{lite}}" hidden$="{{hideBar}}" columns="{{vertexColumns}}" on-session-start="handleSessionStartMenu" on-session-open="handleSessionOpenMenu" on-session-save="handleSessionSaveMenu" on-session-manage="handleSessionManageMenu"
-            on-import-sif="handleImportSifMenu" on-import-text="handleImportTextMenu" on-import-xlsx="handleImportXlsxMenu" on-import-node-attributes="handleImportNodeAttrMenu" on-import-edge-attributes="handleImportEdgeAttrMenu" on-export-sif="handleExportSifMenu"
-            on-export-svg="handleExportSvgMenu" on-export-png="handleExportPngMenu" on-export-node-attributes="handleExportNodeAttrMenu" on-export-edge-attributes="handleExportEdgeAttrMenu" on-nodes-select-all="handleSelectMenu" on-nodes-select-first-neighbourhood="handleSelectMenu"
-            on-nodes-select-invert="handleSelectMenu" on-edges-select-all="handleSelectMenu" on-edges-select-adjacent="handleSelectMenu" on-network-select-all="handleSelectMenu" on-layout="handleLayoutMenu" on-network-edit="handleNetworkEditMenu" on-nodes-edit="handleNodesEditMenu"
-            on-edges-edit="handleEdgesEditMenu" on-nodes-filter="handleNodesFilterMenu" on-edges-filter="handleEdgesFilterMenu" on-cellbase="handleCellbaseMenu" on-node-simple-rendering="handleNodeSimpleRenderingMenu" on-node-list-rendering="handleNodeListRenderingMenu"
-            on-edge-simple-rendering="handleEdgeSimpleRenderingMenu" on-reactome="handleReactomeMenu" on-kegg="handleKeggMenu" on-intact="handleIntactMenu" on-communities-structure-detection="handleCommunitiesMenu" on-topological-study="handleTopologicalMenu"
-            on-reactome-fi-microarray="handleReactomeFiMenu" on-snow="handleSnowMenu" on-network-miner="handleNetworkMinerMenu" on-fatigo="handleFatigoMenu" on-example="handleLoadExampleMenu" on-save="handleSave" on-drugs="handleDrugsMenu" on-diseases="handleDiseasesMenu"
-            on-functionalities="handleFunctionalitiesMenu">
+        <nv-bar id="nvbar" lite="{{lite}}" hidden$="{{hideBar}}" columns="{{vertexColumns}}" on-session-start="handleSessionStartMenu" on-session-open="handleSessionOpenMenu" on-session-save="handleSessionSaveMenu" on-session-manage="handleSessionManageMenu" on-import-sif="handleImportSifMenu" on-import-text="handleImportTextMenu" on-import-xlsx="handleImportXlsxMenu" on-import-node-attributes="handleImportNodeAttrMenu" on-import-edge-attributes="handleImportEdgeAttrMenu" on-export-sif="handleExportSifMenu" on-export-svg="handleExportSvgMenu" on-export-png="handleExportPngMenu" on-export-node-attributes="handleExportNodeAttrMenu" on-export-edge-attributes="handleExportEdgeAttrMenu" on-nodes-select-all="handleSelectMenu" on-nodes-select-first-neighbourhood="handleSelectMenu" on-nodes-select-invert="handleSelectMenu" on-edges-select-all="handleSelectMenu" on-edges-select-adjacent="handleSelectMenu" on-network-select-all="handleSelectMenu" on-layout="handleLayoutMenu" on-network-edit="handleNetworkEditMenu" on-nodes-edit="handleNodesEditMenu" on-edges-edit="handleEdgesEditMenu" on-nodes-filter="handleNodesFilterMenu" on-edges-filter="handleEdgesFilterMenu" on-cellbase="handleCellbaseMenu" on-node-simple-rendering="handleNodeSimpleRenderingMenu" on-node-list-rendering="handleNodeListRenderingMenu" on-edge-simple-rendering="handleEdgeSimpleRenderingMenu" on-reactome="handleReactomeMenu" on-kegg="handleKeggMenu" on-intact="handleIntactMenu" on-communities-structure-detection="handleCommunitiesMenu" on-topological-study="handleTopologicalMenu" on-reactome-fi-microarray="handleReactomeFiMenu" on-snow="handleSnowMenu" on-network-miner="handleNetworkMinerMenu" on-fatigo="handleFatigoMenu" on-example="handleLoadExampleMenu" on-save="handleSave" on-drugs="handleDrugsMenu" on-diseases="handleDiseasesMenu" on-functionalities="handleFunctionalitiesMenu">
         </nv-bar>
 
-        <nv-tool-bar lite="{{lite}}" hidden$="{{hideToolBar}}" background-color="{{backgroundColor}}" mode="{{mode}}" zoom="{{zoom}}" on-layoutchange="handleLayoutChange" on-selectchange="handleSelectChange" on-rotatechange="handleRotateChange" on-importbackgroundimage="handleImportBackgroundImage"
-            on-reset-zoom="handleResetZoom" on-center-network="handleCenterNetwork" on-undo="undoAction" on-redo="redoAction">
+        <nv-tool-bar lite="{{lite}}" hidden$="{{hideToolBar}}" background-color="{{backgroundColor}}" mode="{{mode}}" zoom="{{zoom}}" on-layoutchange="handleLayoutChange" on-selectchange="handleSelectChange" on-rotatechange="handleRotateChange" on-importbackgroundimage="handleImportBackgroundImage" on-reset-zoom="handleResetZoom" on-center-network="handleCenterNetwork" on-undo="undoAction" on-redo="redoAction">
         </nv-tool-bar>
 
-        <nv-edition-bar id="editionBar" hidden$="{{hideEditionBar}}" selection-color="{{vertexDefaults.selectionColor}}" vertex-columns="{{vertexColumns}}" edge-columns="{{edgeColumns}}" on-vertexshape="handleVertexShape" on-vertexopacity="handleVertexOpacity"
-            on-vertexsize="handleVertexSize" on-vertexcolor="handleVertexColor" on-vertexstrokesize="handleVertexStrokeSize" on-vertexstrokecolor="handleVertexStrokeColor" on-vertexlabelsize="handleVertexLabelSize" on-vertexsearch="handleVertexSearch" on-vertexnamefield="handleVertexNameField"
-            on-edgeshape="handleEdgeShape" on-edgesize="handleEdgeSize" on-edgecolor="handleEdgeColor" on-edgelabelsize="handleEdgeLabelSize" on-edgesearch="handleEdgeSearch" on-edgenamefield="handleEdgeNameField">
+        <nv-edition-bar id="editionBar" hidden$="{{hideEditionBar}}" selection-color="{{vertexDefaults.selectionColor}}" vertex-columns="{{vertexColumns}}" edge-columns="{{edgeColumns}}" on-vertexshape="handleVertexShape" on-vertexopacity="handleVertexOpacity" on-vertexsize="handleVertexSize" on-vertexcolor="handleVertexColor" on-vertexstrokesize="handleVertexStrokeSize" on-vertexstrokecolor="handleVertexStrokeColor" on-vertexlabelsize="handleVertexLabelSize" on-vertexsearch="handleVertexSearch" on-vertexnamefield="handleVertexNameField" on-edgeshape="handleEdgeShape" on-edgesize="handleEdgeSize" on-edgecolor="handleEdgeColor" on-edgelabelsize="handleEdgeLabelSize" on-edgesearch="handleEdgeSearch" on-edgenamefield="handleEdgeNameField">
         </nv-edition-bar>
 
-        <nv-layout id="networkLayout" mode="{{mode}}" scale="{{scale}}" tx="{{center.x}}" ty="{{center.y}}" zoom="{{zoom}}" graph="{{graph}}" background-color="{{backgroundColor}}" on-createvertex="handleCreateVertex" on-selectvertex="handleSelectVertex" on-moveselectedvertices="handleMoveSelectedVertices"
-            on-selectarea="handleSelectArea" on-createedge="handleCreateEdge" on-removevertex="handleRemoveVertex" on-removeedge="handleRemoveEdge" on-leftclickvertex="handleLeftClickVertex" on-selectedge="handleSelectEdge" on-leftclickedge="handleLeftClickEdge"
-            on-rightclickvertex="handleRightClickVertex" on-rightclickedge="handleRightClickEdge" on-rightclickbackgroundimage="handleRightClickBackgroundImage">
+        <nv-layout id="networkLayout" mode="{{mode}}" scale="{{scale}}" tx="{{center.x}}" ty="{{center.y}}" zoom="{{zoom}}" graph="{{graph}}" background-color="{{backgroundColor}}" on-createvertex="handleCreateVertex" on-selectvertex="handleSelectVertex" on-moveselectedvertices="handleMoveSelectedVertices" on-selectarea="handleSelectArea" on-createedge="handleCreateEdge" on-removevertex="handleRemoveVertex" on-removeedge="handleRemoveEdge" on-leftclickvertex="handleLeftClickVertex" on-selectedge="handleSelectEdge" on-leftclickedge="handleLeftClickEdge" on-rightclickvertex="handleRightClickVertex" on-rightclickedge="handleRightClickEdge" on-rightclickbackgroundimage="handleRightClickBackgroundImage">
         </nv-layout>
 
         <nv-status-bar hidden$="{{hideStatusBar}}" last-loaded-file-name="{{lastLoadedFileName}}" vertices="{{vertices}}" edges="{{edges}}" selected-vertices="{{selectedVertices}}" selected-edges="{{selectedEdges}}" selection-color="{{vertexDefaults.selectionColor}}">
@@ -202,9 +190,7 @@
                 <div class="header">
                     Node visualization settings
                 </div>
-                <nv-attribute-node-render class="container" id="nodeRender" columns="{{vertexColumns}}" items="{{vertices}}" defaults="{{vertexDefaults}}" visual-sets="{{vertexVisualSets}}" on-labelAttribute="handleVertexDefaultLabelAttribute" on-labelsize="handleVertexDefaultLabelSize"
-                    on-labelpositionx="handleVertexDefaultLabelPositionX" on-labelpositiony="handleVertexDefaultLabelPositionY" on-opacity="handleVertexDefaultOpacity" on-shape="handleVertexDefaultShape" on-color="handleVertexDefaultColor" on-strokecolor="handleVertexDefaultStrokeColor"
-                    on-size="handleVertexDefaultSize" on-strokesize="handleVertexDefaultStrokeSize" on-area="handleVertexDefaultArea" on-strokeArea="handleVertexDefaultStrokeArea" on-xattribute="handleVertexDefaultXAttribute" on-yattribute="handleVertexDefaultYAttribute">
+                <nv-attribute-node-render class="container" id="nodeRender" columns="{{vertexColumns}}" items="{{vertices}}" defaults="{{vertexDefaults}}" visual-sets="{{vertexVisualSets}}" on-labelAttribute="handleVertexDefaultLabelAttribute" on-labelsize="handleVertexDefaultLabelSize" on-labelpositionx="handleVertexDefaultLabelPositionX" on-labelpositiony="handleVertexDefaultLabelPositionY" on-opacity="handleVertexDefaultOpacity" on-shape="handleVertexDefaultShape" on-color="handleVertexDefaultColor" on-strokecolor="handleVertexDefaultStrokeColor" on-size="handleVertexDefaultSize" on-strokesize="handleVertexDefaultStrokeSize" on-area="handleVertexDefaultArea" on-strokeArea="handleVertexDefaultStrokeArea" on-xattribute="handleVertexDefaultXAttribute" on-yattribute="handleVertexDefaultYAttribute">
                 </nv-attribute-node-render>
             </stv-panel>
 
@@ -212,8 +198,7 @@
                 <div class="header">
                     Edge visualization settings
                 </div>
-                <nv-attribute-edge-render class="container" id="edgeRender" columns="{{edgeColumns}}" items="{{edges}}" defaults="{{edgeDefaults}}" visual-sets="{{edgeVisualSets}}" on-labelattribute="handleEdgeDefaultLabelAttribute" on-labelsize="handleEdgeDefaultLabelSize"
-                    on-opacity="handleEdgeDefaultOpacity" on-shaft="handleEdgeDefaultShaft" on-shape="handleEdgeDefaultShape" on-bidirectional="handleEdgeDefaultBidirectional" on-color="handleEdgeDefaultColor" on-size="handleEdgeDefaultSize">
+                <nv-attribute-edge-render class="container" id="edgeRender" columns="{{edgeColumns}}" items="{{edges}}" defaults="{{edgeDefaults}}" visual-sets="{{edgeVisualSets}}" on-labelattribute="handleEdgeDefaultLabelAttribute" on-labelsize="handleEdgeDefaultLabelSize" on-opacity="handleEdgeDefaultOpacity" on-shaft="handleEdgeDefaultShaft" on-shape="handleEdgeDefaultShape" on-bidirectional="handleEdgeDefaultBidirectional" on-color="handleEdgeDefaultColor" on-size="handleEdgeDefaultSize">
                 </nv-attribute-edge-render>
             </stv-panel>
         </div>
@@ -241,8 +226,7 @@
                 <div class="header">
                     Edit Network
                 </div>
-                <nv-network-edit class="container" id="networkEdit" selected-vertices="{{selectedVertices}}" selected-edges="{{selectedEdges}}" vertices="{{vertices}}" edges="{{edges}}" on-remove-selected-edges="removeSelectedEdges" on-remove-selected-vertices="removeSelectedVertices"
-                    on-add-edge="handleNetworkEditAddEdge" on-add-vertex="handleNetworkEditAddVertex">
+                <nv-network-edit class="container" id="networkEdit" selected-vertices="{{selectedVertices}}" selected-edges="{{selectedEdges}}" vertices="{{vertices}}" edges="{{edges}}" on-remove-selected-edges="removeSelectedEdges" on-remove-selected-vertices="removeSelectedVertices" on-add-edge="handleNetworkEditAddEdge" on-add-vertex="handleNetworkEditAddVertex">
                 </nv-network-edit>
             </stv-panel>
 
@@ -251,8 +235,7 @@
                 <div class="header">
                     Edit and filter node attributes
                 </div>
-                <nv-attribute-edit class="container" id="nodeAttributeEdit" columns="{{vertexColumns}}" items="{{vertices}}" selected="{{selectedVertices}}" on-selectedchange="handleAttributeEditVertexSelectedChange" on-selectall="selectAllVertices" on-deselectall="deselectAllVertices"
-                    on-update-row="handleVerticesUpdateRow" type="node">
+                <nv-attribute-edit class="container" id="nodeAttributeEdit" columns="{{vertexColumns}}" items="{{vertices}}" selected="{{selectedVertices}}" on-selectedchange="handleAttributeEditVertexSelectedChange" on-selectall="selectAllVertices" on-deselectall="deselectAllVertices" on-update-row="handleVerticesUpdateRow" type="node">
                 </nv-attribute-edit>
             </stv-panel>
 
@@ -260,8 +243,7 @@
                 <div class="header">
                     Edit and filter edge attributes
                 </div>
-                <nv-attribute-edit class="container" id="edgeAttributeEdit" columns="{{edgeColumns}}" items="{{edges}}" selected="{{selectedEdges}}" on-selectedchange="handleAttributeEditEdgeSelectedChange" on-selectall="selectAllEdges" on-deselectall="deselectAllEdges"
-                    on-update-row="handleEdgesUpdateRow" type="edge">
+                <nv-attribute-edit class="container" id="edgeAttributeEdit" columns="{{edgeColumns}}" items="{{edges}}" selected="{{selectedEdges}}" on-selectedchange="handleAttributeEditEdgeSelectedChange" on-selectall="selectAllEdges" on-deselectall="deselectAllEdges" on-update-row="handleEdgesUpdateRow" type="edge">
                 </nv-attribute-edit>
             </stv-panel>
 
@@ -410,7 +392,6 @@
                 <nv-nv-fatigo id="fatigo" projects="{{projects}}" columns="{{vertexColumns}}" items="{{vertices}}" selected="{{selectedVertices}}" class="container">
                 </nv-nv-fatigo>
             </stv-panel>
-
 
 
             <!--Menu file-->
@@ -669,8 +650,7 @@
             document.body.addEventListener('click', function(e) {
                 me._hideVertexContextMenu();
                 me._hideEdgeContextMenu();
-                me.$.imagecontextmenu.style.opacity = "";
-                me.$.imagecontextmenu.style.visibility = "";
+                me._hideImageContextMenu();
             });
             this._init();
         },
@@ -1839,16 +1819,19 @@
 
         /** Context Handlers **/
         _hideVertexContextMenu: function() {
+            this.$.vertexcontextmenu.setAttribute('hidden', '');
             this.$.vertexcontextmenu.style.opacity = "";
             this.$.vertexcontextmenu.style.visibility = "";
             this._lastContextVertexAttributes = [];
         },
         _hideEdgeContextMenu: function() {
+            this.$.edgecontextmenu.setAttribute('hidden', '');
             this.$.edgecontextmenu.style.opacity = "";
             this.$.edgecontextmenu.style.visibility = "";
             this._lastContextEdgeAttributes = [];
         },
         _showVertexContextMenu: function(x, y) {
+            this.$.vertexcontextmenu.removeAttribute('hidden');
             var bcrnl = this.$.networkLayout.getBoundingClientRect();
             this.$.vertexcontextmenu.style.opacity = "1";
             this.$.vertexcontextmenu.style.visibility = "visible";
@@ -1856,6 +1839,7 @@
             this.$.vertexcontextmenu.style.left = (bcrnl.left + x + 10) + "px";
         },
         _showEdgeContextMenu: function(x, y) {
+            this.$.edgecontextmenu.removeAttribute('hidden');
             var bcrnl = this.$.networkLayout.getBoundingClientRect();
             this.$.edgecontextmenu.style.opacity = "1";
             this.$.edgecontextmenu.style.visibility = "visible";
@@ -1935,6 +1919,7 @@
             this.selectEdgesNeighbour();
         },
         _hideImageContextMenu: function() {
+            this.$.imagecontextmenu.setAttribute('hidden', '');
             this.$.imagecontextmenu.style.opacity = "";
             this.$.imagecontextmenu.style.visibility = "";
         },
@@ -1942,6 +1927,7 @@
             if (this.disableContextMenu === true) {
                 return;
             }
+            this.$.imagecontextmenu.removeAttribute('hidden');
             //                var bcr = e.detail.targetEl.getBoundingClientRect()
             var bcrnl = this.$.networkLayout.getBoundingClientRect();
             //                console.log(bcr)

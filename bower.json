@@ -29,7 +29,7 @@
     "pako": "~0.2.8",
     "stevia-elements": "https://github.com/babelomics/stevia-elements.git#develop",
     "iron-list": "^1.3.4",
-    "d3": "^4.0.0",
+    "d3": "^3.5.17",
     "js-xlsx": "~0.7.11",
     "file-saver.js": "~1.20150507.2",
     "highcharts-release": "^4.2.5",
