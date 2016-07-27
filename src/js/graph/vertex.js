@@ -1,5 +1,5 @@
 function Vertex(args) {
-    this.id = 'v' + Utils.genId();
+    this.id = 'v' + stv.utils.genId();
 
     this.edges = [];
     this.edgesIndex = {};
