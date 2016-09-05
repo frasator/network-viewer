@@ -5,7 +5,7 @@
 
 <dom-module id="nv-bar">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-        :host {
+         :host {
             display: block;
             position: relative;
             box-sizing: border-box;
@@ -20,13 +20,13 @@
             margin-left: 10px;
         }
 
-        stv-dropdown > [data-button]::after {
+        stv-dropdown>[data-button]::after {
             font-family: 'FontAwesome';
             content: '\f0d7';
             margin-left: 3px;
         }
 
-        stv-dropdown > [data-button] {
+        stv-dropdown>[data-button] {
             padding: 5px 10px;
         }
 
@@ -185,13 +185,13 @@
                     <li data-sub>Functional enrichment
                         <ul>
                             <li data-value="snow">Network enrichment...
-                                <span class="tool"> SNOW</span>
+                                <span data-value="snow" class="tool"> SNOW</span>
                             </li>
                             <li data-value="network-miner">Gene set network enrichment...
-                                <span class="tool"> Network Miner</span>
+                                <span data-value="network-miner" class="tool"> Network Miner</span>
                             </li>
                             <li data-value="fatigo">Single enrichment...
-                                <span class="tool"> Fatigo</span>
+                                <span data-value="fatigo" class="tool"> Fatigo</span>
                             </li>
                         </ul>
                     </li>

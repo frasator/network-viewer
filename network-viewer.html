@@ -52,9 +52,6 @@
 
 <!-- analysis -->
 <link rel="import" href="src/analysis/nv-communities-structure-detection.html">
-<link rel="import" href="src/analysis/nv-fatigo.html">
-<link rel="import" href="src/analysis/nv-network-miner.html">
-<link rel="import" href="src/analysis/nv-snow.html">
 <link rel="import" href="src/analysis/nv-topological-study.html">
 
 
@@ -103,7 +100,7 @@
 
 <dom-module id="network-viewer">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-        :host {
+         :host {
             display: block;
             position: relative;
             background-color: #FFFFFF;
@@ -170,7 +167,7 @@
     </style>
     <template>
 
-        <nv-bar id="nvbar" lite="{{lite}}" hidden$="{{hideBar}}" columns="{{vertexColumns}}" on-session-start="handleSessionStartMenu" on-session-open="handleSessionOpenMenu" on-session-save="handleSessionSaveMenu" on-session-manage="handleSessionManageMenu" on-import-sif="handleImportSifMenu" on-import-text="handleImportTextMenu" on-import-xlsx="handleImportXlsxMenu" on-import-node-attributes="handleImportNodeAttrMenu" on-import-edge-attributes="handleImportEdgeAttrMenu" on-export-sif="handleExportSifMenu" on-export-svg="handleExportSvgMenu" on-export-png="handleExportPngMenu" on-export-node-attributes="handleExportNodeAttrMenu" on-export-edge-attributes="handleExportEdgeAttrMenu" on-nodes-select-all="handleSelectMenu" on-nodes-select-first-neighbourhood="handleSelectMenu" on-nodes-select-invert="handleSelectMenu" on-edges-select-all="handleSelectMenu" on-edges-select-adjacent="handleSelectMenu" on-network-select-all="handleSelectMenu" on-layout="handleLayoutMenu" on-network-edit="handleNetworkEditMenu" on-nodes-edit="handleNodesEditMenu" on-edges-edit="handleEdgesEditMenu" on-nodes-filter="handleNodesFilterMenu" on-edges-filter="handleEdgesFilterMenu" on-cellbase="handleCellbaseMenu" on-node-simple-rendering="handleNodeSimpleRenderingMenu" on-node-list-rendering="handleNodeListRenderingMenu" on-edge-simple-rendering="handleEdgeSimpleRenderingMenu" on-reactome="handleReactomeMenu" on-kegg="handleKeggMenu" on-intact="handleIntactMenu" on-communities-structure-detection="handleCommunitiesMenu" on-topological-study="handleTopologicalMenu" on-reactome-fi-microarray="handleReactomeFiMenu" on-snow="handleSnowMenu" on-network-miner="handleNetworkMinerMenu" on-fatigo="handleFatigoMenu" on-example="handleLoadExampleMenu" on-save="handleSave" on-drugs="handleDrugsMenu" on-diseases="handleDiseasesMenu" on-functionalities="handleFunctionalitiesMenu">
+        <nv-bar id="nvbar" lite="{{lite}}" hidden$="{{hideBar}}" columns="{{vertexColumns}}" on-session-start="handleSessionStartMenu" on-session-open="handleSessionOpenMenu" on-session-save="handleSessionSaveMenu" on-session-manage="handleSessionManageMenu" on-import-sif="handleImportSifMenu" on-import-text="handleImportTextMenu" on-import-xlsx="handleImportXlsxMenu" on-import-node-attributes="handleImportNodeAttrMenu" on-import-edge-attributes="handleImportEdgeAttrMenu" on-export-sif="handleExportSifMenu" on-export-svg="handleExportSvgMenu" on-export-png="handleExportPngMenu" on-export-node-attributes="handleExportNodeAttrMenu" on-export-edge-attributes="handleExportEdgeAttrMenu" on-nodes-select-all="handleSelectMenu" on-nodes-select-first-neighbourhood="handleSelectMenu" on-nodes-select-invert="handleSelectMenu" on-edges-select-all="handleSelectMenu" on-edges-select-adjacent="handleSelectMenu" on-network-select-all="handleSelectMenu" on-layout="handleLayoutMenu" on-network-edit="handleNetworkEditMenu" on-nodes-edit="handleNodesEditMenu" on-edges-edit="handleEdgesEditMenu" on-nodes-filter="handleNodesFilterMenu" on-edges-filter="handleEdgesFilterMenu" on-cellbase="handleCellbaseMenu" on-node-simple-rendering="handleNodeSimpleRenderingMenu" on-node-list-rendering="handleNodeListRenderingMenu" on-edge-simple-rendering="handleEdgeSimpleRenderingMenu" on-reactome="handleReactomeMenu" on-kegg="handleKeggMenu" on-intact="handleIntactMenu" on-communities-structure-detection="handleCommunitiesMenu" on-topological-study="handleTopologicalMenu" on-reactome-fi-microarray="handleReactomeFiMenu" on-example="handleLoadExampleMenu" on-save="handleSave" on-drugs="handleDrugsMenu" on-diseases="handleDiseasesMenu" on-functionalities="handleFunctionalitiesMenu">
         </nv-bar>
 
         <nv-tool-bar lite="{{lite}}" hidden$="{{hideToolBar}}" background-color="{{backgroundColor}}" mode="{{mode}}" zoom="{{zoom}}" on-layoutchange="handleLayoutChange" on-selectchange="handleSelectChange" on-rotatechange="handleRotateChange" on-importbackgroundimage="handleImportBackgroundImage" on-reset-zoom="handleResetZoom" on-center-network="handleCenterNetwork" on-undo="undoAction" on-redo="redoAction">
@@ -365,33 +362,6 @@
                 <nv-session-manager class="container" id="sessionManager" user-data="{{userData}}" serialize-version="{{serializeVersion}}">
                 </nv-session-manager>
             </stv-panel> -->
-
-
-            <stv-panel hidden collapsible fixed movable closable id="snowPanel">
-                <div class="header">
-                    Network enrichment form
-                </div>
-                <nv-nv-snow id="snow" projects="{{projects}}" columns="{{vertexColumns}}" items="{{vertices}}" selected="{{selectedVertices}}" class="container">
-                </nv-nv-snow>
-            </stv-panel>
-
-
-            <stv-panel hidden collapsible fixed movable closable id="networkMinerPanel">
-                <div class="header">
-                    Gene set network enrichment form
-                </div>
-                <nv-nv-network-miner id="networkMiner" projects="{{projects}}" columns="{{vertexColumns}}" items="{{vertices}}" selected="{{selectedVertices}}" class="container">
-                </nv-nv-network-miner>
-            </stv-panel>
-
-
-            <stv-panel hidden collapsible fixed movable closable id="fatigoPanel">
-                <div class="header">
-                    Single enrichment form
-                </div>
-                <nv-nv-fatigo id="fatigo" projects="{{projects}}" columns="{{vertexColumns}}" items="{{vertices}}" selected="{{selectedVertices}}" class="container">
-                </nv-nv-fatigo>
-            </stv-panel>
 
 
             <!--Menu file-->
@@ -1541,38 +1511,6 @@
         },
         handleTopologicalMenu: function(e) {
             this.$.topologicalStudyPanel.show();
-        },
-        handleSnowMenu: function(e) {
-            if (this.cellMaps.$.header) {
-                if (this.cellMaps.$.header.isLogged == false) {
-                    this.cellMaps.$.header.anonymousSign();
-                }
-            }
-            this.$.snowPanel.show();
-        },
-        handleNetworkMinerMenu: function(e) {
-            if (this.cellMaps.$.header) {
-                if (this.cellMaps.$.header.isLogged == false) {
-                    this.cellMaps.$.header.anonymousSign();
-                }
-            }
-            this.$.networkMinerPanel.show();
-        },
-        handleFatigoMenu: function(e) {
-            if (this.cellMaps.$.header) {
-                if (this.cellMaps.$.header.isLogged == false) {
-                    this.cellMaps.$.header.anonymousSign();
-                }
-            }
-            this.$.fatigoPanel.show();
-        },
-        handleReactomeFiMenu: function(e) {
-            if (this.cellMaps.$.header) {
-                if (this.cellMaps.$.header.isLogged == false) {
-                    this.cellMaps.$.header.anonymousSign();
-                }
-            }
-            this.$.reactomeFiPanel.show();
         },
         /**/
         handleImportSif: function(e) {
