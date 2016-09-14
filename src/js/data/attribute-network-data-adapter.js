@@ -18,7 +18,6 @@ function AttributeNetworkDataAdapter(args) {
         }
     }
 
-
     this.attributes = [];
     this.columns = [];
 
@@ -27,7 +26,7 @@ function AttributeNetworkDataAdapter(args) {
     }
 
     if (this.async) {
-        this.dataSource.on('success', function(data) {
+        this.dataSource.on('success', function (data) {
             _this.parse(data);
         });
         this.dataSource.fetch(this.async);
@@ -36,19 +35,18 @@ function AttributeNetworkDataAdapter(args) {
         _this.parse(data);
     }
 
-
 };
 
-AttributeNetworkDataAdapter.prototype.on = function(eventName, cb) {
+AttributeNetworkDataAdapter.prototype.on = function (eventName, cb) {
     this.boundEvents[eventName] = cb;
 };
-AttributeNetworkDataAdapter.prototype.trigger = function(event) {
+AttributeNetworkDataAdapter.prototype.trigger = function (event) {
     if (typeof this.boundEvents[event] === 'function') {
         this.boundEvents[event].apply(this, Array.prototype.slice.call(arguments, 1));
     }
 };
 
-AttributeNetworkDataAdapter.prototype.parse = function(data) {
+AttributeNetworkDataAdapter.prototype.parse = function (data) {
     var _this = this;
 
     //    var lines = data.split("\n");
@@ -80,7 +78,6 @@ AttributeNetworkDataAdapter.prototype.parse = function(data) {
         data = data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
         var lines = data.split(/\n/);
 
-
         var firstLine = lines[0].trim();
         var columnNames = [];
         if (firstLine.substr(0, 1) === "#") {
@@ -104,6 +101,7 @@ AttributeNetworkDataAdapter.prototype.parse = function(data) {
         }
 
         var finalColumnNames = [];
+        var auxRepeatMap = {};
         var numColumns = firstLine.split(/\t/).length;
         for (var i = 0; i < numColumns; i++) {
 
@@ -120,19 +118,38 @@ AttributeNetworkDataAdapter.prototype.parse = function(data) {
             if (i == 0) {
                 finalColumnNames[i] = "id";
             }
+
+            if (auxRepeatMap[finalColumnNames[i]] == null) {
+                auxRepeatMap[finalColumnNames[i]] = true;
+            } else {
+                finalColumnNames[i] = finalColumnNames[i] + '_' + i.toString();
+            }
+            
             if (this.ignoreColumns[i] !== true) {
                 var column = {
                     name: finalColumnNames[i].toString(),
                     title: finalColumnNames[i].toString(),
                     type: "text",
-                    formula: function(row) {
+                    formula: function (row) {
                         return row[this.name];
                     }
                 };
                 this.columns.push(column);
             }
         }
-
+        //check repeated column names
+        var auxColumnNameMap = {};
+        var auxColumnNames = [];
+        for (var i = 0; i < finalColumnNames.length; i++) {
+            var cn = finalColumnNames[i];
+            if (auxColumnNameMap[cn] == null) {
+                auxColumnNameMap[cn] = true;
+                auxColumnNames.push(cn);
+            } else {
+                auxColumnNames.push(cn + '_' + i.toString());
+            }
+        }
+        finalColumnNames = auxColumnNames;
 
         //ignore attributes
         if (Object.keys(this.ignoreColumns).length > 0) {
@@ -188,6 +205,5 @@ AttributeNetworkDataAdapter.prototype.parse = function(data) {
             sender: this
         });
     }
-
 
 };

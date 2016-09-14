@@ -355,15 +355,6 @@
             </stv-panel>
 
 
-            <!-- <stv-panel hidden collapsible fixed movable closable id="sessionManagerPanel" on-hidden="handleSessionManagerHidden">
-                <div class="header">
-                    User session manager
-                </div>
-                <nv-session-manager class="container" id="sessionManager" user-data="{{userData}}" serialize-version="{{serializeVersion}}">
-                </nv-session-manager>
-            </stv-panel> -->
-
-
             <!--Menu file-->
             <div style="position:fixed;z-index:10">
                 <stv-panel modal fixed style hidden="{{!computeSelectedMenu(selectedMenu, 'import-sif')}}">
@@ -524,12 +515,14 @@
             },
             vertices: {
                 type: Array,
+                notify: true,
                 value: function() {
                     return []
                 }
             },
             edges: {
                 type: Array,
+                notify: true,
                 value: function() {
                     return []
                 }
@@ -547,16 +540,20 @@
                 }
             },
             vertexColumns: {
-                type: Array
+                type: Array,
+                notify: true
             },
             edgeColumns: {
-                type: Array
+                type: Array,
+                notify: true
             },
             selectedVertices: {
-                type: Array
+                type: Array,
+                notify: true
             },
             selectedEdges: {
-                type: Array
+                type: Array,
+                notify: true
             },
             selectedMenu: {
                 type: String,
@@ -1389,9 +1386,6 @@
             //                });
             //                link.dispatchEvent(event);
             //            }
-        },
-        handleSessionManagerHidden: function() {
-            this.fire('session-manager-hidden', this.$.sessionManagerPanel);
         },
         handleSessionManageMenu: function(e) {
             this.$.sessionManagerPanel.show();
