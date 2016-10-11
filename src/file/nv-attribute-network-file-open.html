@@ -162,17 +162,6 @@
                         var attributes = e.attributes;
                         var columns = e.columns;
 
-                        for (var i = 0; i < columns.length; i++) {
-                            var col = columns[i];
-                            if (col.name == 'id') {
-                                col.editable = false;
-                            }
-                            col.formula = function(row) {
-                                return row.attributes[this.name];
-                            }
-                            col.width = 100;
-                        }
-
                         me.selectedMenu = '';
                         me.fire('open', {
                             columns: columns,
