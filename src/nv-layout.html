@@ -3,7 +3,7 @@
 
 <dom-module id="nv-layout">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-        :host {
+         :host {
             display: block;
             position: relative;
             -webkit-touch-callout: none;
@@ -13,9 +13,30 @@
             -ms-user-select: none;
             user-select: none;
         }
+
+        #svgDiv {
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+
+        #mini1 {
+            position: absolute;
+            background-color: rgba(125, 125, 125, 0.3);
+            border: 1px solid rgba(125, 125, 125, 0.5);
+        }
+
+        #mini2 {
+            position: relative;
+            background-color: rgba(125, 125, 125, 0.3);
+            border: 1px solid rgba(125, 125, 125, 0.5);
+        }
     </style>
     <template>
         <div id="svgDiv" style="height:100%;width:100%;">
+            <div id="mini1" hidden="{{hideMiniMap}}">
+                <div id="mini2"></div>
+            </div>
             <svg xmlns="http://www.w3.org/2000/svg" id="svg" on-wheel="handleWheel" on-mousedown="mouseDownHandler" on-mouseup="mouseUpHandler" on-mouseover="mouseHoverHandler" on-contextmenu="mouseContextMenuHandler" width="100%" height="100%">
                 <rect id="backgroundColor" width="100%" height="100%" fill$="{{backgroundColor}}" x="0" y="0"></rect>
                 <svg id="drawArea">
@@ -107,12 +128,58 @@
             isMouseIn: {
                 type: Boolean,
                 value: false
+            },
+            hideMiniMap: {
+                type: Boolean,
+                value: false
             }
         },
         listeners: {
             'mousemove': 'handleMouseMove',
             'mouseleave': 'handleMouseLeave',
             'mouseenter': 'handleMouseEnter',
+        },
+        created: function() {},
+        ready: function() {
+            this.updateMini();
+        },
+        updateMini: function() {
+            this.async(function() {
+                var size = 150;
+                var vRect = this.getBoundingClientRect();
+                var nRect = this.$.scaleFrontGroup.getBoundingClientRect();
+                var netRect = {};
+                var viewRect = {};
+                for (var key in nRect) {
+                    netRect[key] = nRect[key];
+                    viewRect[key] = vRect[key];
+                }
+                if (netRect.width == 0 && netRect.height == 0) {
+                    netRect.width = 1;
+                    netRect.height = 1;
+                    netRect.left = viewRect.left + viewRect.width / 2;
+                    netRect.top = viewRect.top + viewRect.height / 2;
+                }
+                var nr;
+                if (netRect.width > netRect.height) {
+                    nr = size / (Math.max(netRect.width, viewRect.width));
+                } else {
+                    nr = size / (Math.max(netRect.height, viewRect.width));
+                }
+                // vr = size / viewRect.width;
+                this.$.mini1.style.right = 150 - (netRect.width * nr / 2) + 'px';
+                this.$.mini1.style.bottom = 100 - (netRect.height * nr / 2) + 'px';
+
+                // debugger
+                this.$.mini1.style.width = netRect.width * nr + 'px';
+                this.$.mini1.style.height = netRect.height * nr + 'px';
+
+                this.$.mini2.style.width = (viewRect.width * nr) + 'px';
+                this.$.mini2.style.height = (viewRect.height * nr) + 'px';
+
+                this.$.mini2.style.top = -(netRect.top - viewRect.top) * nr + -1 + 'px';
+                this.$.mini2.style.left = -(netRect.left - viewRect.left) * nr + -1 + 'px';
+            }, 50);
         },
         handleMouseLeave: function(e) {
             this.set('isMouseIn', false);
@@ -138,8 +205,6 @@
             if (navigator.appVersion.indexOf("X11") != -1) return "monospace, 'Courier New', Courier";
             return "'Courier New', Courier";
         },
-        created: function() {},
-        ready: function() {},
         computeTransform: function(tx, ty, scale) {
             return 'translate(' + tx + ',' + ty + ') scale(' + scale + ')';
         },
@@ -218,6 +283,7 @@
                     this.ty += (-this.last_rmy) * inc;
                 }
             }
+            this.updateMini();
         },
         centerNetwork: function() {
             var lbcr = this.getBoundingClientRect();
@@ -231,6 +297,36 @@
             scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
             this.tx += -(scalebcr.left - lbcr.left) + ((lbcr.width - scalebcr.width) / 2);
             this.ty += -(scalebcr.top - lbcr.top) + ((lbcr.height - scalebcr.height) / 2);
+
+            this.updateMini();
+        },
+        adjustWidthNetwork: function() {
+            var lbcr = this.getBoundingClientRect();
+            var scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
+
+            var newScale = lbcr.width / (scalebcr.width / this.scale);
+
+            var finalScale = newScale;
+            this.zoom = Math.min(Math.floor(finalScale * 25), 100);
+            scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
+            this.tx += -(scalebcr.left - lbcr.left) + ((lbcr.width - scalebcr.width) / 2);
+            this.ty += -(scalebcr.top - lbcr.top - 10);
+
+            this.updateMini();
+        },
+        adjustHeightNetwork: function() {
+            var lbcr = this.getBoundingClientRect();
+            var scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
+
+            var newScale2 = lbcr.height / (scalebcr.height / this.scale);
+
+            var finalScale = newScale2;
+            this.zoom = Math.min(Math.floor(finalScale * 25), 100);
+            scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
+            this.tx += -(scalebcr.left - lbcr.left - 10);
+            this.ty += -(scalebcr.top - lbcr.top) + ((lbcr.height - scalebcr.height) / 2);
+
+            this.updateMini();
         },
         mouseHoverHandler: function(e) {
             var targetEl = e.target;
@@ -595,8 +691,8 @@
         },
         _handleDownMoveCanvas: function(e) {
             var me = this;
-            var targetEl = e.target;
-            var targetElNetworkType = targetEl.getAttribute('network-type');
+            // var targetEl = e.target;
+            // var targetElNetworkType = targetEl.getAttribute('network-type');
             var br = this.getBoundingClientRect();
             var downX = e.clientX - br.left;
             var downY = e.clientY - br.top;
@@ -618,6 +714,8 @@
 
                 lastX = moveX;
                 lastY = moveY;
+
+                me.updateMini();
             };
             this.$.svg.addEventListener('mousemove', handler);
             this.moveHandlers.push(handler);
@@ -652,6 +750,8 @@
 
                 lastX = moveX;
                 lastY = moveY;
+
+                me.updateMini();
             };
             this.$.svg.addEventListener('mousemove', handler);
             this.moveHandlers.push(handler);

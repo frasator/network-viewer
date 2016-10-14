@@ -1,4 +1,5 @@
 <script src="../stevia-elements/src/manager/stevia-manager.js"></script>
+<script src="../FileSaver.js/FileSaver.min.js"></script>
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
@@ -176,7 +177,7 @@
         <nv-edition-bar id="editionBar" hidden$="{{hideEditionBar}}" selection-color="{{vertexDefaults.selectionColor}}" vertex-columns="{{vertexColumns}}" edge-columns="{{edgeColumns}}" on-vertexshape="handleVertexShape" on-vertexopacity="handleVertexOpacity" on-vertexsize="handleVertexSize" on-vertexcolor="handleVertexColor" on-vertexstrokesize="handleVertexStrokeSize" on-vertexstrokecolor="handleVertexStrokeColor" on-vertexlabelsize="handleVertexLabelSize" on-vertexsearch="handleVertexSearch" on-vertexnamefield="handleVertexNameField" on-edgeshape="handleEdgeShape" on-edgesize="handleEdgeSize" on-edgecolor="handleEdgeColor" on-edgelabelsize="handleEdgeLabelSize" on-edgesearch="handleEdgeSearch" on-edgenamefield="handleEdgeNameField">
         </nv-edition-bar>
 
-        <nv-layout id="networkLayout" mode="{{mode}}" scale="{{scale}}" tx="{{center.x}}" ty="{{center.y}}" zoom="{{zoom}}" graph="{{graph}}" background-color="{{backgroundColor}}" on-createvertex="handleCreateVertex" on-selectvertex="handleSelectVertex" on-moveselectedvertices="handleMoveSelectedVertices" on-selectarea="handleSelectArea" on-createedge="handleCreateEdge" on-removevertex="handleRemoveVertex" on-removeedge="handleRemoveEdge" on-leftclickvertex="handleLeftClickVertex" on-selectedge="handleSelectEdge" on-leftclickedge="handleLeftClickEdge" on-rightclickvertex="handleRightClickVertex" on-rightclickedge="handleRightClickEdge" on-rightclickbackgroundimage="handleRightClickBackgroundImage">
+        <nv-layout id="networkLayout" hide-mini-map="{{hideMiniMap}}" mode="{{mode}}" scale="{{scale}}" tx="{{center.x}}" ty="{{center.y}}" zoom="{{zoom}}" graph="{{graph}}" background-color="{{backgroundColor}}" on-createvertex="handleCreateVertex" on-selectvertex="handleSelectVertex" on-moveselectedvertices="handleMoveSelectedVertices" on-selectarea="handleSelectArea" on-createedge="handleCreateEdge" on-removevertex="handleRemoveVertex" on-removeedge="handleRemoveEdge" on-leftclickvertex="handleLeftClickVertex" on-selectedge="handleSelectEdge" on-leftclickedge="handleLeftClickEdge" on-rightclickvertex="handleRightClickVertex" on-rightclickedge="handleRightClickEdge" on-rightclickbackgroundimage="handleRightClickBackgroundImage">
         </nv-layout>
 
         <nv-status-bar hidden$="{{hideStatusBar}}" last-loaded-file-name="{{lastLoadedFileName}}" vertices="{{vertices}}" edges="{{edges}}" selected-vertices="{{selectedVertices}}" selected-edges="{{selectedEdges}}" selection-color="{{vertexDefaults.selectionColor}}">
@@ -453,7 +454,6 @@
         </ul>
 
         <nv-graph id="graph" vertices="{{vertices}}" edges="{{edges}}"></nv-graph>
-
     </template>
 </dom-module>
 <script>
@@ -496,6 +496,10 @@
                 type: Boolean,
                 value: false,
                 observer: 'handleHideEdgeRender'
+            },
+            hideMiniMap: {
+                type: Boolean,
+                value: false
             },
             disableContextMenu: {
                 type: Boolean,
@@ -728,6 +732,7 @@
             this._createAttrColumns();
         },
         _createAttrColumns: function() {
+            var me = this;
             var vertexColumns = [];
             var edgeColumns = [];
             vertexColumns.push({
@@ -736,7 +741,33 @@
                 type: "text",
                 editable: false,
                 formula: function(row) {
-                    return row.attributes["id"];
+                    return row.attributes[this.name];
+                }
+            });
+            vertexColumns.push({
+                name: "x",
+                title: "x",
+                type: "text",
+                width: 70,
+                formula: function(row) {
+                    return parseFloat(row.position[this.name].toFixed(2));
+                },
+                editFormula: function(row, newVal) {
+                    row.position[this.name] = parseFloat(newVal);
+                    me.setVertexCoords(row.id);
+                }
+            });
+            vertexColumns.push({
+                name: "y",
+                title: "y",
+                type: "text",
+                width: 70,
+                formula: function(row) {
+                    return parseFloat(row.position[this.name].toFixed(2));
+                },
+                editFormula: function(row, newVal) {
+                    row.position[this.name] = parseFloat(newVal);
+                    me.setVertexCoords(row.id);
                 }
             });
             vertexColumns.push({
@@ -744,28 +775,19 @@
                 title: "Name",
                 type: "text",
                 formula: function(row) {
-                    return row.attributes["name"];
+                    return row.attributes[this.name];
+                },
+                editFormula: function(row, newVal) {
+                    row.attributes[this.name] = newVal;
                 }
             });
-            //            vertexColumns.push({
-            //                defaultValue: "",
-            //                name: "x",
-            //                title: "x",
-            //                type: "string"
-            //            });
-            //            vertexColumns.push({
-            //                defaultValue: "",
-            //                name: "y",
-            //                title: "y",
-            //                type: "string"
-            //            });
             edgeColumns.push({
                 name: "id",
                 title: "Id",
                 type: "text",
                 editable: false,
                 formula: function(row) {
-                    return row.attributes["id"];
+                    return row.attributes[this.name];
                 }
             });
             edgeColumns.push({
@@ -773,7 +795,10 @@
                 title: "Name",
                 type: "text",
                 formula: function(row) {
-                    return row.attributes["name"];
+                    return row.attributes[this.name];
+                },
+                editFormula: function(row, newVal) {
+                    row.attributes[this.name] = newVal;
                 }
             });
             edgeColumns.push({
@@ -782,16 +807,33 @@
                 type: "text",
                 formula: function(row) {
                     return row.attributes["relation"];
+                },
+                editFormula: function(row, newVal) {
+                    row.attributes[this.name] = newVal;
                 }
             });
             this.set('vertexColumns', vertexColumns);
             this.set('edgeColumns', edgeColumns);
         },
         _restoreColumns: function(jsonColumns) {
+            var me = this;
             for (var i = 0; i < jsonColumns.length; i++) {
                 var column = jsonColumns[i];
-                column.formula = function(row) {
-                    return row.attributes[this.name];
+                if (column.name == 'x' || column.name == 'y') {
+                    column.formula = function(row) {
+                        return parseFloat(row.position[this.name].toFixed(2));
+                    }
+                    column.editFormula = function(row, newVal) {
+                        row.position[this.name] = parseFloat(newVal);
+                        me.setVertexCoords(row.id);
+                    }
+                } else {
+                    column.formula = function(row) {
+                        return row.attributes[this.name];
+                    }
+                    column.editFormula = function(row, newVal) {
+                        row.attributes[column.name] = newVal;
+                    }
                 }
             }
         },
@@ -819,7 +861,6 @@
                 this.zoom = 25;
                 this.refreshGraphView();
             }
-
             this.addActionStack();
         },
         loadLocalStorage: function() {
@@ -897,6 +938,7 @@
             if (length > 10) {
                 this.actionStack.pop();
             }
+            this.$.networkLayout.updateMini();
         },
 
         loadJSON: function(o, notAddActionStack) {
@@ -1076,7 +1118,20 @@
         setVertexDefaultPositionX: function(attribute, adjust, invertAxis) {
             adjust = (adjust == null) ? true : adjust;
             invertAxis = (invertAxis == null) ? false : invertAxis;
-            this._calculateVertexAttributeNormalization(attribute, "x", "width", adjust, invertAxis);
+            // this._calculateVertexAttributeNormalization(attribute, "x", "width", adjust, invertAxis);
+            this._setVertexPositionByAttribute(attribute, "x");
+        },
+        _setVertexPositionByAttribute: function(coordAttr, coord) {
+            for (var i = 0; i < this.graph.vertices.length; i++) {
+                vertex = this.graph.vertices[i];
+                attributes = vertex.attributes;
+                c = parseFloat(attributes[coordAttr]);
+                if (!isNaN(c)) {
+                    vertex.position[coord] = c;
+                    this.setVertexCoords(vertex.id);
+                }
+            }
+            this.centerNetwork();
         },
         _calculateVertexAttributeNormalization: function(coordAttr, coord, measure, adjust, invertAxis) {
             var margin = 100,
@@ -1121,7 +1176,8 @@
         setVertexDefaultPositionY: function(attribute, adjust, invertAxis) {
             adjust = (adjust == null) ? true : adjust;
             invertAxis = (invertAxis == null) ? true : invertAxis;
-            this._calculateVertexAttributeNormalization(attribute, "y", "height", adjust, invertAxis);
+            // this._calculateVertexAttributeNormalization(attribute, "y", "height", adjust, invertAxis);
+            this._setVertexPositionByAttribute(attribute, "y");
         },
         /** Handlers **/
         /* Vertex */
@@ -2263,6 +2319,7 @@
                 vertex.renderer.move();
                 this._updateEdgeCoords(vertex);
             }
+            this.$.nodeAttributeEdit.update();
         },
         selectVerticesByIds: function(vertexIds) {
             var selected = [];
@@ -2312,10 +2369,12 @@
         },
         setVertexCoords: function(vertexId, x, y) {
             var vertex = this.graph.getVertexById(vertexId);
-            vertex.position.x = x;
-            vertex.position.y = y;
-            //                row.x = vertex.position.x;
-            //                row.y = vertex.position.y;
+            if (x != null) {
+                vertex.position.x = x;
+            }
+            if (y != null) {
+                vertex.position.y = y;
+            }
             vertex.renderer.move();
             this._updateEdgeCoords(vertex);
         },
@@ -2883,8 +2942,12 @@
             for (var i = 0, l = items.length; i < l; i++) {
                 item = items[i];
                 for (var j = 0; j < lc; j++) {
-                    attr = columns[j].name;
-                    text += item.attributes[attr] + separator;
+                    var column = columns[j];
+                    if (column.name == 'x' || column.name == 'y') {
+                        text += item.position[column.name].toFixed(2) + separator;
+                    } else {
+                        text += item.attributes[column.name] + separator;
+                    }
                 }
                 text += '\n';
             }
@@ -2934,21 +2997,65 @@
             this.$.networkLayout.appendDom();
         },
         importVertexAttributeManager: function(columns, attributes) {
+            for (var i = 0; i < columns.length; i++) {
+                var column = columns[i];
+                if (column.name == 'id') {
+                    column.editable = false;
+                }
+                if (column.name == 'x' || column.name == 'y') {
+                    column.formula = function(row) {
+                        return parseFloat(row.position[this.name].toFixed(2));
+                    }
+                    column.editFormula = function(row, newVal) {
+                        row.position[this.name] = parseFloat(newVal);
+                        me.setVertexCoords(row.id);
+                    }
+                    column.width = 50;
+                } else {
+                    column.formula = function(row) {
+                        return row.attributes[this.name];
+                    }
+                    column.editFormula = function(row, newVal) {
+                        row.attributes[this.name] = newVal;
+                    }
+                    column.width = 100;
+                }
+            }
+
+            var xyModifiedFlag = false;
             for (var i = 0; i < attributes.length; i++) {
                 var row = attributes[i];
                 var vertex = this.graph.getVertexById(row.id);
                 if (vertex) {
                     for (key in row) {
-                        vertex.attributes[key] = row[key];
+                        if (key == 'x' || key == 'y') {
+                            xyModifiedFlag = true;
+                            var value = parseFloat(row[key]);
+                            if (!isNaN(value)) {
+                                vertex.position[key] = value;
+                            }
+                        } else {
+                            vertex.attributes[key] = row[key];
+                        }
                     }
                 }
             }
 
             this._addColumns(columns, 'vertexColumns');
+
+            if (xyModifiedFlag) {
+                for (var i = 0; i < this.graph.vertices.length; i++) {
+                    var vertex = this.graph.vertices[i];
+                    vertex.renderer.move();
+                    this._updateEdgeCoords(vertex);
+                }
+                this.centerNetwork();
+            }
+
             //            this.$.nodeRender.refreshAttributes();
 
-            this.handleVertexDefaultXAttribute();
-            this.handleVertexDefaultYAttribute();
+            // this.handleVertexDefaultXAttribute();
+            // this.handleVertexDefaultYAttribute();
         },
         _getNewColumns: function(newColumns, columns) {
             var found;
@@ -2974,6 +3081,19 @@
             this.set(path, this[path].concat(toAddColumns));
         },
         importEdgeAttributeManager: function(columns, attributes) {
+            for (var i = 0; i < columns.length; i++) {
+                var column = columns[i];
+                if (column.name == 'id') {
+                    column.editable = false;
+                }
+                column.formula = function(row) {
+                    return row.attributes[this.name];
+                }
+                column.editFormula = function(row, newVal) {
+                    row.attributes[this.name] = newVal;
+                }
+                column.width = 100;
+            }
             for (var i = 0; i < attributes.length; i++) {
                 var row = attributes[i];
                 var edge = this.graph.getEdgeById(row.id);
@@ -3012,6 +3132,7 @@
                         to: 'string'
                     });
                     me.loadJSON(JSON.parse(jsonStr));
+                    me.centerNetwork();
                     // me.setLayout("Force directed");
                 };
                 request.open('GET', './example-files/RAF_MAK_kinase_cascade.json.gz', true);
