@@ -137,7 +137,7 @@
 
                         <div class="horizontal layout">
                             <stv-select id="selectDelete" style="width:173px;">
-                                <template is="dom-repeat" items={{columns}} as="column" filter="isColumnEditable">
+                                <template is="dom-repeat" items={{columns}} as="column" filter="isColumnRemovable">
                                     <stv-option value="{{column.name}}">{{column.title}}</stv-option>
                                 </template>
                             </stv-select>
@@ -270,7 +270,7 @@
                     </div>
                 </div>
 
-                <stv-table id="table" enable-paging enable-select enable-edit enable-resize columns="{{columns}}" data="{{_currentItems}}" selected="{{_currentSelected}}" page-size="15" style="height:530px"></stv-table>
+                <stv-table id="table" enable-paging enable-select enable-edit enable-resize columns="{{columns}}" data="{{_currentItems}}" selected="{{_currentSelected}}" page-size="15" style="height:530px" on-iron-resize="handleTableResize"></stv-table>
 
             </div>
         </div>
@@ -344,23 +344,22 @@
             '_currentSelectedChanged(_currentSelected.splices)',
             '_filtersChanged(_filters.splices)'
         ],
-        ready: function() {
+        ready: function() {},
+        handleTableResize: function() {
             var me = this;
-            this._parentPanel.addEventListener('expand', function() {
-                if (me._parentPanel.expanded) {
-                    var brcMe = me.getBoundingClientRect();
-                    var bcrPanel = me._parentPanel.getBoundingClientRect();
-                    var bcrTopBar = me.$.topbar.getBoundingClientRect();
-                    me.style.width = bcrPanel.width + 'px';
-                    me.$.table.style.height = brcMe.height - bcrTopBar.height + 'px';
-                    me.$.table.pageSize = Math.floor((brcMe.height - bcrTopBar.height) / 30) - 3;
-                } else {
-                    me.style.width = '';
-                    me.$.table.style.height = '530px';
-                    me.$.table.pageSize = 15;
-                }
-                me._parentPanel._center();
-            });
+            if (me._parentPanel.expanded) {
+                var brcMe = me.getBoundingClientRect();
+                var bcrPanel = me._parentPanel.getBoundingClientRect();
+                var bcrTopBar = me.$.topbar.getBoundingClientRect();
+                me.style.width = bcrPanel.width + 'px';
+                me.$.table.style.height = brcMe.height - bcrTopBar.height + 'px';
+                me.$.table.pageSize = Math.floor((brcMe.height - bcrTopBar.height) / 30) - 3;
+            } else {
+                me.style.width = '';
+                me.$.table.style.height = '530px';
+                me.$.table.pageSize = 15;
+            }
+            me._parentPanel._center();
         },
         update: function() {
             this._checkCurrentItems();
@@ -397,6 +396,9 @@
         // },
         isColumnEditable: function(column) {
             return column.editable != false;
+        },
+        isColumnRemovable: function(column) {
+            return ['id', 'x', 'y'].indexOf(column.name) == -1;
         },
         isAddFilterSelected: function(_filterSelectedOption) {
             return _filterSelectedOption == 'add';

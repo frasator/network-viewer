@@ -4,7 +4,7 @@
 <link rel="import" href="nv-attribute-render-behavior.html">
 <dom-module id="nv-attribute-node-render">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-        :host {
+         :host {
             display: block;
             position: relative;
             box-sizing: border-box;
@@ -31,15 +31,15 @@
             border-left: 5px solid var(--accent-color);
         }
 
-        .vertical > * {
+        .vertical>* {
             margin-top: 3px;
         }
 
-        .horizontal > * {
+        .horizontal>* {
             margin-right: 3px;
         }
 
-        .horizontal > *:last-child {
+        .horizontal>*:last-child {
             margin-right: 0px;
         }
 
@@ -256,17 +256,17 @@
 
 
             <div class="horizontal layout">
-                <div class="stv-txt">X:</div>
-                <stv-select class="flex" value="{{defaults.xAttribute}}" on-change="handleXAttribute">
-                    <template is="dom-repeat" items="{{columns}}" as="column">
+                <div class="stv-txt">Coord X:</div>
+                <stv-select class="flex" value="{{defaults.xAttribute}}" on-option-click="handleXAttribute">
+                    <template is="dom-repeat" items="{{columns}}" as="column" filter="isColumnCoordinate">
                         <stv-option value="{{column.name}}">{{column.title}}</stv-option>
                     </template>
                 </stv-select>
             </div>
             <div class="horizontal layout">
-                <div class="stv-txt">Y:</div>
-                <stv-select class="flex" value="{{defaults.yAttribute}}" on-change="handleYAttribute">
-                    <template is="dom-repeat" items="{{columns}}" as="column">
+                <div class="stv-txt">Coord Y:</div>
+                <stv-select class="flex" value="{{defaults.yAttribute}}" on-option-click="handleYAttribute">
+                    <template is="dom-repeat" items="{{columns}}" as="column" filter="isColumnCoordinate">
                         <stv-option value="{{column.name}}">{{column.title}}</stv-option>
                     </template>
                 </stv-select>
@@ -313,6 +313,9 @@
                     return ['circle', 'ellipse', 'square', 'rectangle']
                 }
             }
+        },
+        isColumnCoordinate: function(column) {
+            return ['x', 'y'].indexOf(column.name) == -1;
         },
         handleLabelAttribute: function(e) {
             this.set('defaults.labelAttribute', e.currentTarget.value);

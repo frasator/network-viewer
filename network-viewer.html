@@ -1,4 +1,5 @@
 <script src="../stevia-elements/src/manager/stevia-manager.js"></script>
+<script src="../FileSaver.js/FileSaver.min.js"></script>
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
@@ -745,11 +746,11 @@
             });
             vertexColumns.push({
                 name: "x",
-                title: "X",
+                title: "x",
                 type: "text",
-                width: 60,
+                width: 70,
                 formula: function(row) {
-                    return row.position[this.name];
+                    return parseFloat(row.position[this.name].toFixed(2));
                 },
                 editFormula: function(row, newVal) {
                     row.position[this.name] = parseFloat(newVal);
@@ -758,11 +759,11 @@
             });
             vertexColumns.push({
                 name: "y",
-                title: "Y",
+                title: "y",
                 type: "text",
-                width: 60,
+                width: 70,
                 formula: function(row) {
-                    return row.position[this.name];
+                    return parseFloat(row.position[this.name].toFixed(2));
                 },
                 editFormula: function(row, newVal) {
                     row.position[this.name] = parseFloat(newVal);
@@ -780,18 +781,6 @@
                     row.attributes[this.name] = newVal;
                 }
             });
-            //            vertexColumns.push({
-            //                defaultValue: "",
-            //                name: "x",
-            //                title: "x",
-            //                type: "string"
-            //            });
-            //            vertexColumns.push({
-            //                defaultValue: "",
-            //                name: "y",
-            //                title: "y",
-            //                type: "string"
-            //            });
             edgeColumns.push({
                 name: "id",
                 title: "Id",
@@ -832,7 +821,7 @@
                 var column = jsonColumns[i];
                 if (column.name == 'x' || column.name == 'y') {
                     column.formula = function(row) {
-                        return row.position[this.name];
+                        return parseFloat(row.position[this.name].toFixed(2));
                     }
                     column.editFormula = function(row, newVal) {
                         row.position[this.name] = parseFloat(newVal);
@@ -1129,7 +1118,20 @@
         setVertexDefaultPositionX: function(attribute, adjust, invertAxis) {
             adjust = (adjust == null) ? true : adjust;
             invertAxis = (invertAxis == null) ? false : invertAxis;
-            this._calculateVertexAttributeNormalization(attribute, "x", "width", adjust, invertAxis);
+            // this._calculateVertexAttributeNormalization(attribute, "x", "width", adjust, invertAxis);
+            this._setVertexPositionByAttribute(attribute, "x");
+        },
+        _setVertexPositionByAttribute: function(coordAttr, coord) {
+            for (var i = 0; i < this.graph.vertices.length; i++) {
+                vertex = this.graph.vertices[i];
+                attributes = vertex.attributes;
+                c = parseFloat(attributes[coordAttr]);
+                if (!isNaN(c)) {
+                    vertex.position[coord] = c;
+                    this.setVertexCoords(vertex.id);
+                }
+            }
+            this.centerNetwork();
         },
         _calculateVertexAttributeNormalization: function(coordAttr, coord, measure, adjust, invertAxis) {
             var margin = 100,
@@ -1174,7 +1176,8 @@
         setVertexDefaultPositionY: function(attribute, adjust, invertAxis) {
             adjust = (adjust == null) ? true : adjust;
             invertAxis = (invertAxis == null) ? true : invertAxis;
-            this._calculateVertexAttributeNormalization(attribute, "y", "height", adjust, invertAxis);
+            // this._calculateVertexAttributeNormalization(attribute, "y", "height", adjust, invertAxis);
+            this._setVertexPositionByAttribute(attribute, "y");
         },
         /** Handlers **/
         /* Vertex */
@@ -2941,7 +2944,7 @@
                 for (var j = 0; j < lc; j++) {
                     var column = columns[j];
                     if (column.name == 'x' || column.name == 'y') {
-                        text += item.position[column.name].toFixed(3) + separator;
+                        text += item.position[column.name].toFixed(2) + separator;
                     } else {
                         text += item.attributes[column.name] + separator;
                     }
@@ -3001,7 +3004,7 @@
                 }
                 if (column.name == 'x' || column.name == 'y') {
                     column.formula = function(row) {
-                        return row.position[this.name];
+                        return parseFloat(row.position[this.name].toFixed(2));
                     }
                     column.editFormula = function(row, newVal) {
                         row.position[this.name] = parseFloat(newVal);
@@ -3027,7 +3030,10 @@
                     for (key in row) {
                         if (key == 'x' || key == 'y') {
                             xyModifiedFlag = true;
-                            vertex.position[key] = parseFloat(row[key]);
+                            var value = parseFloat(row[key]);
+                            if (!isNaN(value)) {
+                                vertex.position[key] = value;
+                            }
                         } else {
                             vertex.attributes[key] = row[key];
                         }
@@ -3126,6 +3132,7 @@
                         to: 'string'
                     });
                     me.loadJSON(JSON.parse(jsonStr));
+                    me.centerNetwork();
                     // me.setLayout("Force directed");
                 };
                 request.open('GET', './example-files/RAF_MAK_kinase_cascade.json.gz', true);
