@@ -91,6 +91,7 @@
 
 <link rel="import" href="src/nv-bar.html">
 <link rel="import" href="src/nv-edition-bar.html">
+<link rel="import" href="src/nv-background-bar.html">
 <link rel="import" href="src/nv-layout.html">
 <link rel="import" href="src/nv-status-bar.html">
 <link rel="import" href="src/nv-tool-bar.html">
@@ -171,13 +172,16 @@
         <nv-bar id="nvbar" lite="{{lite}}" hidden$="{{hideBar}}" columns="{{vertexColumns}}" on-session-start="handleSessionStartMenu" on-session-open="handleSessionOpenMenu" on-session-save="handleSessionSaveMenu" on-session-manage="handleSessionManageMenu" on-import-sif="handleImportSifMenu" on-import-text="handleImportTextMenu" on-import-xlsx="handleImportXlsxMenu" on-import-node-attributes="handleImportNodeAttrMenu" on-import-edge-attributes="handleImportEdgeAttrMenu" on-export-sif="handleExportSifMenu" on-export-svg="handleExportSvgMenu" on-export-png="handleExportPngMenu" on-export-node-attributes="handleExportNodeAttrMenu" on-export-edge-attributes="handleExportEdgeAttrMenu" on-nodes-select-all="handleSelectMenu" on-nodes-select-first-neighbourhood="handleSelectMenu" on-nodes-select-invert="handleSelectMenu" on-edges-select-all="handleSelectMenu" on-edges-select-adjacent="handleSelectMenu" on-network-select-all="handleSelectMenu" on-layout="handleLayoutMenu" on-network-edit="handleNetworkEditMenu" on-nodes-edit="handleNodesEditMenu" on-edges-edit="handleEdgesEditMenu" on-nodes-filter="handleNodesFilterMenu" on-edges-filter="handleEdgesFilterMenu" on-cellbase="handleCellbaseMenu" on-node-simple-rendering="handleNodeSimpleRenderingMenu" on-node-list-rendering="handleNodeListRenderingMenu" on-edge-simple-rendering="handleEdgeSimpleRenderingMenu" on-reactome="handleReactomeMenu" on-kegg="handleKeggMenu" on-intact="handleIntactMenu" on-communities-structure-detection="handleCommunitiesMenu" on-topological-study="handleTopologicalMenu" on-reactome-fi-microarray="handleReactomeFiMenu" on-example="handleLoadExampleMenu" on-save="handleSave" on-drugs="handleDrugsMenu" on-diseases="handleDiseasesMenu" on-functionalities="handleFunctionalitiesMenu">
         </nv-bar>
 
-        <nv-tool-bar lite="{{lite}}" hidden$="{{hideToolBar}}" background-color="{{backgroundColor}}" mode="{{mode}}" zoom="{{zoom}}" on-layoutchange="handleLayoutChange" on-selectchange="handleSelectChange" on-rotatechange="handleRotateChange" on-importbackgroundimage="handleImportBackgroundImage" on-reset-zoom="handleResetZoom" on-center-network="handleCenterNetwork" on-undo="undoAction" on-redo="redoAction">
+        <nv-tool-bar lite="{{lite}}" hidden$="{{hideToolBar}}" background-color="{{backgroundColor}}" mode="{{mode}}" zoom="{{zoom}}" on-layoutchange="handleLayoutChange" on-selectchange="handleSelectChange" on-rotatechange="handleRotateChange" on-reset-zoom="handleResetZoom" on-center-network="handleCenterNetwork" on-undo="undoAction" on-redo="redoAction">
         </nv-tool-bar>
 
-        <nv-edition-bar id="editionBar" hidden$="{{hideEditionBar}}" selection-color="{{vertexDefaults.selectionColor}}" vertex-columns="{{vertexColumns}}" edge-columns="{{edgeColumns}}" on-vertexshape="handleVertexShape" on-vertexopacity="handleVertexOpacity" on-vertexsize="handleVertexSize" on-vertexcolor="handleVertexColor" on-vertexstrokesize="handleVertexStrokeSize" on-vertexstrokecolor="handleVertexStrokeColor" on-vertexlabelsize="handleVertexLabelSize" on-vertexsearch="handleVertexSearch" on-vertexnamefield="handleVertexNameField" on-edgeshape="handleEdgeShape" on-edgesize="handleEdgeSize" on-edgecolor="handleEdgeColor" on-edgelabelsize="handleEdgeLabelSize" on-edgesearch="handleEdgeSearch" on-edgenamefield="handleEdgeNameField">
+        <nv-edition-bar id="editionBar" hidden$="{{isEditionBarHidden(hideEditionBar, mode)}}" selection-color="{{vertexDefaults.selectionColor}}" vertex-columns="{{vertexColumns}}" edge-columns="{{edgeColumns}}" on-vertexshape="handleVertexShape" on-vertexopacity="handleVertexOpacity" on-vertexsize="handleVertexSize" on-vertexcolor="handleVertexColor" on-vertexstrokesize="handleVertexStrokeSize" on-vertexstrokecolor="handleVertexStrokeColor" on-vertexlabelsize="handleVertexLabelSize" on-vertexsearch="handleVertexSearch" on-vertexnamefield="handleVertexNameField" on-edgeshape="handleEdgeShape" on-edgesize="handleEdgeSize" on-edgecolor="handleEdgeColor" on-edgelabelsize="handleEdgeLabelSize" on-edgesearch="handleEdgeSearch" on-edgenamefield="handleEdgeNameField">
         </nv-edition-bar>
 
-        <nv-layout id="networkLayout" hide-mini-map="{{hideMiniMap}}" mode="{{mode}}" scale="{{scale}}" tx="{{center.x}}" ty="{{center.y}}" zoom="{{zoom}}" graph="{{graph}}" background-color="{{backgroundColor}}" on-createvertex="handleCreateVertex" on-selectvertex="handleSelectVertex" on-moveselectedvertices="handleMoveSelectedVertices" on-selectarea="handleSelectArea" on-createedge="handleCreateEdge" on-removevertex="handleRemoveVertex" on-removeedge="handleRemoveEdge" on-leftclickvertex="handleLeftClickVertex" on-selectedge="handleSelectEdge" on-leftclickedge="handleLeftClickEdge" on-rightclickvertex="handleRightClickVertex" on-rightclickedge="handleRightClickEdge" on-rightclickbackgroundimage="handleRightClickBackgroundImage">
+        <nv-background-bar id="backgroundBar" back-canvas="{{backCanvas}}" hidden$="{{isBackgroundBarHidden(hideEditionBar, mode)}}">
+        </nv-background-bar>
+
+        <nv-layout id="networkLayout" back-canvas="{{backCanvas}}" hide-mini-map="{{hideMiniMap}}" mode="{{mode}}" scale="{{scale}}" tx="{{center.x}}" ty="{{center.y}}" zoom="{{zoom}}" graph="{{graph}}" background-color="{{backgroundColor}}" on-createvertex="handleCreateVertex" on-selectvertex="handleSelectVertex" on-moveselectedvertices="handleMoveSelectedVertices" on-selectarea="handleSelectArea" on-createedge="handleCreateEdge" on-removevertex="handleRemoveVertex" on-removeedge="handleRemoveEdge" on-leftclickvertex="handleLeftClickVertex" on-selectedge="handleSelectEdge" on-leftclickedge="handleLeftClickEdge" on-rightclickvertex="handleRightClickVertex" on-rightclickedge="handleRightClickEdge" on-rightclickbackgroundimage="handleRightClickBackgroundImage">
         </nv-layout>
 
         <nv-status-bar hidden$="{{hideStatusBar}}" last-loaded-file-name="{{lastLoadedFileName}}" vertices="{{vertices}}" edges="{{edges}}" selected-vertices="{{selectedVertices}}" selected-edges="{{selectedEdges}}" selection-color="{{vertexDefaults.selectionColor}}">
@@ -464,6 +468,9 @@
                 type: String,
                 value: 'select'
             },
+            backCanvas: {
+                type: Object,
+            },
             lite: {
                 type: Boolean,
                 value: false
@@ -658,6 +665,12 @@
             } else if (neo == false) {
                 this.$.edgeRenderPanel.show();
             }
+        },
+        isEditionBarHidden: function(hideEditionBar, mode) {
+            return hideEditionBar || mode == 'selectbackground';
+        },
+        isBackgroundBarHidden: function(hideEditionBar, mode) {
+            return hideEditionBar || mode != 'selectbackground';
         },
         _init: function() {
             this.resetZoom();
@@ -1667,10 +1680,7 @@
         handleCenterNetwork: function() {
             this.centerNetwork();
         },
-        handleImportBackgroundImage: function(e) {
-            this.$.networkLayout.addBackgroundImage(e.detail.image);
-            this.addActionStack();
-        },
+
         handleLayoutChange: function(e) {
             this.setLayout(e.detail.layout);
         },
@@ -2944,7 +2954,12 @@
                 for (var j = 0; j < lc; j++) {
                     var column = columns[j];
                     if (column.name == 'x' || column.name == 'y') {
-                        text += item.position[column.name].toFixed(2) + separator;
+                        if (column.name == 'y') {
+                            text += (item.position[column.name].toFixed(2) * -1) + separator;
+                        }
+                        if (column.name == 'x') {
+                            text += item.position[column.name].toFixed(2) + separator;
+                        }
                     } else {
                         text += item.attributes[column.name] + separator;
                     }
@@ -3032,7 +3047,12 @@
                             xyModifiedFlag = true;
                             var value = parseFloat(row[key]);
                             if (!isNaN(value)) {
-                                vertex.position[key] = value;
+                                if (key == 'x') {
+                                    vertex.position[key] = value;
+                                }
+                                if (key == 'y') {
+                                    vertex.position[key] = value * -1;
+                                }
                             }
                         } else {
                             vertex.attributes[key] = row[key];

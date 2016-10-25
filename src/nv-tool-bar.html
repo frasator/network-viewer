@@ -5,7 +5,7 @@
 
 <dom-module id="nv-tool-bar">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-        :host {
+         :host {
             display: block;
             position: relative;
             box-sizing: border-box;
@@ -99,12 +99,7 @@
             </stv-dropdown>
 
 
-            <div style="margin-left:5px;border-right-width: 0" title="Upload your own background image" on-click=handleBackgroundImage id="importBackgroundImageButton" class="stv-btn">
-                <i class="fa fa-file-image-o"></i>
-            </div>
-            <input on-change=handleBackgroundImageField id="importBackgroundImageField" type="file" hidden>
-
-            <stv-color-picker ctitle="Change the color of the background" id="backgroundColorPicker" color="{{backgroundColor}}" on-color-click="handleBackgroundColorPicker" style="float:left;width:90px;"></stv-color-picker>
+            <stv-color-picker ctitle="Change the color of the background" id="backgroundColorPicker" color="{{backgroundColor}}" on-color-click="handleBackgroundColorPicker" style="margin-left:5px;float:left;width:90px;"></stv-color-picker>
 
             <stv-dropdown title="Rotate" style="margin-left: 10px">
                 <div data-button id="rotateButton" class="stv-btn" style="border-right: none">
@@ -203,28 +198,6 @@
                         angle: parseFloat(query)
                     });
                 }
-            }
-        },
-        handleBackgroundImage: function() {
-            this.$.importBackgroundImageField.click();
-        },
-        handleBackgroundImageField: function(e) {
-            var me = this;
-            var file = e.currentTarget.files[0];
-            if (file) {
-                var reader = new FileReader();
-                reader.onload = function(evt) {
-                    var image = new Image;
-                    image.onload = function() {
-                        me.fire('importbackgroundimage', {
-                            image: image
-                        });
-                    };
-                    var content = evt.target.result;
-                    image.src = content;
-                };
-                reader.readAsDataURL(file);
-                e.currentTarget.value = null;
             }
         },
         handleBackgroundColorPicker: function(e) {

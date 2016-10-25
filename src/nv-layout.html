@@ -1,5 +1,6 @@
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+<script src="../../fabric.js/dist/fabric.min.js"></script>
 
 <dom-module id="nv-layout">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
@@ -20,6 +21,20 @@
             overflow-y: hidden;
         }
 
+        .canvas-container {
+            position: absolute !important;
+            width: 100% !important;
+            height: 100% !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+
+        #svg {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+
         #mini1 {
             position: absolute;
             background-color: rgba(125, 125, 125, 0.3);
@@ -33,12 +48,12 @@
         }
     </style>
     <template>
-        <div id="svgDiv" style="height:100%;width:100%;">
+        <div id="svgDiv" style="height:100%;width:100%;background-color:{{backgroundColor}};">
             <div id="mini1" hidden="{{hideMiniMap}}">
                 <div id="mini2"></div>
             </div>
+            <canvas id="canvas"></canvas>
             <svg xmlns="http://www.w3.org/2000/svg" id="svg" on-wheel="handleWheel" on-mousedown="mouseDownHandler" on-mouseup="mouseUpHandler" on-mouseover="mouseHoverHandler" on-contextmenu="mouseContextMenuHandler" width="100%" height="100%">
-                <rect id="backgroundColor" width="100%" height="100%" fill$="{{backgroundColor}}" x="0" y="0"></rect>
                 <svg id="drawArea">
                     <svg id="backSvg" x="0" y="0">
                         <g id="scaleBackGroup" transform$="{{computeTransform(tx,ty,scale)}}"></g>
@@ -62,6 +77,10 @@
         properties: {
             backgroundColor: {
                 type: String
+            },
+            backCanvas: {
+                type: Object,
+                notify: true
             },
             mode: {
                 type: String,
@@ -141,7 +160,16 @@
         },
         created: function() {},
         ready: function() {
+            var me = this;
             this.updateMini();
+            this.async(function() {
+                var canvas = new fabric.Canvas(this.$.canvas);
+                this.set('backCanvas', canvas);
+                var canvasContainer = this.$.canvas.parentNode;
+                var vRect = this.getBoundingClientRect();
+                canvas.setWidth(vRect.width);
+                canvas.setHeight(vRect.height);
+            }, 60);
         },
         updateMini: function() {
             this.async(function() {
@@ -239,24 +267,33 @@
             }
         },
         modeChanged: function(neo, old) {
+            if (this.backCanvas) {
+                this.backCanvas.deactivateAll().renderAll();
+            }
             switch (neo) {
                 case "add":
-                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.$.svgDiv.appendChild(this.$.svg);
+                    // this.$.drawArea.appendChild(this.$.frontSvg);
                     break;
                 case "join":
-                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.$.svgDiv.appendChild(this.$.svg);
+                    // this.$.drawArea.appendChild(this.$.frontSvg);
                     break;
                 case "delete":
-                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.$.svgDiv.appendChild(this.$.svg);
+                    // this.$.drawArea.appendChild(this.$.frontSvg);
                     break;
                 case "selectbackground":
-                    this.$.drawArea.appendChild(this.$.backSvg);
+                    this.$.svgDiv.appendChild(this.$.canvas.parentNode);
+                    // this.$.drawArea.appendChild(this.$.backSvg);
                     break;
                 case "select":
-                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.$.svgDiv.appendChild(this.$.svg);
+                    // this.$.drawArea.appendChild(this.$.frontSvg);
                     break;
                 case "move":
-                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.$.svgDiv.appendChild(this.$.svg);
+                    // this.$.drawArea.appendChild(this.$.frontSvg);
                     break;
                 default:
                     break;
