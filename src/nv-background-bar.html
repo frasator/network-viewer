@@ -109,6 +109,11 @@
             font: {
                 type: String,
                 value: 'Times New Roman'
+            },
+            zoom: {
+                type: Number,
+                notify: true,
+                observer: 'zoomChanged'
             }
         },
         ready: function() {
@@ -186,99 +191,14 @@
                             case 'line':
                                 el = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
                                     strokeWidth: 5,
-                                    fill: me.color,
                                     stroke: me.color,
                                     originX: 'center',
                                     originY: 'center',
-                                    perPixelTargetFind: true,
-                                    hasBorders: false
+                                    opacity: 0.7,
+                                    hasBorders: false,
+                                    perPixelTargetFind: true
                                 });
-                                el.on('scaling', function(se) {
-                                    var pointer = me.backCanvas.getPointer(se.e);
-                                    ActiveNode = 2;
-                                    if (ActiveNode === 2) {
-                                        this.set({
-                                            x2: pointer.x,
-                                            y2: pointer.y
-                                        });
-                                    } else {
-                                        this.set({
-                                            x1: pointer.x,
-                                            y1: pointer.y
-                                        });
-                                    }
-                                    var controlvis = this.y2 >= this.y1 ? this.x2 >= this.x1 : this.x1 > this.x2;
-                                    this.setControlsVisibility({
-                                        tr: !controlvis,
-                                        br: controlvis,
-                                        tl: controlvis,
-                                        bl: !controlvis
-                                    });
-                                });
-                                //                                 .setControlsVisibility({
-                                //   mb:false,
-                                //   ml:false,
-                                //   mr:false,
-                                //   mt:false,
-                                //   mtr:false,
-                                //   tr: !(this.y2 >= this.y1 ? this.x2 >= this.x1 : this.x1 > this.x2),
-                                //   br: this.y2 >= this.y1 ? this.x2 >= this.x1 : this.x1 > this.x2,
-                                //   tl: this.y2 >= this.y1 ? this.x2 >= this.x1 : this.x1 > this.x2,
-                                //   bl: !(this.y2 >= this.y1 ? this.x2 >= this.x1 : this.x1 > this.x2)
-                                // }).on('scaling', function(e){
-                                //   var pointer = VectLayer1.getPointer(e.e);
-                                //   if(ActiveNode === 2)
-                                //   {
-                                //     this.set({
-                                //       x2: pointer.x,
-                                //       y2: pointer.y
-                                //     });
-                                //   }
-                                //   else
-                                //   {
-                                //     this.set({
-                                //       x1: pointer.x,
-                                //       y1: pointer.y
-                                //     });
-                                //   }
-                                //   var controlvis = this.y2 >= this.y1 ? this.x2 >= this.x1 : this.x1 > this.x2;
-                                //   this.setControlsVisibility({
-                                //       tr: !controlvis,
-                                //       br: controlvis,
-                                //       tl: controlvis,
-                                //       bl: !controlvis
-                                //     });
-                                // }).on('moving', function(e){
-                                //   var gx1 = this.x1 + this.getLeft(),
-                                //   gx2 = this.x2 + this.getLeft(),
-                                //   gy1 = this.y1 + this.getTop(),
-                                //   gy2 = this.y2 + this.getTop();
-                                //   this.moving = true;
-                                //   console.log(this);
-                                // }).on('modified', fixCoords).on('mousedown', function(e){
-                                //   if(this.__corner === 'tr' || this.__corner === 'br')
-                                //   {
-                                //     if(this.x2 >= this.x1)
-                                //     {
-                                //       ActiveNode=2;
-                                //     }
-                                //     else
-                                //     {
-                                //       ActiveNode=1;
-                                //     }
-                                //   }
-                                //   else
-                                //   {
-                                //     if(this.x2 > this.x1)
-                                //     {
-                                //       ActiveNode=1;
-                                //     }
-                                //     else
-                                //     {
-                                //       ActiveNode=2;
-                                //     }
-                                //   }
-                                // })
+                                me._setLineEvents(el);
                                 me.backCanvas.add(el);
                                 break;
                             case 'text':
@@ -337,17 +257,6 @@
                                     x2: pointer.x,
                                     y2: pointer.y
                                 });
-                                el.setControlsVisibility({
-                                    mb: false,
-                                    ml: false,
-                                    mr: false,
-                                    mt: false,
-                                    mtr: false,
-                                    tr: !(el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2),
-                                    br: el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2,
-                                    tl: el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2,
-                                    bl: !(el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2)
-                                });
                                 me.backCanvas.renderAll();
                                 break;
                             case 'text':
@@ -399,11 +308,27 @@
                 });
             }
         },
+        zoomChanged: function(neo, old) {
+            var me = this;
+            if (neo && me.backCanvas) {
+                var scale;
+                if (this.zoom === 0) {
+                    scale = 0.04;
+                } else {
+                    scale = this.zoom / 25;
+                }
+                console.log(scale);
+                me.backCanvas.zoomToPoint();
+            }
+        },
         handleColor: function(e) {
             var selected = this._getSelectedObjects();
             for (var i = 0; i < selected.length; i++) {
                 var obj = selected[i];
                 obj.set('fill', this.color);
+                if (obj.type == 'line') {
+                    obj.set('stroke', this.color);
+                }
             }
             this.backCanvas.renderAll();
         },
@@ -411,7 +336,7 @@
             var selected = this._getSelectedObjects();
             for (var i = 0; i < selected.length; i++) {
                 var obj = selected[i];
-                if (obj.get('type') == 'i-text') {
+                if (obj.get('type') == 'textbox') {
                     obj.set('fontFamily', this.font);
                 }
             }
@@ -465,6 +390,82 @@
                     top: 100
                 });
                 me.backCanvas.add(el).setActiveObject(el);
+            });
+        },
+        _setLineEvents: function(el) {
+            var me = this;
+            var moving = false;
+            var ActiveNode = 0;
+            var fixCoords = function(e) {
+                var line = this.toObject();
+                if (moving) {
+                    this.set({
+                        x2: line.left + line.x2,
+                        y2: line.top + line.y2,
+                        x1: line.left + line.x1,
+                        y1: line.top + line.y1,
+                        top: line.top,
+                        left: line.left
+                    });
+
+                    console.log(line.left, line.top);
+                }
+                this.moving = false;
+                this.setCoords();
+            };
+            el.on('scaling', function(se) {
+                var pointer = me.backCanvas.getPointer(se.e);
+                if (ActiveNode === 2) {
+                    this.set({
+                        x2: pointer.x,
+                        y2: pointer.y
+                    });
+                } else {
+                    this.set({
+                        x1: pointer.x,
+                        y1: pointer.y
+                    });
+                }
+                var controlvis = this.y2 >= this.y1 ? this.x2 >= this.x1 : this.x1 > this.x2;
+                this.setControlsVisibility({
+                    tr: !controlvis,
+                    br: controlvis,
+                    tl: controlvis,
+                    bl: !controlvis
+                });
+            });
+            el.setControlsVisibility({
+                mb: false,
+                ml: false,
+                mr: false,
+                mt: false,
+                mtr: false,
+                tr: !(el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2),
+                br: el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2,
+                tl: el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2,
+                bl: !(el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2)
+            });
+            el.on('moving', function(se) {
+                var gx1 = this.x1 + this.getLeft(),
+                    gx2 = this.x2 + this.getLeft(),
+                    gy1 = this.y1 + this.getTop(),
+                    gy2 = this.y2 + this.getTop();
+                moving = true;
+            });
+            el.on('modified', fixCoords).on('mousedown', function(e) {
+                if (this.__corner === 'tr' || this.__corner === 'br') {
+                    if (this.x2 >= this.x1) {
+                        ActiveNode = 2;
+                    } else {
+                        ActiveNode = 1;
+                    }
+                } else {
+                    if (this.x2 > this.x1) {
+                        ActiveNode = 1;
+                    } else {
+                        ActiveNode = 2;
+                    }
+                }
             });
         }
     });
