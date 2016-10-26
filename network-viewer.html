@@ -1127,7 +1127,12 @@
                 attributes = vertex.attributes;
                 c = parseFloat(attributes[coordAttr]);
                 if (!isNaN(c)) {
-                    vertex.position[coord] = c;
+                    if (coord == "y") {
+                        vertex.position[coord] = c * -1;
+                    }
+                    if (coord == "x") {
+                        vertex.position[coord] = c;
+                    }
                     this.setVertexCoords(vertex.id);
                 }
             }
