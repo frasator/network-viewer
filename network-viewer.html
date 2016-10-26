@@ -2944,7 +2944,12 @@
                 for (var j = 0; j < lc; j++) {
                     var column = columns[j];
                     if (column.name == 'x' || column.name == 'y') {
-                        text += item.position[column.name].toFixed(2) + separator;
+                        if (column.name == 'y') {
+                            text += (item.position[column.name].toFixed(2) * -1) + separator;
+                        }
+                        if (column.name == 'x') {
+                            text += item.position[column.name].toFixed(2) + separator;
+                        }
                     } else {
                         text += item.attributes[column.name] + separator;
                     }
@@ -3032,7 +3037,12 @@
                             xyModifiedFlag = true;
                             var value = parseFloat(row[key]);
                             if (!isNaN(value)) {
-                                vertex.position[key] = value;
+                                if (key == 'x') {
+                                    vertex.position[key] = value;
+                                }
+                                if (key == 'y') {
+                                    vertex.position[key] = value * -1;
+                                }
                             }
                         } else {
                             vertex.attributes[key] = row[key];
