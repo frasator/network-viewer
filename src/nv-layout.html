@@ -1,6 +1,5 @@
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
-<script src="../../fabric.js/dist/fabric.min.js"></script>
 
 <dom-module id="nv-layout">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
@@ -162,10 +161,10 @@
         ready: function() {
             var me = this;
             this.updateMini();
+            var canvas = new fabric.Canvas(this.$.canvas);
+            this.set('backCanvas', canvas);
+            var canvasContainer = this.$.canvas.parentNode;
             this.async(function() {
-                var canvas = new fabric.Canvas(this.$.canvas);
-                this.set('backCanvas', canvas);
-                var canvasContainer = this.$.canvas.parentNode;
                 var vRect = this.getBoundingClientRect();
                 canvas.setWidth(vRect.width);
                 canvas.setHeight(vRect.height);
@@ -250,13 +249,16 @@
                 this.x = 0;
                 this.y = 0;
             }
-
             while (this.$.scaleFrontGroup.firstChild) {
                 this.$.scaleFrontGroup.removeChild(this.$.scaleFrontGroup.firstChild);
             }
             while (this.$.scaleBackGroup.firstChild) {
                 this.$.scaleBackGroup.removeChild(this.$.scaleBackGroup.firstChild);
             }
+
+            this.backCanvas.viewportTransform[4] = this.tx;
+            this.backCanvas.viewportTransform[5] = this.ty;
+            this.backCanvas.clear();
         },
         handleWheel: function(e) {
             e.preventDefault();
@@ -319,6 +321,16 @@
                     this.tx += (-this.last_rmx) * inc;
                     this.ty += (-this.last_rmy) * inc;
                 }
+
+                if (this.backCanvas) {
+                    this.backCanvas.zoomToPoint({
+                        x: this.mx,
+                        y: this.my
+                    }, this.scale);
+                    this.backCanvas.viewportTransform[4] = this.tx;
+                    this.backCanvas.viewportTransform[5] = this.ty;
+                    this.backCanvas.renderAll();
+                }
             }
             this.updateMini();
         },
@@ -330,11 +342,14 @@
             var newScale2 = lbcr.height / (scalebcr.height / this.scale);
 
             var finalScale = Math.min(newScale, newScale2);
-            this.zoom = Math.min(Math.floor(finalScale * 25), 100);
+            this.zoom = Math.min(Math.floor(finalScale * 25), 25);
             scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
             this.tx += -(scalebcr.left - lbcr.left) + ((lbcr.width - scalebcr.width) / 2);
             this.ty += -(scalebcr.top - lbcr.top) + ((lbcr.height - scalebcr.height) / 2);
 
+            this.backCanvas.viewportTransform[4] = this.tx;
+            this.backCanvas.viewportTransform[5] = this.ty;
+            this.backCanvas.renderAll();
             this.updateMini();
         },
         adjustWidthNetwork: function() {
@@ -344,11 +359,14 @@
             var newScale = lbcr.width / (scalebcr.width / this.scale);
 
             var finalScale = newScale;
-            this.zoom = Math.min(Math.floor(finalScale * 25), 100);
+            this.zoom = Math.min(Math.floor(finalScale * 25), 25);
             scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
             this.tx += -(scalebcr.left - lbcr.left) + ((lbcr.width - scalebcr.width) / 2);
             this.ty += -(scalebcr.top - lbcr.top - 10);
 
+            this.backCanvas.viewportTransform[4] = this.tx;
+            this.backCanvas.viewportTransform[5] = this.ty;
+            this.backCanvas.renderAll();
             this.updateMini();
         },
         adjustHeightNetwork: function() {
@@ -358,11 +376,14 @@
             var newScale2 = lbcr.height / (scalebcr.height / this.scale);
 
             var finalScale = newScale2;
-            this.zoom = Math.min(Math.floor(finalScale * 25), 100);
+            this.zoom = Math.min(Math.floor(finalScale * 25), 25);
             scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
             this.tx += -(scalebcr.left - lbcr.left - 10);
             this.ty += -(scalebcr.top - lbcr.top) + ((lbcr.height - scalebcr.height) / 2);
 
+            this.backCanvas.viewportTransform[4] = this.tx;
+            this.backCanvas.viewportTransform[5] = this.ty;
+            this.backCanvas.renderAll();
             this.updateMini();
         },
         mouseHoverHandler: function(e) {
@@ -749,6 +770,10 @@
                 me.x += dispX;
                 me.y += dispY;
 
+                me.backCanvas.viewportTransform[4] = me.tx;
+                me.backCanvas.viewportTransform[5] = me.ty;
+                me.backCanvas.renderAll();
+
                 lastX = moveX;
                 lastY = moveY;
 
@@ -842,34 +867,19 @@
         getEdgeId: function(targetEl) {
             return stv.utils.closest(targetEl, '[network-type=edge-g]').getAttribute('id');
         },
-        addBackgroundImage: function(image) {
-            SVG.addChildImage(this.$.scaleBackGroup, {
-                "x": image.x,
-                "y": image.y,
-                "xlink:href": image.src,
-                "width": image.width,
-                "height": image.height,
-                "network-type": "background-image"
-            });
-        },
-        addBackgroundImages: function(images) {
-            for (var i = 0, li = images.length; i < li; i++) {
-                this.addBackgroundImage(images[i]);
-            }
-        },
-        getBackgroundImages: function() {
-            var images = [];
-            var imageElements = this.$.scaleBackGroup.querySelectorAll('image[network-type="background-image"]');
-            for (var i = 0; i < imageElements.length; i++) {
-                images.push({
-                    src: imageElements[i].getAttribute('href'),
-                    width: imageElements[i].getAttribute('width'),
-                    height: imageElements[i].getAttribute('height'),
-                    x: imageElements[i].getAttribute('x'),
-                    y: imageElements[i].getAttribute('y')
-                });
-            }
-            return images;
-        }
+        // getBackgroundImages: function() {
+        //     var images = [];
+        //     var imageElements = this.$.scaleBackGroup.querySelectorAll('image[network-type="background-image"]');
+        //     for (var i = 0; i < imageElements.length; i++) {
+        //         images.push({
+        //             src: imageElements[i].getAttribute('href'),
+        //             width: imageElements[i].getAttribute('width'),
+        //             height: imageElements[i].getAttribute('height'),
+        //             x: imageElements[i].getAttribute('x'),
+        //             y: imageElements[i].getAttribute('y')
+        //         });
+        //     }
+        //     return images;
+        // }
     });
 </script>

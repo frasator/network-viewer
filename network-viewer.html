@@ -178,7 +178,7 @@
         <nv-edition-bar id="editionBar" hidden$="{{isEditionBarHidden(hideEditionBar, mode)}}" selection-color="{{vertexDefaults.selectionColor}}" vertex-columns="{{vertexColumns}}" edge-columns="{{edgeColumns}}" on-vertexshape="handleVertexShape" on-vertexopacity="handleVertexOpacity" on-vertexsize="handleVertexSize" on-vertexcolor="handleVertexColor" on-vertexstrokesize="handleVertexStrokeSize" on-vertexstrokecolor="handleVertexStrokeColor" on-vertexlabelsize="handleVertexLabelSize" on-vertexsearch="handleVertexSearch" on-vertexnamefield="handleVertexNameField" on-edgeshape="handleEdgeShape" on-edgesize="handleEdgeSize" on-edgecolor="handleEdgeColor" on-edgelabelsize="handleEdgeLabelSize" on-edgesearch="handleEdgeSearch" on-edgenamefield="handleEdgeNameField">
         </nv-edition-bar>
 
-        <nv-background-bar id="backgroundBar" back-canvas="{{backCanvas}}" hidden$="{{isBackgroundBarHidden(hideEditionBar, mode)}}" zoom="{{zoom}}">
+        <nv-background-bar id="backgroundBar" back-canvas="{{backCanvas}}" hidden$="{{isBackgroundBarHidden(hideEditionBar, mode)}}">
         </nv-background-bar>
 
         <nv-layout id="networkLayout" back-canvas="{{backCanvas}}" hide-mini-map="{{hideMiniMap}}" mode="{{mode}}" scale="{{scale}}" tx="{{center.x}}" ty="{{center.y}}" zoom="{{zoom}}" graph="{{graph}}" background-color="{{backgroundColor}}" on-createvertex="handleCreateVertex" on-selectvertex="handleSelectVertex" on-moveselectedvertices="handleMoveSelectedVertices" on-selectarea="handleSelectArea" on-createedge="handleCreateEdge" on-removevertex="handleRemoveVertex" on-removeedge="handleRemoveEdge" on-leftclickvertex="handleLeftClickVertex" on-selectedge="handleSelectEdge" on-leftclickedge="handleLeftClickEdge" on-rightclickvertex="handleRightClickVertex" on-rightclickedge="handleRightClickEdge" on-rightclickbackgroundimage="handleRightClickBackgroundImage">
@@ -577,7 +577,7 @@
             },
             serializeVersion: {
                 type: String,
-                value: 'v2'
+                value: 'v3'
             },
             saveInProgress: {
                 type: Boolean,
@@ -675,7 +675,6 @@
         _init: function() {
             this.resetZoom();
             this.lastLoadedFileName = "";
-            this.backgroundImages = [];
             this.backgroundColor = '#FFF';
             this.vertexDefaults = {
                 shape: 'circle',
@@ -861,11 +860,7 @@
             this.saveLocalStorage();
         },
         resetZoom: function() {
-            // Deprecated
-
-            // this.zoom = 25;
-            // this.set('center.x', 0);
-            // this.set('center.y', 0);
+            this.zoom = 25;
         },
         centerNetwork: function() {
             if (this.vertices.length > 0) {
@@ -955,6 +950,7 @@
         },
 
         loadJSON: function(o, notAddActionStack) {
+            var me = this;
             this.startOver();
             //Version fix  selectionColor
             if (o.vertexDefaults.selectionColor == null) {
@@ -967,7 +963,6 @@
             if (o.edgeDefaults.filters == null) {
                 o.edgeDefaults.filters = this.edgeDefaults.filters;
             }
-            this.backgroundImages = o.backgroundImages;
 
             this.backgroundColor = o.backgroundColor;
 
@@ -994,13 +989,25 @@
 
             this.setVertexDefaultLabelAttribute(this.vertexDefaults.labelAttribute);
             this.setEdgeDefaultLabelAttribute(this.edgeDefaults.labelAttribute);
-            this.$.networkLayout.addBackgroundImages(this.backgroundImages);
+
             this.resetZoom();
             this.set('center.x', o.center.x);
             this.set('center.y', o.center.y);
             this.resetZoom();
             this.zoom = o.zoom;
 
+            this.backCanvas.loadFromJSON(o.background, function(e) {
+                me.backCanvas.renderAll();
+                me.saveLocalStorage();
+            });
+            //backward compatibility
+            if (o.backgroundImages != null) {
+                for (var i = 0, li = o.backgroundImages.length; i < li; i++) {
+                    this.$.backgroundBar.addBackgroundImage(o.backgroundImages[i], false, function() {
+                        me.saveLocalStorage();
+                    });
+                }
+            }
             this.saveLocalStorage();
 
             if (notAddActionStack !== true) {
@@ -1011,7 +1018,6 @@
         toJSON: function() {
             return {
                 zoom: this.zoom,
-                backgroundImages: this.$.networkLayout.getBackgroundImages(),
                 backgroundColor: this.backgroundColor,
                 center: this.center,
                 vertexDefaults: this.vertexDefaults,
@@ -1021,7 +1027,8 @@
                 graph: this.graph,
                 vertexColumns: this.vertexColumns,
                 edgeColumns: this.edgeColumns,
-                version: this.serializeVersion
+                version: this.serializeVersion,
+                background: this.backCanvas
             };
         },
         /** Display Properties - Attribute Handlers **/

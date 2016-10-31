@@ -2,6 +2,7 @@
 <link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
 
 <link rel="import" href="../../stevia-elements/src/dropdown/stv-dropdown.html">
+<script src="../../fabric.js/dist/fabric.min.js"></script>
 
 <dom-module id="nv-background-bar">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
@@ -109,11 +110,6 @@
             font: {
                 type: String,
                 value: 'Times New Roman'
-            },
-            zoom: {
-                type: Number,
-                notify: true,
-                observer: 'zoomChanged'
             }
         },
         ready: function() {
@@ -308,19 +304,6 @@
                 });
             }
         },
-        zoomChanged: function(neo, old) {
-            var me = this;
-            if (neo && me.backCanvas) {
-                var scale;
-                if (this.zoom === 0) {
-                    scale = 0.04;
-                } else {
-                    scale = this.zoom / 25;
-                }
-                console.log(scale);
-                me.backCanvas.zoomToPoint();
-            }
-        },
         handleColor: function(e) {
             var selected = this._getSelectedObjects();
             for (var i = 0; i < selected.length; i++) {
@@ -382,37 +365,28 @@
                 e.currentTarget.value = null;
             }
         },
-        addBackgroundImage: function(image) {
+        addBackgroundImage: function(image, setActive, cb) {
             var me = this;
             fabric.Image.fromURL(image.src, function(el) {
                 el.set({
                     left: 100,
-                    top: 100
+                    top: 100,
+                    opacity: 0.95
                 });
-                me.backCanvas.add(el).setActiveObject(el);
+                me.backCanvas.add(el);
+                if (setActive != false) {
+                    me.backCanvas.setActiveObject(el);
+                }
+                me.backCanvas.renderAll();
+                if (cb) {
+                    cb();
+                }
             });
         },
         _setLineEvents: function(el) {
             var me = this;
             var moving = false;
             var ActiveNode = 0;
-            var fixCoords = function(e) {
-                var line = this.toObject();
-                if (moving) {
-                    this.set({
-                        x2: line.left + line.x2,
-                        y2: line.top + line.y2,
-                        x1: line.left + line.x1,
-                        y1: line.top + line.y1,
-                        top: line.top,
-                        left: line.left
-                    });
-
-                    console.log(line.left, line.top);
-                }
-                this.moving = false;
-                this.setCoords();
-            };
             el.on('scaling', function(se) {
                 var pointer = me.backCanvas.getPointer(se.e);
                 if (ActiveNode === 2) {
@@ -446,13 +420,25 @@
                 bl: !(el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2)
             });
             el.on('moving', function(se) {
-                var gx1 = this.x1 + this.getLeft(),
-                    gx2 = this.x2 + this.getLeft(),
-                    gy1 = this.y1 + this.getTop(),
-                    gy2 = this.y2 + this.getTop();
                 moving = true;
             });
-            el.on('modified', fixCoords).on('mousedown', function(e) {
+            el.on('modified', function(e) {
+                var line = this.toObject();
+                if (moving) {
+                    this.set({
+                        x2: line.left + line.x2,
+                        y2: line.top + line.y2,
+                        x1: line.left + line.x1,
+                        y1: line.top + line.y1,
+                        top: line.top,
+                        left: line.left
+                    });
+                    // console.log(line.left, line.top);
+                }
+                this.moving = false;
+                this.setCoords();
+            });
+            el.on('mousedown', function(e) {
                 if (this.__corner === 'tr' || this.__corner === 'br') {
                     if (this.x2 >= this.x1) {
                         ActiveNode = 2;
