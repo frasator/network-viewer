@@ -21,10 +21,6 @@
             margin-left: 10px;
         }
 
-        stv-dropdown>[data-button] {
-            margin-left: 5px;
-        }
-
         .stv-context {
             min-width: 200px;
             cursor: pointer;
@@ -42,38 +38,80 @@
         .stv-btn:hover {
             /*background-color: var(--light-button-color);*/
         }
+
+        .br0{
+            border-right: none;
+        }
+
+
     </style>
     <template>
         <div id="bar" class="horizontal layout center">
             <div title="Select" class="stv-btn" data-backmode="select" data-checked$="{{isSelected(backmode,'select')}}" on-click="handleMode">
-                <i class="fa fa-mouse-pointer"></i>
+                <i class="fa fa-mouse-pointer" style="margin-left:2px;"></i>
             </div>
-            <div style="margin-left:20px;"></div>
-            <div title="Add square" class="stv-btn" data-backmode="square" data-checked$="{{isSelected(backmode,'square')}}" on-click="handleMode">
+            <div style="margin-left:10px;"></div>
+            <div title="Add square" class="stv-btn br0" data-backmode="square" data-checked$="{{isSelected(backmode,'square')}}" on-click="handleMode">
                 <i class="fa fa-stop"></i>
             </div>
-            <div title="Add circle" class="stv-btn" data-backmode="circle" data-checked$="{{isSelected(backmode,'circle')}}" on-click="handleMode">
+            <div title="Add circle" class="stv-btn br0" data-backmode="circle" data-checked$="{{isSelected(backmode,'circle')}}" on-click="handleMode">
                 <i class="fa fa-circle"></i>
             </div>
-            <div title="Add triangle" class="stv-btn" data-backmode="triangle" data-checked$="{{isSelected(backmode,'triangle')}}" on-click="handleMode">
+            <div title="Add triangle" class="stv-btn br0" data-backmode="triangle" data-checked$="{{isSelected(backmode,'triangle')}}" on-click="handleMode">
                 <i class="fa fa-play fa-rotate-270"></i>
             </div>
-            <div title="Add line" class="stv-btn" data-backmode="line" data-checked$="{{isSelected(backmode,'line')}}" on-click="handleMode">
+            <div title="Add line" class="stv-btn br0" data-backmode="line" data-checked$="{{isSelected(backmode,'line')}}" on-click="handleMode">
                 <i class="fa fa-minus fa-rotate-90"></i>
             </div>
             <div title="Add Text" class="stv-btn" data-backmode="text" data-checked$="{{isSelected(backmode,'text')}}" on-click="handleMode">
                 <i class="fa fa-font"></i>
             </div>
-            <div style="margin-left:20px;"></div>
+
+            <div style="margin-left:10px;"></div>
+            <div data-button id="strokeSizeButton" style="border-right: none; padding:0 5px;">
+                <i class="fa fa-paint-brush"></i>
+            </div>
             <stv-color-picker ctitle="Change the color of the selected elements" id="colorPicker" color="{{color}}" on-color-click="handleColor" style="float:left;width:90px;"></stv-color-picker>
 
-            <div style="margin-left:20px;"></div>
-            <div title="Upload your own background image" on-click=handleBackgroundImage id="importBackgroundImageButton" class="stv-btn">
-                <i class="fa fa-file-image-o"></i>
-            </div>
-            <input on-change=handleBackgroundImageField id="importBackgroundImageField" type="file" hidden>
+            <div style="margin-left:10px;"></div>
+            <stv-dropdown title="Change the size of the selected elements">
+                <div data-button id="strokeSizeButton" class="stv-btn" style="border-right: none;">
+                    <i class="fa fa-pencil"></i>
+                </div>
+                <ul data-menu id="sizeMenu">
+                    <li on-mousedown="handleStrokeSize" data-value="1">1 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="2">2 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="3">3 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="4">4 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="8">8 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="10">10 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="12">12 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="16">16 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="20">20 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="24">24 px</li>
+                </ul>
+            </stv-dropdown>
+            <stv-color-picker ctitle="Change stroke color of the selected elements" id="strokeColor" color="{{strokeColor}}" on-color-click="handleStrokeColor" style="float:left;width:90px;"></stv-color-picker>
 
-            <div style="margin-left:20px;"></div>
+            <div style="margin-left:10px;"></div>
+
+            <stv-dropdown title="Change the size of the selected elements">
+                <div data-button id="textSizeButton" class="stv-btn">
+                    <i class="fa fa-text-height"></i>
+                </div>
+                <ul data-menu id="textSizeMenu">
+                    <li on-mousedown="handleTextSize" data-value="12">12 px</li>
+                    <li on-mousedown="handleTextSize" data-value="16">16 px</li>
+                    <li on-mousedown="handleTextSize" data-value="20">20 px</li>
+                    <li on-mousedown="handleTextSize" data-value="24">24 px</li>
+                    <li on-mousedown="handleTextSize" data-value="32">32 px</li>
+                    <li on-mousedown="handleTextSize" data-value="40">40 px</li>
+                    <li on-mousedown="handleTextSize" data-value="50">50 px</li>
+                    <li on-mousedown="handleTextSize" data-value="60">60 px</li>
+                </ul>
+            </stv-dropdown>
+
+            <div style="margin-left:10px;"></div>
             <stv-select value="{{font}}" on-change="handleFont" style="width:140px;">
                 <stv-option value="Times New Roman">Times New Roman</stv-option>
                 <stv-option value="Oxygen">Oxygen</stv-option>
@@ -82,6 +120,12 @@
                 <stv-option value="Lato">Lato</stv-option>
                 <stv-option value="Roboto">Roboto</stv-option>
             </stv-select>
+
+            <div style="margin-left:20px;"></div>
+            <div title="Upload your own background image" on-click=handleBackgroundImage id="importBackgroundImageButton" class="stv-btn">
+                <i class="fa fa-file-image-o"></i>
+            </div>
+            <input on-change=handleBackgroundImageField id="importBackgroundImageField" type="file" hidden>
         </div>
 
         <ul id="imagecontextmenu" class="stv-context" hidden>
@@ -105,11 +149,21 @@
             },
             color: {
                 type: String,
-                value: '#da1f1f'
+                value: '#1f9cda'
+            },
+            strokeColor: {
+                type: String,
+                value: '#ffffff'
             },
             font: {
                 type: String,
                 value: 'Times New Roman'
+            },
+            lastSelected: {
+                type: Array,
+                value: function() {
+                    return [];
+                }
             }
         },
         ready: function() {
@@ -119,7 +173,9 @@
                     var selected = me._getSelectedObjects();
                     for (var i = 0; i < selected.length; i++) {
                         var obj = selected[i];
-                        me.backCanvas.remove(obj);
+                        if (obj.isEditing !== true) {
+                            me.backCanvas.remove(obj);
+                        }
                     }
                     me.backCanvas.renderAll();
                 }
@@ -140,14 +196,14 @@
                 // fabric.Triangle
                 var el, isDown;
 
-                var lastSelected = [];
+                me.lastSelected = [];
                 me.backCanvas.on('before:selection:cleared', function(o) {
-                    lastSelected = me._getSelectedObjects();
+                    me.lastSelected = me._getSelectedObjects();
                 });
 
                 me.backCanvas.on('mouse:down', function(o) {
-                    if (lastSelected.length > 0) {
-                        lastSelected = [];
+                    if (me.lastSelected.length > 0) {
+                        me.lastSelected = [];
                     } else if (o.target == null) {
                         me.backCanvas.selection = false;
                         isDown = true;
@@ -158,7 +214,8 @@
                                     left: pointer.x,
                                     top: pointer.y,
                                     fill: me.color,
-                                    opacity: 0.7
+                                    stroke: me.strokeColor,
+                                    opacity: 1
                                 });
                                 me.backCanvas.add(el);
                                 break;
@@ -167,7 +224,8 @@
                                     left: pointer.x,
                                     top: pointer.y,
                                     fill: me.color,
-                                    opacity: 0.7
+                                    stroke: me.strokeColor,
+                                    opacity: 1
                                 });
                                 me.backCanvas.add(el);
                                 break;
@@ -176,7 +234,8 @@
                                     left: pointer.x,
                                     top: pointer.y,
                                     fill: me.color,
-                                    opacity: 0.7
+                                    stroke: me.strokeColor,
+                                    opacity: 1
                                 });
                                 el.set({
                                     width: 0,
@@ -190,7 +249,7 @@
                                     stroke: me.color,
                                     originX: 'center',
                                     originY: 'center',
-                                    opacity: 0.7,
+                                    opacity: 1,
                                     hasBorders: false,
                                     perPixelTargetFind: true
                                 });
@@ -202,7 +261,8 @@
                                     left: pointer.x,
                                     top: pointer.y,
                                     width: 200,
-                                    fill: me.color
+                                    fill: "#000",
+                                    opacity: 1
                                 });
                                 el.set({
                                     fontFamily: me.font
@@ -263,44 +323,46 @@
                 });
 
                 me.backCanvas.on('mouse:up', function(o) {
-                    console.log(el);
-                    switch (me.backmode) {
-                        case 'square':
-                            if (el.width == 0 && el.height == 0) {
-                                me.backCanvas.remove(el);
-                            } else {
+                    // console.log(el);
+                    if (isDown) {
+                        switch (me.backmode) {
+                            case 'square':
+                                if (el.width == 0 && el.height == 0) {
+                                    me.backCanvas.remove(el);
+                                } else {
+                                    el.setCoords();
+                                }
+                                break;
+                            case 'circle':
+                                if (el.radius == 0) {
+                                    me.backCanvas.remove(el);
+                                } else {
+                                    el.setCoords();
+                                }
+                                break;
+                            case 'triangle':
+                                if (el.width == 0 && el.height == 0) {
+                                    me.backCanvas.remove(el);
+                                } else {
+                                    el.setCoords();
+                                }
+                                break;
+                            case 'line':
+                                if (el.x1 == el.x2 && el.y1 == el.y2) {
+                                    me.backCanvas.remove(el);
+                                } else {
+                                    el.setCoords();
+                                }
+                                break;
+                            case 'text':
+                                me.backCanvas.renderAll();
                                 el.setCoords();
-                            }
-                            break;
-                        case 'circle':
-                            if (el.radius == 0) {
-                                me.backCanvas.remove(el);
-                            } else {
-                                el.setCoords();
-                            }
-                            break;
-                        case 'triangle':
-                            if (el.width == 0 && el.height == 0) {
-                                me.backCanvas.remove(el);
-                            } else {
-                                el.setCoords();
-                            }
-                            break;
-                        case 'line':
-                            if (el.x1 == el.x2 && el.y1 == el.y2) {
-                                me.backCanvas.remove(el);
-                            } else {
-                                el.setCoords();
-                            }
-                            break;
-                        case 'text':
-                            me.backCanvas.renderAll();
-                            el.setCoords();
-                            break;
-                        default:
+                                break;
+                            default:
+                        }
+                        isDown = false;
+                        me.backCanvas.selection = true;
                     }
-                    me.backCanvas.selection = true;
-                    isDown = false;
                 });
             }
         },
@@ -311,6 +373,36 @@
                 obj.set('fill', this.color);
                 if (obj.type == 'line') {
                     obj.set('stroke', this.color);
+                }
+            }
+            this.backCanvas.renderAll();
+        },
+        handleStrokeColor: function(e) {
+            var selected = this._getSelectedObjects();
+            for (var i = 0; i < selected.length; i++) {
+                var obj = selected[i];
+                if (obj.get('type') != 'textbox') {
+                    obj.set('stroke', this.strokeColor);
+                }
+            }
+            this.backCanvas.renderAll();
+        },
+        handleStrokeSize: function(e) {
+            var selected = this._getSelectedObjects();
+            for (var i = 0; i < selected.length; i++) {
+                var obj = selected[i];
+                if (obj.get('type') != 'textbox') {
+                    obj.set('strokeWidth', parseInt(e.currentTarget.dataset.value));
+                }
+            }
+            this.backCanvas.renderAll();
+        },
+        handleTextSize: function(e) {
+            var selected = this._getSelectedObjects();
+            for (var i = 0; i < selected.length; i++) {
+                var obj = selected[i];
+                if (obj.get('type') == 'textbox') {
+                    obj.set('fontSize', parseInt(e.currentTarget.dataset.value));
                 }
             }
             this.backCanvas.renderAll();
@@ -339,6 +431,7 @@
             return objects;
         },
         handleMode: function(e) {
+            this.backCanvas.deactivateAll().renderAll();
             this.set('backmode', e.currentTarget.dataset.backmode);
         },
         isSelected: function(backmode, v) {

@@ -3,7 +3,7 @@
 
 <dom-module id="nv-intact-import">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-        :host {
+         :host {
             display: block;
             box-sizing: border-box;
             width: 680px;
@@ -33,7 +33,7 @@
             background-color: var(--light-secondary-color);
         }
 
-        .footer > * {
+        .footer>* {
             margin-left: 5px;
         }
     </style>
@@ -214,8 +214,9 @@
             },
             handleGo: function() {
                 var me = this;
-                var queryList = this.$.textarea.value.split('\n');
-                if (this.$.species.selected != null && queryList.length > 0) {
+                var value = this.$.textarea.value.trim();
+                var queryList = value.split('\n');
+                if (this.$.species.selected != null && value.length != '' && queryList.length > 0) {
                     this.getGraph(this.$.species.selected, queryList, function(graph) {
                         me.loading = false;
                         me.message = "Information has been saved as nodes and edges";
@@ -224,7 +225,7 @@
                         });
                     });
                 } else {
-                    this.message = "Please select one species and one attribute";
+                    this.message = "Please select one species, one attribute and fill the text area with any indetifier";
                 }
             },
 
@@ -255,7 +256,6 @@
                             var sourceName = interaction.interactorA.id;
                             var edgeRelation = 'pp';
                             var targetName = interaction.interactorB.id;
-
 
                             var sourceVertex = new Vertex({
                                 id: sourceName,

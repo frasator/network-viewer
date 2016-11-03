@@ -208,6 +208,14 @@
                 this.$.mini2.style.left = -(netRect.left - viewRect.left) * nr + -1 + 'px';
             }, 50);
         },
+        updateBack: function() {
+            this.backCanvas.viewportTransform[4] = this.tx;
+            this.backCanvas.viewportTransform[5] = this.ty;
+            this.backCanvas.renderAll();
+            this.backCanvas.getObjects().forEach(function(obj) {
+                obj.setCoords();
+            });
+        },
         handleMouseLeave: function(e) {
             this.set('isMouseIn', false);
         },
@@ -256,8 +264,7 @@
                 this.$.scaleBackGroup.removeChild(this.$.scaleBackGroup.firstChild);
             }
 
-            this.backCanvas.viewportTransform[4] = this.tx;
-            this.backCanvas.viewportTransform[5] = this.ty;
+            this.updateBack();
             this.backCanvas.clear();
         },
         handleWheel: function(e) {
@@ -327,9 +334,7 @@
                         x: this.mx,
                         y: this.my
                     }, this.scale);
-                    this.backCanvas.viewportTransform[4] = this.tx;
-                    this.backCanvas.viewportTransform[5] = this.ty;
-                    this.backCanvas.renderAll();
+                    this.updateBack();
                 }
             }
             this.updateMini();
@@ -347,9 +352,7 @@
             this.tx += -(scalebcr.left - lbcr.left) + ((lbcr.width - scalebcr.width) / 2);
             this.ty += -(scalebcr.top - lbcr.top) + ((lbcr.height - scalebcr.height) / 2);
 
-            this.backCanvas.viewportTransform[4] = this.tx;
-            this.backCanvas.viewportTransform[5] = this.ty;
-            this.backCanvas.renderAll();
+            this.updateBack();
             this.updateMini();
         },
         adjustWidthNetwork: function() {
@@ -364,9 +367,7 @@
             this.tx += -(scalebcr.left - lbcr.left) + ((lbcr.width - scalebcr.width) / 2);
             this.ty += -(scalebcr.top - lbcr.top - 10);
 
-            this.backCanvas.viewportTransform[4] = this.tx;
-            this.backCanvas.viewportTransform[5] = this.ty;
-            this.backCanvas.renderAll();
+            this.updateBack();
             this.updateMini();
         },
         adjustHeightNetwork: function() {
@@ -381,9 +382,7 @@
             this.tx += -(scalebcr.left - lbcr.left - 10);
             this.ty += -(scalebcr.top - lbcr.top) + ((lbcr.height - scalebcr.height) / 2);
 
-            this.backCanvas.viewportTransform[4] = this.tx;
-            this.backCanvas.viewportTransform[5] = this.ty;
-            this.backCanvas.renderAll();
+            this.updateBack();
             this.updateMini();
         },
         mouseHoverHandler: function(e) {
@@ -770,13 +769,10 @@
                 me.x += dispX;
                 me.y += dispY;
 
-                me.backCanvas.viewportTransform[4] = me.tx;
-                me.backCanvas.viewportTransform[5] = me.ty;
-                me.backCanvas.renderAll();
-
                 lastX = moveX;
                 lastY = moveY;
 
+                me.updateBack();
                 me.updateMini();
             };
             this.$.svg.addEventListener('mousemove', handler);
