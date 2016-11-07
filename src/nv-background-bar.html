@@ -1,0 +1,551 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
+
+<link rel="import" href="../../stevia-elements/src/dropdown/stv-dropdown.html">
+<script src="../../fabric.js/dist/fabric.min.js"></script>
+
+<dom-module id="nv-background-bar">
+    <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
+         :host {
+            display: block;
+            position: relative;
+            box-sizing: border-box;
+            background-color: #FAFAFA;
+            border-bottom: 1px solid #D9D9D9;
+            height: 32px;
+        }
+
+        #bar {
+            width: 900px;
+            height: 32px;
+            margin-left: 10px;
+        }
+
+        .stv-context {
+            min-width: 200px;
+            cursor: pointer;
+        }
+
+        .stv-btn {
+            text-align: center;
+        }
+
+        .stv-btn {
+            /*color: var(--text-primary-color);*/
+            /*background-color: var(--dark-button-color);*/
+        }
+
+        .stv-btn:hover {
+            /*background-color: var(--light-button-color);*/
+        }
+
+        .br0{
+            border-right: none;
+        }
+
+
+    </style>
+    <template>
+        <div id="bar" class="horizontal layout center">
+            <div title="Select" class="stv-btn" data-backmode="select" data-checked$="{{isSelected(backmode,'select')}}" on-click="handleMode">
+                <i class="fa fa-mouse-pointer" style="margin-left:2px;"></i>
+            </div>
+            <div style="margin-left:10px;"></div>
+            <div title="Add square" class="stv-btn br0" data-backmode="square" data-checked$="{{isSelected(backmode,'square')}}" on-click="handleMode">
+                <i class="fa fa-stop"></i>
+            </div>
+            <div title="Add circle" class="stv-btn br0" data-backmode="circle" data-checked$="{{isSelected(backmode,'circle')}}" on-click="handleMode">
+                <i class="fa fa-circle"></i>
+            </div>
+            <div title="Add triangle" class="stv-btn br0" data-backmode="triangle" data-checked$="{{isSelected(backmode,'triangle')}}" on-click="handleMode">
+                <i class="fa fa-play fa-rotate-270"></i>
+            </div>
+            <div title="Add line" class="stv-btn br0" data-backmode="line" data-checked$="{{isSelected(backmode,'line')}}" on-click="handleMode">
+                <i class="fa fa-minus fa-rotate-90"></i>
+            </div>
+            <div title="Add Text" class="stv-btn" data-backmode="text" data-checked$="{{isSelected(backmode,'text')}}" on-click="handleMode">
+                <i class="fa fa-font"></i>
+            </div>
+
+            <div style="margin-left:10px;"></div>
+            <div data-button id="strokeSizeButton" style="border-right: none; padding:0 5px;">
+                <i class="fa fa-paint-brush"></i>
+            </div>
+            <stv-color-picker ctitle="Change the color of the selected elements" id="colorPicker" color="{{color}}" on-color-click="handleColor" style="float:left;width:90px;"></stv-color-picker>
+
+            <div style="margin-left:10px;"></div>
+            <stv-dropdown title="Change the size of the selected elements">
+                <div data-button id="strokeSizeButton" class="stv-btn" style="border-right: none;">
+                    <i class="fa fa-pencil"></i>
+                </div>
+                <ul data-menu id="sizeMenu">
+                    <li on-mousedown="handleStrokeSize" data-value="1">1 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="2">2 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="3">3 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="4">4 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="8">8 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="10">10 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="12">12 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="16">16 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="20">20 px</li>
+                    <li on-mousedown="handleStrokeSize" data-value="24">24 px</li>
+                </ul>
+            </stv-dropdown>
+            <stv-color-picker ctitle="Change stroke color of the selected elements" id="strokeColor" color="{{strokeColor}}" on-color-click="handleStrokeColor" style="float:left;width:90px;"></stv-color-picker>
+
+            <div style="margin-left:10px;"></div>
+
+            <stv-dropdown title="Change the size of the selected elements">
+                <div data-button id="textSizeButton" class="stv-btn">
+                    <i class="fa fa-text-height"></i>
+                </div>
+                <ul data-menu id="textSizeMenu">
+                    <li on-mousedown="handleTextSize" data-value="12">12 px</li>
+                    <li on-mousedown="handleTextSize" data-value="16">16 px</li>
+                    <li on-mousedown="handleTextSize" data-value="20">20 px</li>
+                    <li on-mousedown="handleTextSize" data-value="24">24 px</li>
+                    <li on-mousedown="handleTextSize" data-value="32">32 px</li>
+                    <li on-mousedown="handleTextSize" data-value="40">40 px</li>
+                    <li on-mousedown="handleTextSize" data-value="50">50 px</li>
+                    <li on-mousedown="handleTextSize" data-value="60">60 px</li>
+                </ul>
+            </stv-dropdown>
+
+            <div style="margin-left:10px;"></div>
+            <stv-select value="{{font}}" on-change="handleFont" style="width:140px;">
+                <stv-option value="Times New Roman">Times New Roman</stv-option>
+                <stv-option value="Oxygen">Oxygen</stv-option>
+                <stv-option value="Ubuntu">Ubuntu</stv-option>
+                <stv-option value="Ubuntu Mono">Ubuntu Mono</stv-option>
+                <stv-option value="Lato">Lato</stv-option>
+                <stv-option value="Roboto">Roboto</stv-option>
+            </stv-select>
+
+            <div style="margin-left:20px;"></div>
+            <div title="Upload your own background image" on-click=handleBackgroundImage id="importBackgroundImageButton" class="stv-btn">
+                <i class="fa fa-file-image-o"></i>
+            </div>
+            <input on-change=handleBackgroundImageField id="importBackgroundImageField" type="file" hidden>
+        </div>
+
+        <ul id="imagecontextmenu" class="stv-context" hidden>
+            <li on-click="remove">Remove</li>
+        </ul>
+
+    </template>
+</dom-module>
+<script>
+    Polymer({
+        is: 'nv-background-bar',
+        properties: {
+            backmode: {
+                type: String,
+                value: 'select',
+                notify: true
+            },
+            backCanvas: {
+                type: Object,
+                observer: 'backCanvasChanged'
+            },
+            color: {
+                type: String,
+                value: '#1f9cda'
+            },
+            strokeColor: {
+                type: String,
+                value: '#ffffff'
+            },
+            font: {
+                type: String,
+                value: 'Times New Roman'
+            },
+            lastSelected: {
+                type: Array,
+                value: function() {
+                    return [];
+                }
+            }
+        },
+        ready: function() {
+            var me = this;
+            document.addEventListener('keyup', function(e) {
+                if (me.backCanvas && e.keyCode == 46) { //SUPR
+                    var selected = me._getSelectedObjects();
+                    for (var i = 0; i < selected.length; i++) {
+                        var obj = selected[i];
+                        if (obj.isEditing !== true) {
+                            me.backCanvas.remove(obj);
+                        }
+                    }
+                    me.backCanvas.renderAll();
+                }
+            });
+        },
+        backCanvasChanged: function(neo, old) {
+            var me = this;
+            if (neo) {
+                var canvasContainer = this.backCanvas.wrapperEl;
+                // this.backCanvas.isDrawingMode = true;
+
+                // fabric.Circle
+                // fabric.Ellipse
+                // fabric.Line
+                // fabric.Polygon
+                // fabric.Polyline
+                // fabric.Rect
+                // fabric.Triangle
+                var el, isDown;
+
+                me.lastSelected = [];
+                me.backCanvas.on('before:selection:cleared', function(o) {
+                    me.lastSelected = me._getSelectedObjects();
+                });
+
+                me.backCanvas.on('mouse:down', function(o) {
+                    if (me.lastSelected.length > 0) {
+                        me.lastSelected = [];
+                    } else if (o.target == null) {
+                        me.backCanvas.selection = false;
+                        isDown = true;
+                        var pointer = me.backCanvas.getPointer(o.e);
+                        switch (me.backmode) {
+                            case 'square':
+                                el = new fabric.Rect({
+                                    left: pointer.x,
+                                    top: pointer.y,
+                                    fill: me.color,
+                                    stroke: me.strokeColor,
+                                    opacity: 1
+                                });
+                                me.backCanvas.add(el);
+                                break;
+                            case 'circle':
+                                el = new fabric.Circle({
+                                    left: pointer.x,
+                                    top: pointer.y,
+                                    fill: me.color,
+                                    stroke: me.strokeColor,
+                                    opacity: 1
+                                });
+                                me.backCanvas.add(el);
+                                break;
+                            case 'triangle':
+                                el = new fabric.Triangle({
+                                    left: pointer.x,
+                                    top: pointer.y,
+                                    fill: me.color,
+                                    stroke: me.strokeColor,
+                                    opacity: 1
+                                });
+                                el.set({
+                                    width: 0,
+                                    height: 0
+                                });
+                                me.backCanvas.add(el);
+                                break;
+                            case 'line':
+                                el = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+                                    strokeWidth: 5,
+                                    stroke: me.color,
+                                    originX: 'center',
+                                    originY: 'center',
+                                    opacity: 1,
+                                    hasBorders: false,
+                                    perPixelTargetFind: true
+                                });
+                                me._setLineEvents(el);
+                                me.backCanvas.add(el);
+                                break;
+                            case 'text':
+                                el = new fabric.Textbox('New text', {
+                                    left: pointer.x,
+                                    top: pointer.y,
+                                    width: 200,
+                                    fill: "#000",
+                                    opacity: 1
+                                });
+                                el.set({
+                                    fontFamily: me.font
+                                });
+                                me.backCanvas.add(el);
+                                break;
+                            default:
+                                me.backCanvas.selection = true;
+                        }
+                    } else {
+                        me.backCanvas.bringToFront(o.target);
+                    }
+                });
+
+                me.backCanvas.on('mouse:move', function(o) {
+                    if (isDown) {
+                        var pointer = me.backCanvas.getPointer(o.e);
+                        switch (me.backmode) {
+                            case 'square':
+                                var w = pointer.x - el.left;
+                                var h = pointer.y - el.top;
+                                el.set({
+                                    width: w,
+                                    height: h
+                                });
+                                me.backCanvas.renderAll();
+                                break;
+                            case 'circle':
+                                var r = pointer.x - el.left;
+                                if (r > 0) {
+                                    el.set({
+                                        radius: r
+                                    });
+                                }
+                                me.backCanvas.renderAll();
+                                break;
+                            case 'triangle':
+                                var w = pointer.x - el.left;
+                                var h = pointer.y - el.top;
+                                el.set({
+                                    width: w,
+                                    height: h
+                                });
+                                me.backCanvas.renderAll();
+                                break;
+                            case 'line':
+                                el.set({
+                                    x2: pointer.x,
+                                    y2: pointer.y
+                                });
+                                me.backCanvas.renderAll();
+                                break;
+                            case 'text':
+                                break;
+                            default:
+                        }
+                    }
+                });
+
+                me.backCanvas.on('mouse:up', function(o) {
+                    // console.log(el);
+                    if (isDown) {
+                        switch (me.backmode) {
+                            case 'square':
+                                if (el.width == 0 && el.height == 0) {
+                                    me.backCanvas.remove(el);
+                                } else {
+                                    el.setCoords();
+                                }
+                                break;
+                            case 'circle':
+                                if (el.radius == 0) {
+                                    me.backCanvas.remove(el);
+                                } else {
+                                    el.setCoords();
+                                }
+                                break;
+                            case 'triangle':
+                                if (el.width == 0 && el.height == 0) {
+                                    me.backCanvas.remove(el);
+                                } else {
+                                    el.setCoords();
+                                }
+                                break;
+                            case 'line':
+                                if (el.x1 == el.x2 && el.y1 == el.y2) {
+                                    me.backCanvas.remove(el);
+                                } else {
+                                    el.setCoords();
+                                }
+                                break;
+                            case 'text':
+                                me.backCanvas.renderAll();
+                                el.setCoords();
+                                break;
+                            default:
+                        }
+                        isDown = false;
+                        me.backCanvas.selection = true;
+                    }
+                });
+            }
+        },
+        handleColor: function(e) {
+            var selected = this._getSelectedObjects();
+            for (var i = 0; i < selected.length; i++) {
+                var obj = selected[i];
+                obj.set('fill', this.color);
+                if (obj.type == 'line') {
+                    obj.set('stroke', this.color);
+                }
+            }
+            this.backCanvas.renderAll();
+        },
+        handleStrokeColor: function(e) {
+            var selected = this._getSelectedObjects();
+            for (var i = 0; i < selected.length; i++) {
+                var obj = selected[i];
+                if (obj.get('type') != 'textbox') {
+                    obj.set('stroke', this.strokeColor);
+                }
+            }
+            this.backCanvas.renderAll();
+        },
+        handleStrokeSize: function(e) {
+            var selected = this._getSelectedObjects();
+            for (var i = 0; i < selected.length; i++) {
+                var obj = selected[i];
+                if (obj.get('type') != 'textbox') {
+                    obj.set('strokeWidth', parseInt(e.currentTarget.dataset.value));
+                }
+            }
+            this.backCanvas.renderAll();
+        },
+        handleTextSize: function(e) {
+            var selected = this._getSelectedObjects();
+            for (var i = 0; i < selected.length; i++) {
+                var obj = selected[i];
+                if (obj.get('type') == 'textbox') {
+                    obj.set('fontSize', parseInt(e.currentTarget.dataset.value));
+                }
+            }
+            this.backCanvas.renderAll();
+        },
+        handleFont: function(e) {
+            var selected = this._getSelectedObjects();
+            for (var i = 0; i < selected.length; i++) {
+                var obj = selected[i];
+                if (obj.get('type') == 'textbox') {
+                    obj.set('fontFamily', this.font);
+                }
+            }
+            this.backCanvas.renderAll();
+        },
+        _getSelectedObjects: function() {
+            var objects = [];
+            var obj = this.backCanvas.getActiveObject();
+            var grp = this.backCanvas.getActiveGroup();
+            if (obj != null) {
+                objects.push(obj);
+            } else if (grp != null) {
+                grp.forEachObject(function(o) {
+                    objects.push(o);
+                });
+            }
+            return objects;
+        },
+        handleMode: function(e) {
+            this.backCanvas.deactivateAll().renderAll();
+            this.set('backmode', e.currentTarget.dataset.backmode);
+        },
+        isSelected: function(backmode, v) {
+            return backmode == v;
+        },
+        handleBackgroundImage: function() {
+            this.$.importBackgroundImageField.click();
+        },
+        handleBackgroundImageField: function(e) {
+            // this.addActionStack();
+            var me = this;
+            var file = e.currentTarget.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(evt) {
+                    var image = new Image;
+                    image.onload = function() {
+                        me.addBackgroundImage(image);
+                    };
+                    var content = evt.target.result;
+                    image.src = content;
+                };
+                reader.readAsDataURL(file);
+                e.currentTarget.value = null;
+            }
+        },
+        addBackgroundImage: function(image, setActive, cb) {
+            var me = this;
+            fabric.Image.fromURL(image.src, function(el) {
+                el.set({
+                    left: 100,
+                    top: 100,
+                    opacity: 0.95
+                });
+                me.backCanvas.add(el);
+                if (setActive != false) {
+                    me.backCanvas.setActiveObject(el);
+                }
+                me.backCanvas.renderAll();
+                if (cb) {
+                    cb();
+                }
+            });
+        },
+        _setLineEvents: function(el) {
+            var me = this;
+            var moving = false;
+            var ActiveNode = 0;
+            el.on('scaling', function(se) {
+                var pointer = me.backCanvas.getPointer(se.e);
+                if (ActiveNode === 2) {
+                    this.set({
+                        x2: pointer.x,
+                        y2: pointer.y
+                    });
+                } else {
+                    this.set({
+                        x1: pointer.x,
+                        y1: pointer.y
+                    });
+                }
+                var controlvis = this.y2 >= this.y1 ? this.x2 >= this.x1 : this.x1 > this.x2;
+                this.setControlsVisibility({
+                    tr: !controlvis,
+                    br: controlvis,
+                    tl: controlvis,
+                    bl: !controlvis
+                });
+            });
+            el.setControlsVisibility({
+                mb: false,
+                ml: false,
+                mr: false,
+                mt: false,
+                mtr: false,
+                tr: !(el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2),
+                br: el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2,
+                tl: el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2,
+                bl: !(el.y2 >= el.y1 ? el.x2 >= el.x1 : el.x1 > el.x2)
+            });
+            el.on('moving', function(se) {
+                moving = true;
+            });
+            el.on('modified', function(e) {
+                var line = this.toObject();
+                if (moving) {
+                    this.set({
+                        x2: line.left + line.x2,
+                        y2: line.top + line.y2,
+                        x1: line.left + line.x1,
+                        y1: line.top + line.y1,
+                        top: line.top,
+                        left: line.left
+                    });
+                    // console.log(line.left, line.top);
+                }
+                this.moving = false;
+                this.setCoords();
+            });
+            el.on('mousedown', function(e) {
+                if (this.__corner === 'tr' || this.__corner === 'br') {
+                    if (this.x2 >= this.x1) {
+                        ActiveNode = 2;
+                    } else {
+                        ActiveNode = 1;
+                    }
+                } else {
+                    if (this.x2 > this.x1) {
+                        ActiveNode = 1;
+                    } else {
+                        ActiveNode = 2;
+                    }
+                }
+            });
+        }
+    });
+</script>

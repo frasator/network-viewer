@@ -5,7 +5,7 @@
 
 <dom-module id="nv-edition-bar">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-        :host {
+         :host {
             display: block;
             position: relative;
             box-sizing: border-box;
@@ -17,10 +17,10 @@
         #bar {
             width: 900px;
             height: 32px;
-                        margin-left: 10px;
+            margin-left: 10px;
         }
 
-        stv-dropdown > [data-button] {
+        stv-dropdown>[data-button] {
             margin-left: 5px;
         }
     </style>
@@ -343,7 +343,6 @@
                 });
             }
         },
-
 
         handleEdgeShape: function(e) {
             this.fire('edgeshape', {

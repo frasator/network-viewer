@@ -20,6 +20,20 @@
             overflow-y: hidden;
         }
 
+        .canvas-container {
+            position: absolute !important;
+            width: 100% !important;
+            height: 100% !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+
+        #svg {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+
         #mini1 {
             position: absolute;
             background-color: rgba(125, 125, 125, 0.3);
@@ -33,12 +47,12 @@
         }
     </style>
     <template>
-        <div id="svgDiv" style="height:100%;width:100%;">
+        <div id="svgDiv" style="height:100%;width:100%;background-color:{{backgroundColor}};">
             <div id="mini1" hidden="{{hideMiniMap}}">
                 <div id="mini2"></div>
             </div>
+            <canvas id="canvas"></canvas>
             <svg xmlns="http://www.w3.org/2000/svg" id="svg" on-wheel="handleWheel" on-mousedown="mouseDownHandler" on-mouseup="mouseUpHandler" on-mouseover="mouseHoverHandler" on-contextmenu="mouseContextMenuHandler" width="100%" height="100%">
-                <rect id="backgroundColor" width="100%" height="100%" fill$="{{backgroundColor}}" x="0" y="0"></rect>
                 <svg id="drawArea">
                     <svg id="backSvg" x="0" y="0">
                         <g id="scaleBackGroup" transform$="{{computeTransform(tx,ty,scale)}}"></g>
@@ -62,6 +76,10 @@
         properties: {
             backgroundColor: {
                 type: String
+            },
+            backCanvas: {
+                type: Object,
+                notify: true
             },
             mode: {
                 type: String,
@@ -141,7 +159,16 @@
         },
         created: function() {},
         ready: function() {
+            var me = this;
             this.updateMini();
+            var canvas = new fabric.Canvas(this.$.canvas);
+            this.set('backCanvas', canvas);
+            var canvasContainer = this.$.canvas.parentNode;
+            this.async(function() {
+                var vRect = this.getBoundingClientRect();
+                canvas.setWidth(vRect.width);
+                canvas.setHeight(vRect.height);
+            }, 60);
         },
         updateMini: function() {
             this.async(function() {
@@ -180,6 +207,14 @@
                 this.$.mini2.style.top = -(netRect.top - viewRect.top) * nr + -1 + 'px';
                 this.$.mini2.style.left = -(netRect.left - viewRect.left) * nr + -1 + 'px';
             }, 50);
+        },
+        updateBack: function() {
+            this.backCanvas.viewportTransform[4] = this.tx;
+            this.backCanvas.viewportTransform[5] = this.ty;
+            this.backCanvas.renderAll();
+            this.backCanvas.getObjects().forEach(function(obj) {
+                obj.setCoords();
+            });
         },
         handleMouseLeave: function(e) {
             this.set('isMouseIn', false);
@@ -222,13 +257,15 @@
                 this.x = 0;
                 this.y = 0;
             }
-
             while (this.$.scaleFrontGroup.firstChild) {
                 this.$.scaleFrontGroup.removeChild(this.$.scaleFrontGroup.firstChild);
             }
             while (this.$.scaleBackGroup.firstChild) {
                 this.$.scaleBackGroup.removeChild(this.$.scaleBackGroup.firstChild);
             }
+
+            this.updateBack();
+            this.backCanvas.clear();
         },
         handleWheel: function(e) {
             e.preventDefault();
@@ -239,24 +276,33 @@
             }
         },
         modeChanged: function(neo, old) {
+            if (this.backCanvas) {
+                this.backCanvas.deactivateAll().renderAll();
+            }
             switch (neo) {
                 case "add":
-                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.$.svgDiv.appendChild(this.$.svg);
+                    // this.$.drawArea.appendChild(this.$.frontSvg);
                     break;
                 case "join":
-                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.$.svgDiv.appendChild(this.$.svg);
+                    // this.$.drawArea.appendChild(this.$.frontSvg);
                     break;
                 case "delete":
-                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.$.svgDiv.appendChild(this.$.svg);
+                    // this.$.drawArea.appendChild(this.$.frontSvg);
                     break;
                 case "selectbackground":
-                    this.$.drawArea.appendChild(this.$.backSvg);
+                    this.$.svgDiv.appendChild(this.$.canvas.parentNode);
+                    // this.$.drawArea.appendChild(this.$.backSvg);
                     break;
                 case "select":
-                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.$.svgDiv.appendChild(this.$.svg);
+                    // this.$.drawArea.appendChild(this.$.frontSvg);
                     break;
                 case "move":
-                    this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.$.svgDiv.appendChild(this.$.svg);
+                    // this.$.drawArea.appendChild(this.$.frontSvg);
                     break;
                 default:
                     break;
@@ -282,6 +328,14 @@
                     this.tx += (-this.last_rmx) * inc;
                     this.ty += (-this.last_rmy) * inc;
                 }
+
+                if (this.backCanvas) {
+                    this.backCanvas.zoomToPoint({
+                        x: this.mx,
+                        y: this.my
+                    }, this.scale);
+                    this.updateBack();
+                }
             }
             this.updateMini();
         },
@@ -293,11 +347,12 @@
             var newScale2 = lbcr.height / (scalebcr.height / this.scale);
 
             var finalScale = Math.min(newScale, newScale2);
-            this.zoom = Math.min(Math.floor(finalScale * 25), 100);
+            this.zoom = Math.min(Math.floor(finalScale * 25), 25);
             scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
             this.tx += -(scalebcr.left - lbcr.left) + ((lbcr.width - scalebcr.width) / 2);
             this.ty += -(scalebcr.top - lbcr.top) + ((lbcr.height - scalebcr.height) / 2);
 
+            this.updateBack();
             this.updateMini();
         },
         adjustWidthNetwork: function() {
@@ -307,11 +362,12 @@
             var newScale = lbcr.width / (scalebcr.width / this.scale);
 
             var finalScale = newScale;
-            this.zoom = Math.min(Math.floor(finalScale * 25), 100);
+            this.zoom = Math.min(Math.floor(finalScale * 25), 25);
             scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
             this.tx += -(scalebcr.left - lbcr.left) + ((lbcr.width - scalebcr.width) / 2);
             this.ty += -(scalebcr.top - lbcr.top - 10);
 
+            this.updateBack();
             this.updateMini();
         },
         adjustHeightNetwork: function() {
@@ -321,11 +377,12 @@
             var newScale2 = lbcr.height / (scalebcr.height / this.scale);
 
             var finalScale = newScale2;
-            this.zoom = Math.min(Math.floor(finalScale * 25), 100);
+            this.zoom = Math.min(Math.floor(finalScale * 25), 25);
             scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
             this.tx += -(scalebcr.left - lbcr.left - 10);
             this.ty += -(scalebcr.top - lbcr.top) + ((lbcr.height - scalebcr.height) / 2);
 
+            this.updateBack();
             this.updateMini();
         },
         mouseHoverHandler: function(e) {
@@ -715,6 +772,7 @@
                 lastX = moveX;
                 lastY = moveY;
 
+                me.updateBack();
                 me.updateMini();
             };
             this.$.svg.addEventListener('mousemove', handler);
@@ -805,34 +863,19 @@
         getEdgeId: function(targetEl) {
             return stv.utils.closest(targetEl, '[network-type=edge-g]').getAttribute('id');
         },
-        addBackgroundImage: function(image) {
-            SVG.addChildImage(this.$.scaleBackGroup, {
-                "x": image.x,
-                "y": image.y,
-                "xlink:href": image.src,
-                "width": image.width,
-                "height": image.height,
-                "network-type": "background-image"
-            });
-        },
-        addBackgroundImages: function(images) {
-            for (var i = 0, li = images.length; i < li; i++) {
-                this.addBackgroundImage(images[i]);
-            }
-        },
-        getBackgroundImages: function() {
-            var images = [];
-            var imageElements = this.$.scaleBackGroup.querySelectorAll('image[network-type="background-image"]');
-            for (var i = 0; i < imageElements.length; i++) {
-                images.push({
-                    src: imageElements[i].getAttribute('href'),
-                    width: imageElements[i].getAttribute('width'),
-                    height: imageElements[i].getAttribute('height'),
-                    x: imageElements[i].getAttribute('x'),
-                    y: imageElements[i].getAttribute('y')
-                });
-            }
-            return images;
-        }
+        // getBackgroundImages: function() {
+        //     var images = [];
+        //     var imageElements = this.$.scaleBackGroup.querySelectorAll('image[network-type="background-image"]');
+        //     for (var i = 0; i < imageElements.length; i++) {
+        //         images.push({
+        //             src: imageElements[i].getAttribute('href'),
+        //             width: imageElements[i].getAttribute('width'),
+        //             height: imageElements[i].getAttribute('height'),
+        //             x: imageElements[i].getAttribute('x'),
+        //             y: imageElements[i].getAttribute('y')
+        //         });
+        //     }
+        //     return images;
+        // }
     });
 </script>
