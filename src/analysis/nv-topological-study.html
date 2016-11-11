@@ -237,7 +237,7 @@
                             body: JSON.stringify(args),
                             success: function(response) {
                                 if (response.response[0].error == null) {
-                                    var results = JSON.parse(response.response[0].results[0].out.split('result.global.json')[1].trim());
+                                    var results = JSON.parse(response.response[0].results[0].output.split('result.global.json')[1].trim());
                                     results.avgNodesPerComponent = results['Average nodes per component'];
                                     results.avgShortestPathLength = results['Average shorthest path length'];
                                     results.clusteringCoeff = results['Clustering coefficient'];
@@ -247,7 +247,7 @@
                                     results.numNodes = results['Number of nodes'];
                                     me.results = results;
 
-                                    var localResults = response.response[0].results[0].out.split('result.local')[1].trim()
+                                    var localResults = response.response[0].results[0].output.split('result.local')[1].trim()
                                     var attributes = [];
                                     var lines = localResults.split("\n");
                                     var line, fields;

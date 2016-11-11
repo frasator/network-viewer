@@ -118,13 +118,19 @@ AttributeNetworkDataAdapter.prototype.parse = function (data) {
             if (i == 0) {
                 finalColumnNames[i] = "id";
             }
+            if (finalColumnNames[i] == 'X') {
+                finalColumnNames[i] = 'x';
+            }
+            if (finalColumnNames[i] == 'Y') {
+                finalColumnNames[i] = 'y';
+            }
 
             if (auxRepeatMap[finalColumnNames[i]] == null) {
                 auxRepeatMap[finalColumnNames[i]] = true;
             } else {
                 finalColumnNames[i] = finalColumnNames[i] + '_' + i.toString();
             }
-            
+
             if (this.ignoreColumns[i] !== true) {
                 var column = {
                     name: finalColumnNames[i].toString(),

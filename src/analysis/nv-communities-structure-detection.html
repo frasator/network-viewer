@@ -259,13 +259,13 @@
                                     // console.log(response.response[0].results[0].out);
                                     // console.log(response.response[0].results[0].err);
 
-                                    var results = JSON.parse(response.response[0].results[0].out.split('result.json')[1].trim());
+                                    var results = JSON.parse(response.response[0].results[0].output.split('result.json')[1].trim());
                                     results.globalModularity = results['Global modularity'];
                                     results.numberCommunities = results['Number of communities with more than 2 nodes'];
                                     results.totalCommunities = results['Total number of communities'];
                                     me.results = results;
 
-                                    var comm = response.response[0].results[0].out.split('result.comm')[1].trim();
+                                    var comm = response.response[0].results[0].output.split('result.comm')[1].trim();
 
                                     var attributes = [];
                                     var lines = comm.split("\n");
