@@ -3,7 +3,7 @@
 
 <dom-module id="nv-reactome">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-        :host {
+         :host {
             display: block;
             box-sizing: border-box;
             width: 500px;
@@ -28,7 +28,7 @@
             background-color: var(--light-secondary-color);
         }
 
-        .footer > * {
+        .footer>* {
             margin-left: 5px;
         }
     </style>
@@ -68,9 +68,18 @@
                 Pathway: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAVklEQVR42tVSQQoAIAza0/a0/bwuLUZJaJ0SPGSbSGZW4O5t5UnfMC4mqwHSocFTgkRENEWHg0l0pnG9KMX+szqYSqku020GLKGB0gJlIL8B2w4N9h90t4HQjSs2eNAAAAAASUVORK5CYII="
             },
             ready: function() {
-                this._getSpeciesPathways({
-                    value: 'Homo+sapiens'
-                });
+                var me = this;
+                var loaded = false;
+                // if (this._parentPanel) {
+                //     this._parentPanel.addEventListener('hidden', function(e) {
+                //         if (loaded == false && me._parentPanel.hidden == false) {
+                //             loaded = true;
+                //             me._getSpeciesPathways({
+                //                 value: 'Homo+sapiens'
+                //             });
+                //         }
+                //     });
+                // }
             },
             handleSpeciesSelect: function(e) {
                 this.speciesSelected = e.model.spe;

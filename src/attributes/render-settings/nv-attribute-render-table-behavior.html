@@ -141,7 +141,6 @@
             }
         },
 
-
         clean: function() {
             if (this.$.columnSelectBox) {
                 this.$.columnSelectBox.selectByIndex(0);
@@ -224,7 +223,6 @@
             return attributeParse.name == 'list';
         },
 
-
         handleColumnSelect: function(e) {
             this.set('selectedColumn', e.detail);
         },
@@ -234,7 +232,6 @@
         handleAttributeParseSelect: function(e) {
             this.set('attributeParse', e.detail);
         },
-
 
         handleClose: function() {
             this.displayProperty = '';
@@ -269,7 +266,6 @@
             }
             this.set('uniqueItems', uniqueItems);
         },
-
 
         _createVisualSet: function() {
             var uniqueMatches = {};
@@ -306,7 +302,7 @@
 
         _updateUniqueValues: function() {
             var me = this;
-            if (this.selectedColumn && this.selectedColumn.name != '') {
+            if (this.displayProperty != '' && this.displayProperty != null && this.selectedColumn && this.selectedColumn.name != '') {
                 var uniqueMap = {};
                 var uniqueItems = [];
                 var max;
@@ -366,7 +362,6 @@
                         processValue(attributes[this.selectedColumn.name]);
                     }
                 }
-
 
                 var firstPoint = this.points[0];
                 var lastPoint = this.points[this.points.length - 1];

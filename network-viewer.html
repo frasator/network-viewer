@@ -858,6 +858,7 @@
             this.$.networkLayout.clean();
             this.graph.clean();
             this.saveLocalStorage();
+            this.fire('startover');
         },
         resetZoom: function() {
             this.zoom = 25;
