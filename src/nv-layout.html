@@ -52,7 +52,8 @@
                 <div id="mini2"></div>
             </div>
             <canvas id="canvas"></canvas>
-            <svg xmlns="http://www.w3.org/2000/svg" id="svg" on-wheel="handleWheel" on-mousedown="mouseDownHandler" on-mouseup="mouseUpHandler" on-mouseover="mouseHoverHandler" on-contextmenu="mouseContextMenuHandler" width="100%" height="100%">
+            <svg xmlns="http://www.w3.org/2000/svg" id="svg" width="100%" height="100%" on-wheel="handleWheel" on-mousedown="mouseDownHandler" on-mouseup="mouseUpHandler" on-mouseover="mouseHoverHandler" on-contextmenu="mouseContextMenuHandler">
+                <rect id="backgroundColorRect" x="0" y="0"></rect>
                 <svg id="drawArea">
                     <svg id="backSvg" x="0" y="0">
                         <g id="scaleBackGroup" transform$="{{computeTransform(tx,ty,scale)}}"></g>
@@ -169,6 +170,20 @@
                 canvas.setWidth(vRect.width);
                 canvas.setHeight(vRect.height);
             }, 60);
+        },
+        exportSVG: function() {
+            var svgText = this.$.svg.outerHTML.trim();
+            var bcrLayout = this.$.drawArea.getBoundingClientRect();
+            var toReplace = 'id="svg" width="100%" height="100%"';
+            svgText = svgText.replace(toReplace, 'id="svg" width="' + bcrLayout.width + '" height="' + bcrLayout.height + '"');
+            toReplace = 'id="backgroundColorRect"';
+            svgText = svgText.replace(toReplace, 'id="backgroundColorRect" width="' + bcrLayout.width + '" height="' + bcrLayout.height + '" fill="' + this.backgroundColor + '"');
+            var backSvgText = this.backCanvas.toSVG();
+            backSvgText = backSvgText.substring(backSvgText.indexOf('<svg'));
+            toReplace = '<svg id="drawArea"';
+            svgText = svgText.replace(toReplace, backSvgText + toReplace);
+            debugger
+            return svgText;
         },
         updateMini: function() {
             this.async(function() {
