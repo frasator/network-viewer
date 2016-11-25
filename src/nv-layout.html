@@ -182,7 +182,6 @@
             backSvgText = backSvgText.substring(backSvgText.indexOf('<svg'));
             toReplace = '<svg id="drawArea"';
             svgText = svgText.replace(toReplace, backSvgText + toReplace);
-            debugger
             return svgText;
         },
         updateMini: function() {

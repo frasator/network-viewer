@@ -1543,11 +1543,14 @@
             //            link.dispatchEvent(event);
         },
         handleExportSvgMenu: function(e) {
-            var text = this.$.networkLayout.exportSVG();
+            var text = this.exportSVG();
             var blob = new Blob([text], {
                 type: "image/svg+xml"
             });
             saveAs(blob, "network.svg");
+        },
+        exportSVG: function() {
+            return this.$.networkLayout.exportSVG();
         },
         handleExportPngMenu: function(e) {
             //            Deprecated
