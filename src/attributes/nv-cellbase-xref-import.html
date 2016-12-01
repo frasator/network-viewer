@@ -287,22 +287,22 @@
                 }
             }
         },
-        // uncheckAllDatabases: function() {
-        //     var processCheckBoxes = function(item) {
-        //         item.selected = false;
-        //     };
-        //     this.extList.forEach(processCheckBoxes);
-        //     this.repoList.forEach(processCheckBoxes);
-        // },
-        // checkDatabase: function(db) {
-        //     var processCheckBoxes = function(item) {
-        //         if (db === item.inputValue.db) {
-        //             item.selected = true;
-        //         }
-        //     };
-        //     this.extList.forEach(processCheckBoxes);
-        //     this.repoList.forEach(processCheckBoxes);
-        // },
+        uncheckAllDatabases: function() {
+            var processCheckBoxes = function(item) {
+                item.selected = false;
+            };
+            this.extList.forEach(processCheckBoxes);
+            this.repoList.forEach(processCheckBoxes);
+        },
+        checkDatabase: function(db) {
+            var processCheckBoxes = function(item) {
+                if (db === item.inputValue.db) {
+                    item.selected = true;
+                }
+            };
+            this.extList.forEach(processCheckBoxes);
+            this.repoList.forEach(processCheckBoxes);
+        },
         retrieveData: function(attributeName, species, callbackFunction) {
             var me = this;
             var columns = [];
