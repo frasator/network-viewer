@@ -1800,6 +1800,8 @@
             this.addActionStack();
         },
         handleLeftClickVertex: function(e) {
+            e.stopPropagation();
+
             var vertex = this.graph.getVertexById(e.detail.vertexId);
             this.$.editionBar.vertexColor = vertex.renderer.color;
             this.$.editionBar.vertexStrokeColor = vertex.renderer.strokeColor;
@@ -1807,13 +1809,31 @@
             this.$.editionBar.vertexSizeField = vertex.renderer.size;
             this.$.editionBar.vertexStrokeSizeField = vertex.renderer.strokeSize;
             this.$.editionBar.selectedBar = 'vertex';
+
+            var bcr = this.getBoundingClientRect();
+            this.fire('leftclickvertex', {
+                x: e.detail.x + bcr.left + 15,
+                y: e.detail.y + bcr.top + 15,
+                vertex: vertex,
+                nv: this
+            });
         },
         handleLeftClickEdge: function(e) {
+            e.stopPropagation();
+
             var edge = this.graph.getEdgeById(e.detail.edgeId);
             this.$.editionBar.edgeColor = edge.renderer.color;
             this.$.editionBar.edgeSizeField = edge.renderer.size;
             //                this.$.editionBar.edgeNameField = edge.renderer.labelText;
             this.$.editionBar.selectedBar = 'edge';
+
+            var bcr = this.getBoundingClientRect();
+            this.fire('leftclickedge', {
+                x: e.detail.x + bcr.left + 15,
+                y: e.detail.y + bcr.top + 15,
+                edge: edge,
+                nv: this
+            });
         },
 
         /** Context Handlers **/
@@ -1846,40 +1866,54 @@
             this.$.edgecontextmenu.style.left = (bcrnl.left + x + 10) + "px";
         },
         handleRightClickVertex: function(e) {
-            if (this.disableContextMenu === true) {
-                return;
-            }
-            this._hideEdgeContextMenu();
-            this._lastContextVertexAttributes = [];
-            this._showVertexContextMenu(e.detail.x, e.detail.y);
+            e.stopPropagation();
             var vertex = this.graph.getVertexById(e.detail.vertexId);
-            this._lastContextVertex = vertex;
-            var attrs = [];
-            for (var key in vertex.attributes) {
-                attrs.push({
-                    key: key,
-                    value: vertex.attributes[key]
-                });
+            if (this.disableContextMenu === false) {
+                this._hideEdgeContextMenu();
+                this._lastContextVertexAttributes = [];
+                this._showVertexContextMenu(e.detail.x, e.detail.y);
+                this._lastContextVertex = vertex;
+                var attrs = [];
+                for (var key in vertex.attributes) {
+                    attrs.push({
+                        key: key,
+                        value: vertex.attributes[key]
+                    });
+                }
+                this._lastContextVertexAttributes = attrs;
             }
-            this._lastContextVertexAttributes = attrs;
+            var bcr = this.getBoundingClientRect();
+            this.fire('rightclickvertex', {
+                x: e.detail.x + bcr.left + 15,
+                y: e.detail.y + bcr.top + 15,
+                vertex: vertex,
+                nv: this
+            });
         },
         handleRightClickEdge: function(e) {
-            if (this.disableContextMenu === true) {
-                return;
-            }
-            this._hideVertexContextMenu();
-            this._lastContextEdgeAttributes = [];
-            this._showEdgeContextMenu(e.detail.x, e.detail.y);
+            e.stopPropagation();
             var edge = this.graph.getEdgeById(e.detail.edgeId);
-            this._lastContextEdge = edge;
-            var attrs = [];
-            for (var key in edge.attributes) {
-                attrs.push({
-                    key: key,
-                    value: edge.attributes[key]
-                });
+            if (this.disableContextMenu === false) {
+                this._hideVertexContextMenu();
+                this._lastContextEdgeAttributes = [];
+                this._showEdgeContextMenu(e.detail.x, e.detail.y);
+                this._lastContextEdge = edge;
+                var attrs = [];
+                for (var key in edge.attributes) {
+                    attrs.push({
+                        key: key,
+                        value: edge.attributes[key]
+                    });
+                }
+                this._lastContextEdgeAttributes = attrs;
             }
-            this._lastContextEdgeAttributes = attrs;
+            var bcr = this.getBoundingClientRect();
+            this.fire('rightclickedge', {
+                x: e.detail.x + bcr.left + 15,
+                y: e.detail.y + bcr.top + 15,
+                vertex: vertex,
+                nv: this
+            });
         },
         handleContextRemoveVertex: function(e) {
             if (confirm('Remove selected vertex?')) {

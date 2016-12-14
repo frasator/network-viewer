@@ -22,7 +22,7 @@ function SIFNetworkDataAdapter(args) {
     }
 
     if (this.async) {
-        this.dataSource.on('success', function(data) {
+        this.dataSource.on('success', function (data) {
             _this.parse(data);
         });
         this.dataSource.fetch(this.async);
@@ -36,20 +36,20 @@ function SIFNetworkDataAdapter(args) {
 
 };
 
-SIFNetworkDataAdapter.prototype.on = function(eventName, cb) {
+SIFNetworkDataAdapter.prototype.on = function (eventName, cb) {
     this.boundEvents[eventName] = cb;
 };
-SIFNetworkDataAdapter.prototype.trigger = function(event) {
+SIFNetworkDataAdapter.prototype.trigger = function (event) {
     if (typeof this.boundEvents[event] === 'function') {
         this.boundEvents[event].apply(this, Array.prototype.slice.call(arguments, 1));
     }
 };
 
-SIFNetworkDataAdapter.prototype.getGraph = function() {
+SIFNetworkDataAdapter.prototype.getGraph = function () {
     return this.graph;
 };
 
-SIFNetworkDataAdapter.prototype.parse = function(data) {
+SIFNetworkDataAdapter.prototype.parse = function (data) {
     var _this = this;
 
     try {
@@ -61,7 +61,7 @@ SIFNetworkDataAdapter.prototype.parse = function(data) {
         }
 
         console.time("SIFParse");
-        data = data.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        data = data.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
         var lines = data.split(/\n/);
         this.addedVertex = {};
         this.addedEdges = {};
