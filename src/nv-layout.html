@@ -357,8 +357,13 @@
             var lbcr = this.getBoundingClientRect();
             var scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
 
-            var newScale = lbcr.width / (scalebcr.width / this.scale);
-            var newScale2 = lbcr.height / (scalebcr.height / this.scale);
+            if (lbcr.width == 0 && lbcr.height == 0) {
+                var newScale = 0;
+                var newScale2 = 0;
+            } else {
+                var newScale = lbcr.width / (scalebcr.width / this.scale);
+                var newScale2 = lbcr.height / (scalebcr.height / this.scale);
+            }
 
             var finalScale = Math.min(newScale, newScale2);
             this.zoom = Math.min(Math.floor(finalScale * 25), 25);

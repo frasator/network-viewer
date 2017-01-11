@@ -1552,6 +1552,9 @@
         exportSVG: function() {
             return this.$.networkLayout.exportSVG();
         },
+        exportBackground: function() {
+            return JSON.stringify(this.backCanvas);
+        },
         handleExportPngMenu: function(e) {
             //            Deprecated
         },
@@ -2996,7 +2999,11 @@
                             text += item.position[column.name].toFixed(2) + separator;
                         }
                     } else {
-                        text += item.attributes[column.name] + separator;
+                        if (item.attributes[column.name] != null) {
+                            text += item.attributes[column.name] + separator;
+                        } else {
+                            text += "" + separator;
+                        }
                     }
                 }
                 text += '\n';
@@ -3134,6 +3141,12 @@
         _addColumns: function(newColumns, path) {
             var toAddColumns = this._getNewColumns(newColumns, this[path]);
             this.set(path, this[path].concat(toAddColumns));
+        },
+        addVertexColumns: function(newColumns) {
+            this._addColumns([].concat(newColumns), 'vertexColumns');
+        },
+        addEdgeColumns: function(newColumns) {
+            this._addColumns([].concat(newColumns), 'edgeColumns');
         },
         importEdgeAttributeManager: function(columns, attributes) {
             for (var i = 0; i < columns.length; i++) {
@@ -3287,6 +3300,13 @@
                 }
             });
             this.importEdgeAttributeManager(e.columns, e.attributes);
+        },
+        loadBackground: function(backgroundString) {
+            var me = this;
+            this.backCanvas.loadFromJSON(JSON.parse(backgroundString), function(e) {
+                me.backCanvas.renderAll();
+                me.saveLocalStorage();
+            });
         }
     });
 </script>

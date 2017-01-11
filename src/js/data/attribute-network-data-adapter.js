@@ -102,7 +102,7 @@ AttributeNetworkDataAdapter.prototype.parse = function (data) {
 
         var finalColumnNames = [];
         var auxRepeatMap = {};
-        var numColumns = firstLine.split(/\t/).length;
+        var numColumns = columnNames.length;
         for (var i = 0; i < numColumns; i++) {
 
             if (this.renameColumns[i]) {

@@ -111,19 +111,19 @@
                     <!--<label class="stv"><span>{{attributeType.title}}</span> mapping</label>-->
 
                     <template is="dom-if" if="{{isContinuousType(attributeType)}}">
-                        <div class="horizontal layout flex">
+                        <div class="horizontal layout">
                             <label class="stv flex" on-click="handleAttributeValueHeaderClick">Attribute value</label>
                             <label class="stv flex">Render value</label>
                         </div>
 
-                        <div class="flex vertical layout" style="margin-bottom:5px;">
+                        <div class="vertical layout" style="margin-bottom:5px;">
                             <template is="dom-repeat" items="{{points}}" as="point" index-as="index">
                                 <nv-attribute-render-number-point point="{{point}}" points="{{points}}" controlType="{{controlType}}" index="{{index}}">
                                 </nv-attribute-render-number-point>
                             </template>
                         </div>
 
-                        <div class="flex horizontal layout end-justified" style="margin:0  0 5px 0">
+                        <div class="horizontal layout end-justified" style="margin:0  0 5px 0">
                             <div class="stv-btn stv-btn-shdw">
                                 Max & Min &nbsp; <i class="fa fa-refresh" style="color:#FF6600"></i>
                             </div>

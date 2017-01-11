@@ -534,6 +534,9 @@
                         type: "text",
                         formula: function(row) {
                             return row.attributes[this.name];
+                        },
+                        editFormula: function(row, val) {
+                            row.attributes[this.name] = val;
                         }
                     });
                     this._newColumnName = '';

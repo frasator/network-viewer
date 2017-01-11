@@ -103,7 +103,7 @@
         <div class="container vertical layout">
             <div class="horizontal layout">
                 <div class="stv-txt">Label attr:</div>
-                <stv-select class="flex" value="{{defaults.labelAttribute}}" on-change="handleLabelAttribute">
+                <stv-select class="flex" value="{{defaults.labelAttribute}}" on-option-click="handleLabelAttribute">
                     <template is="dom-repeat" items="{{columns}}" as="column">
                         <stv-option value="{{column.name}}">{{column.title}}</stv-option>
                     </template>

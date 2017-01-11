@@ -121,6 +121,7 @@
         },
         selectedColumnChanged: function(neo, old) {
             this._updateUniqueValues();
+            this.$.columnSelectBox.selectByName(neo.name);
         },
         attributeParseChanged: function(neo, old) {
             this._updateUniqueValues();
