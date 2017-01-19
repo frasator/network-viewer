@@ -66,11 +66,18 @@
             this.displayProperty = null;
         },
         applyVisualSet: function(visualSet) {
-            this.displayProperty = visualSet.displayProperty;
+            if (visualSet != null) {
+                this.displayProperty = visualSet.displayProperty;
 
-            var table = this.$[visualSet.displayProperty];
-            table.applyVisualSet(visualSet);
-            this.displayProperty = null;
+                var table = this.$[visualSet.displayProperty];
+                table.applyVisualSet(visualSet);
+                this.displayProperty = null;
+            }
+        },
+        applyVisualSets: function() {
+            for (var key in this.visualSets) {
+                this.applyVisualSet(this.visualSets[key]);
+            }
         },
         removeVisualSet: function(displayProperty) {
             delete this.visualSets[displayProperty];

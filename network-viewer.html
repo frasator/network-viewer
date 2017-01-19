@@ -18,6 +18,7 @@
 <script src="../cookies-js/dist/cookies.min.js"></script>
 <script src="../crypto-js/core.js"></script>
 <script src="../crypto-js/sha1.js"></script>
+<script src="../crypto-js/md5.js"></script>
 <script src="../highcharts-release/adapters/standalone-framework.js"></script>
 <script src="../highcharts-release/highcharts.js"></script>
 
@@ -49,6 +50,7 @@
 <link rel="import" href="../stevia-elements/src/stv-select.html">
 <link rel="import" href="../stevia-elements/src/table/stv-table.html">
 <link rel="import" href="../stevia-elements/src/form/stv-file-origin.html">
+<link rel="import" href="../stevia-elements/src/stv-dialog/stv-dialog.html">
 
 
 <!-- analysis -->
@@ -169,7 +171,7 @@
     </style>
     <template>
 
-        <nv-bar id="nvbar" lite="{{lite}}" hidden$="{{hideBar}}" columns="{{vertexColumns}}" on-session-start="handleSessionStartMenu" on-session-open="handleSessionOpenMenu" on-session-save="handleSessionSaveMenu" on-session-manage="handleSessionManageMenu" on-import-sif="handleImportSifMenu" on-import-text="handleImportTextMenu" on-import-xlsx="handleImportXlsxMenu" on-import-node-attributes="handleImportNodeAttrMenu" on-import-edge-attributes="handleImportEdgeAttrMenu" on-export-sif="handleExportSifMenu" on-export-svg="handleExportSvgMenu" on-export-png="handleExportPngMenu" on-export-node-attributes="handleExportNodeAttrMenu" on-export-edge-attributes="handleExportEdgeAttrMenu" on-nodes-select-all="handleSelectMenu" on-nodes-select-first-neighbourhood="handleSelectMenu" on-nodes-select-invert="handleSelectMenu" on-edges-select-all="handleSelectMenu" on-edges-select-adjacent="handleSelectMenu" on-network-select-all="handleSelectMenu" on-layout="handleLayoutMenu" on-network-edit="handleNetworkEditMenu" on-nodes-edit="handleNodesEditMenu" on-edges-edit="handleEdgesEditMenu" on-nodes-filter="handleNodesFilterMenu" on-edges-filter="handleEdgesFilterMenu" on-cellbase="handleCellbaseMenu" on-node-simple-rendering="handleNodeSimpleRenderingMenu" on-node-list-rendering="handleNodeListRenderingMenu" on-edge-simple-rendering="handleEdgeSimpleRenderingMenu" on-reactome="handleReactomeMenu" on-kegg="handleKeggMenu" on-intact="handleIntactMenu" on-communities-structure-detection="handleCommunitiesMenu" on-topological-study="handleTopologicalMenu" on-reactome-fi-microarray="handleReactomeFiMenu" on-example="handleLoadExampleMenu" on-save="handleSave" on-drugs="handleDrugsMenu" on-diseases="handleDiseasesMenu" on-functionalities="handleFunctionalitiesMenu">
+        <nv-bar id="nvbar" lite="{{lite}}" hide-external="{{hideExternal}}" hidden$="{{hideBar}}" columns="{{vertexColumns}}" on-session-start="handleSessionStartMenu" on-session-open="handleSessionOpenMenu" on-session-save="handleSessionSaveMenu" on-session-manage="handleSessionManageMenu" on-import-sif="handleImportSifMenu" on-import-text="handleImportTextMenu" on-import-xlsx="handleImportXlsxMenu" on-import-node-attributes="handleImportNodeAttrMenu" on-import-edge-attributes="handleImportEdgeAttrMenu" on-export-sif="handleExportSifMenu" on-export-svg="handleExportSvgMenu" on-export-png="handleExportPngMenu" on-export-node-attributes="handleExportNodeAttrMenu" on-export-edge-attributes="handleExportEdgeAttrMenu" on-nodes-select-all="handleSelectMenu" on-nodes-select-first-neighbourhood="handleSelectMenu" on-nodes-select-invert="handleSelectMenu" on-edges-select-all="handleSelectMenu" on-edges-select-adjacent="handleSelectMenu" on-network-select-all="handleSelectMenu" on-layout="handleLayoutMenu" on-network-edit="handleNetworkEditMenu" on-nodes-edit="handleNodesEditMenu" on-edges-edit="handleEdgesEditMenu" on-nodes-filter="handleNodesFilterMenu" on-edges-filter="handleEdgesFilterMenu" on-cellbase="handleCellbaseMenu" on-node-simple-rendering="handleNodeSimpleRenderingMenu" on-node-list-rendering="handleNodeListRenderingMenu" on-edge-simple-rendering="handleEdgeSimpleRenderingMenu" on-reactome="handleReactomeMenu" on-kegg="handleKeggMenu" on-intact="handleIntactMenu" on-communities-structure-detection="handleCommunitiesMenu" on-topological-study="handleTopologicalMenu" on-reactome-fi-microarray="handleReactomeFiMenu" on-example="handleLoadExampleMenu" on-save="handleSave" on-drugs="handleDrugsMenu" on-diseases="handleDiseasesMenu" on-functionalities="handleFunctionalitiesMenu">
         </nv-bar>
 
         <nv-tool-bar lite="{{lite}}" hidden$="{{hideToolBar}}" background-color="{{backgroundColor}}" mode="{{mode}}" zoom="{{zoom}}" on-layoutchange="handleLayoutChange" on-selectchange="handleSelectChange" on-rotatechange="handleRotateChange" on-reset-zoom="handleResetZoom" on-center-network="handleCenterNetwork" on-undo="undoAction" on-redo="redoAction">
@@ -473,7 +475,13 @@
             },
             lite: {
                 type: Boolean,
-                value: false
+                value: false,
+                reflectToAttribute: true
+            },
+            hideExternal: {
+                type: Boolean,
+                value: false,
+                reflectToAttribute: true
             },
             hideBar: {
                 type: Boolean,
@@ -1401,9 +1409,12 @@
             this.$.functionalitiesPanel.show();
         },
         handleSessionStartMenu: function(e) {
-            if (confirm('All changes will be lost. Are you sure?')) {
-                this.startOver();
-            }
+            var me = this;
+            new StvDialog().confirm('All changes will be lost. Are you sure?', function(res) {
+                if (res) {
+                    me.startOver();
+                }
+            });
         },
         handleSessionOpenMenu: function(e) {
             var me = this;
@@ -1449,10 +1460,16 @@
                 });
                 var initialFileName = 'network.json.gz';
             }
-            var fileName = window.prompt("Please enter file name", initialFileName);
-            if (fileName != null && fileName != "") {
-                saveAs(blob, fileName);
-            }
+            new StvDialog({
+                defaultText: initialFileName
+            }).prompt('Please enter file name:', function(res, text) {
+                if (res) {
+                    var fileName = text;
+                    if (fileName != "") {
+                        saveAs(blob, fileName);
+                    }
+                }
+            });
 
             //            var url = URL.createObjectURL(blob);
             //            var link = document.createElement('a');
@@ -1551,9 +1568,6 @@
         },
         exportSVG: function() {
             return this.$.networkLayout.exportSVG();
-        },
-        exportBackground: function() {
-            return JSON.stringify(this.backCanvas);
         },
         handleExportPngMenu: function(e) {
             //            Deprecated
@@ -1914,37 +1928,49 @@
             this.fire('rightclickedge', {
                 x: e.detail.x + bcr.left + 15,
                 y: e.detail.y + bcr.top + 15,
-                vertex: vertex,
+                edge: edge,
                 nv: this
             });
         },
         handleContextRemoveVertex: function(e) {
-            if (confirm('Remove selected vertex?')) {
-                this._hideVertexContextMenu();
-                this.removeVertex(this._lastContextVertex);
-                this.addActionStack();
-            }
+            var me = this;
+            new StvDialog().confirm('Remove selected vertex?', function(res) {
+                if (res) {
+                    me._hideVertexContextMenu();
+                    me.removeVertex(me._lastContextVertex);
+                    me.addActionStack();
+                }
+            });
         },
         handleContextRemoveEdge: function(e) {
-            if (confirm('Remove selected edge?')) {
-                this._hideEdgeContextMenu();
-                this.removeEdge(this._lastContextEdge);
-                this.addActionStack();
-            }
+            var me = this;
+            new StvDialog().confirm('Remove selected edge?', function(res) {
+                if (res) {
+                    me._hideEdgeContextMenu();
+                    me.removeEdge(me._lastContextEdge);
+                    me.addActionStack();
+                }
+            });
         },
         handleContextRemoveSelectedVertices: function(e) {
-            if (confirm('Remove selected vertices?')) {
-                this._hideVertexContextMenu();
-                this.removeSelectedVertices();
-                this.addActionStack();
-            }
+            var me = this;
+            new StvDialog().confirm('Remove selected vertices?', function(res) {
+                if (res) {
+                    me._hideVertexContextMenu();
+                    me.removeSelectedVertices();
+                    me.addActionStack();
+                }
+            });
         },
         handleContextRemoveSelectedEdges: function(e) {
-            if (confirm('Remove selected edges?')) {
-                this._hideVertexContextMenu();
-                this.removeSelectedEdges();
-                this.addActionStack();
-            }
+            var me = this;
+            new StvDialog().confirm('Remove selected edges?', function(res) {
+                if (res) {
+                    me._hideVertexContextMenu();
+                    me.removeSelectedEdges();
+                    me.addActionStack();
+                }
+            });
         },
         handleContextSelectVerticesNeighbour: function(e) {
             this.selectVertex(this._lastContextVertex);
@@ -2356,6 +2382,9 @@
                     edge.renderer.move();
                 }
             }
+            this.debounce('click', function() {
+                this.addActionStack();
+            }, 600);
         },
         moveSelectedVertices: function(dispX, dispY) {
             dispX /= this.scale;
@@ -2773,7 +2802,7 @@
                                 }
                             });
                         } else {
-                            alert("Please select only one vertex to use it as root");
+                            new StvDialog().alert('Please select only one vertex to use it as root.');
                         }
                         break;
                     case 'Grid':
@@ -2972,6 +3001,17 @@
         },
         exportEdgeAttributes: function(separator) {
             return this._getAttributesAsFile(this.edgeColumns, this.edges, separator);
+        },
+        exportBackground: function() {
+            return JSON.stringify(this.backCanvas);
+        },
+        exportVisualSettings: function() {
+            return JSON.stringify({
+                vertexDefaults: this.vertexDefaults,
+                edgeDefaults: this.edgeDefaults,
+                vertexVisualSets: this.vertexVisualSets,
+                edgeVisualSets: this.edgeVisualSets
+            });
         },
         _getAttributesAsFile: function(columns, items, separator) {
             if (!separator) {
@@ -3307,6 +3347,23 @@
                 me.backCanvas.renderAll();
                 me.saveLocalStorage();
             });
+        },
+        loadVisualSettings: function(settingsString) {
+            var me = this;
+            var o = JSON.parse(settingsString);
+
+            this.vertexDefaults = o.vertexDefaults;
+            this.edgeDefaults = o.edgeDefaults;
+            this.vertexVisualSets = o.vertexVisualSets;
+            this.edgeVisualSets = o.edgeVisualSets;
+
+            this.refreshGraphView();
+
+            this.saveLocalStorage();
+        },
+        applyVisualSets: function() {
+            this.$.nodeRender.applyVisualSets();
+            this.$.edgeRender.applyVisualSets();
         }
     });
 </script>

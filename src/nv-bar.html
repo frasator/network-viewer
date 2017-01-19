@@ -76,7 +76,7 @@
                 </div>
                 <ul data-menu id="networkMenu" on-click="handleClick">
                     <li data-value="network-edit">Edit network...</li>
-                    <li data-sub hidden$="{{lite}}">Import network
+                    <li data-sub hidden$="{{testOr(lite,hideExternal)}}">Import network
                         <ul>
                             <li data-value="reactome">Reactome...</li>
                             <li data-value="kegg">Kegg...</li>
@@ -148,12 +148,12 @@
                     <li data-divider>
                         <li data-value="node-simple-rendering">Node visualization settings...</li>
                         <li data-value="edge-simple-rendering">Edge visualization settings...</li>
-                        <li hidden$="{{lite}}" data-divider></li>
-                        <li data-value="cellbase" hidden$="{{lite}}"> Import external references...</li>
-                        <li hidden$="{{lite}}" data-divider></li>
-                        <li data-value="functionalities" hidden$="{{lite}}"> Import functional annotations...</li>
-                        <li data-value="drugs" hidden$="{{lite}}"> Import drugs by gene...</li>
-                        <li data-value="diseases" hidden$="{{lite}}"> Import diseases by gene...</li>
+                        <li hidden$="{{testOr(lite,hideExternal)}}" data-divider></li>
+                        <li data-value="cellbase" hidden$="{{testOr(lite,hideExternal)}}"> Import external references...</li>
+                        <li hidden$="{{testOr(lite,hideExternal)}}" data-divider></li>
+                        <li data-value="functionalities" hidden$="{{testOr(lite,hideExternal)}}"> Import functional annotations...</li>
+                        <li data-value="drugs" hidden$="{{testOr(lite,hideExternal)}}"> Import drugs by gene...</li>
+                        <li data-value="diseases" hidden$="{{testOr(lite,hideExternal)}}"> Import diseases by gene...</li>
                 </ul>
             </stv-dropdown>
             <!--<div class="">-->
@@ -165,7 +165,7 @@
             <!--&lt;!&ndash;<li data-divider>&ndash;&gt;-->
             <!--</ul>-->
             <!--</div>-->
-            <stv-dropdown hidden$="{{lite}}">
+            <stv-dropdown hidden$="{{testOr(lite,hideExternal)}}">
                 <div data-button id="pluginsButton">
                     Analysis
                 </div>
@@ -197,7 +197,7 @@
                     </li>
                 </ul>
             </stv-dropdown>
-            <stv-dropdown hidden$="{{lite}}">
+            <stv-dropdown hidden$="{{testOr(lite,hideExternal)}}">
                 <div data-button id="examplesButton">
                     Examples
                 </div>
@@ -224,7 +224,13 @@
         properties: {
             lite: {
                 type: Boolean,
-                value: false
+                value: false,
+                reflectToAttribute: true
+            },
+            hideExternal: {
+                type: Boolean,
+                value: false,
+                reflectToAttribute: true
             },
             columns: {
                 type: Array,
@@ -232,6 +238,17 @@
         },
         ready: function() {
             this.networkViewer = this.domHost;
+        },
+        testOr: function() {
+            var b = false;
+            for (var i = 0; i < arguments.length; i++) {
+                var arg = arguments[i];
+                if (arg == true) {
+                    b = true;
+                    break;
+                }
+            }
+            return b;
         },
         handleClick: function(e) {
             if ('value' in e.target.dataset) {
