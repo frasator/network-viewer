@@ -607,6 +607,12 @@
             actionStackPointer: {
                 type: Number,
                 value: 0
+            },
+            lastContextVertex: {
+                type: Object,
+            },
+            lastContextEdge: {
+                type: Object,
             }
         },
         _computingHeigth: false,
@@ -1885,11 +1891,11 @@
         handleRightClickVertex: function(e) {
             e.stopPropagation();
             var vertex = this.graph.getVertexById(e.detail.vertexId);
+            this.lastContextVertex = vertex;
+            this._lastContextVertexAttributes = [];
             if (this.disableContextMenu === false) {
                 this._hideEdgeContextMenu();
-                this._lastContextVertexAttributes = [];
                 this._showVertexContextMenu(e.detail.x, e.detail.y);
-                this._lastContextVertex = vertex;
                 var attrs = [];
                 for (var key in vertex.attributes) {
                     attrs.push({
@@ -1904,17 +1910,18 @@
                 x: e.detail.x + bcr.left + 15,
                 y: e.detail.y + bcr.top + 15,
                 vertex: vertex,
+                e: e.detail.e,
                 nv: this
             });
         },
         handleRightClickEdge: function(e) {
             e.stopPropagation();
             var edge = this.graph.getEdgeById(e.detail.edgeId);
+            this.lastContextEdge = edge;
+            this._lastContextEdgeAttributes = [];
             if (this.disableContextMenu === false) {
                 this._hideVertexContextMenu();
-                this._lastContextEdgeAttributes = [];
                 this._showEdgeContextMenu(e.detail.x, e.detail.y);
-                this._lastContextEdge = edge;
                 var attrs = [];
                 for (var key in edge.attributes) {
                     attrs.push({
@@ -1929,6 +1936,7 @@
                 x: e.detail.x + bcr.left + 15,
                 y: e.detail.y + bcr.top + 15,
                 edge: edge,
+                e: e.detail.e,
                 nv: this
             });
         },
@@ -1937,7 +1945,7 @@
             new StvDialog().confirm('Remove selected vertex?', function(res) {
                 if (res) {
                     me._hideVertexContextMenu();
-                    me.removeVertex(me._lastContextVertex);
+                    me.removeVertex(me.lastContextVertex);
                     me.addActionStack();
                 }
             });
@@ -1947,7 +1955,7 @@
             new StvDialog().confirm('Remove selected edge?', function(res) {
                 if (res) {
                     me._hideEdgeContextMenu();
-                    me.removeEdge(me._lastContextEdge);
+                    me.removeEdge(me.lastContextEdge);
                     me.addActionStack();
                 }
             });
@@ -1973,11 +1981,11 @@
             });
         },
         handleContextSelectVerticesNeighbour: function(e) {
-            this.selectVertex(this._lastContextVertex);
+            this.selectVertex(this.lastContextVertex);
             this.selectVerticesNeighbour();
         },
         handleContextSelectEdgesNeighbour: function(e) {
-            this.selectVertex(this._lastContextVertex);
+            this.selectVertex(this.lastContextVertex);
             this.selectEdgesNeighbour();
         },
         _hideImageContextMenu: function() {
@@ -2590,6 +2598,20 @@
                 edge = this.graph.getEdgeById(id);
             }
             return edge;
+        },
+        swapEdgeDirection: function(edge) {
+            if (edge) {
+                var s = edge.source;
+                var t = edge.target;
+                var r = edge.relation;
+                var a = edge.attributes;
+                this.removeEdge(edge);
+                var e = this.createEdge(t, s, r);
+                for (var att in a) {
+                    e.attributes[att] = a[att]
+                }
+                this.$.edgeAttributeEdit.update();
+            }
         },
         removeBackGroundImage: function(imageEl) {
             if (imageEl && imageEl.parentNode) {

@@ -728,7 +728,8 @@
                         this.fire('rightclickvertex', {
                             vertexId: vertexId,
                             x: downX,
-                            y: downY
+                            y: downY,
+                            e: e
                         });
                     }
                     if (targetElNetworkType === 'edge' || targetElNetworkType === 'edge-label') {
@@ -736,7 +737,8 @@
                         this.fire('rightclickedge', {
                             edgeId: edgeId,
                             x: downX,
-                            y: downY
+                            y: downY,
+                            e: e
                         });
                     }
                     break;
