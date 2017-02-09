@@ -1317,7 +1317,7 @@
             }
         },
         selectedVerticesChanged: function(changeRecord) {
-            console.time("selectedVerticesChanged")
+            // console.time("selectedVerticesChanged")
             if (this.vertices && this.selectedVertices) {
                 if (changeRecord) {
                     changeRecord.indexSplices.forEach(function(s) {
@@ -1345,7 +1345,7 @@
                 }
                 this.notifyPath('selectedVertices.length', this.selectedVertices.length);
             }
-            console.timeEnd("selectedVerticesChanged");
+            // console.timeEnd("selectedVerticesChanged");
         },
         selectedEdgesChanged: function(changeRecord) {
             //            console.log('selectedEdgesChanged');
