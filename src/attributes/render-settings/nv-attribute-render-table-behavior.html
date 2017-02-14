@@ -36,11 +36,11 @@
                 type: Array,
                 value: function() {
                     return [{
-                        value: undefined,
-                        render: this.defaultValue
+                        // value: undefined,
+                        // render: this.defaultValue
                     }, {
-                        value: undefined,
-                        render: this.defaultValue
+                        // value: undefined,
+                        // render: this.defaultValue
                     }]
                 }
             },
@@ -155,6 +155,7 @@
 
             this.uniqueItems = [];
             this.uniqueMatches = {};
+            this.points = [{}, {}];
         },
 
         refreshAttributes: function() {
@@ -344,24 +345,26 @@
                 };
 
                 var attributes, value;
-                if (this.attributeParse.name == "list") {
-                    var splitStr = ",",
-                        values;
-                    for (var i = 0, l = this.items.length; i < l; i++) {
-                        attributes = this.items[i].attributes;
-                        value = attributes[this.selectedColumn.name];
-                        if (value == null) {
-                            value = "";
+                if (this.attributeParse != null) {
+                    if (this.attributeParse.name == "list") {
+                        var splitStr = ",",
+                            values;
+                        for (var i = 0, l = this.items.length; i < l; i++) {
+                            attributes = this.items[i].attributes;
+                            value = attributes[this.selectedColumn.name];
+                            if (value == null) {
+                                value = "";
+                            }
+                            values = value.split(splitStr);
+                            for (var j = 0, lj = values.length; j < lj; j++) {
+                                processValue(values[j]);
+                            }
                         }
-                        values = value.split(splitStr);
-                        for (var j = 0, lj = values.length; j < lj; j++) {
-                            processValue(values[j]);
+                    } else {
+                        for (var i = 0, l = this.items.length; i < l; i++) {
+                            attributes = this.items[i].attributes;
+                            processValue(attributes[this.selectedColumn.name]);
                         }
-                    }
-                } else {
-                    for (var i = 0, l = this.items.length; i < l; i++) {
-                        attributes = this.items[i].attributes;
-                        processValue(attributes[this.selectedColumn.name]);
                     }
                 }
 
@@ -384,9 +387,13 @@
                         return me._uniqueItemsSort(b, a);
                     });
                 }
-                if (this.attributeType.name == 'continuous') {
-                    this._updateUniqueInterpolatedValues(uniqueItems);
+
+                if (this.attributeType != null) {
+                    if (this.attributeType.name == 'continuous') {
+                        this._updateUniqueInterpolatedValues(uniqueItems);
+                    }
                 }
+
                 this.set('uniqueItems', uniqueItems);
             }
         },

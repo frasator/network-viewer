@@ -256,7 +256,7 @@
                 <div class="header">
                     Import external references
                 </div>
-                <nv-cellbase-xref-import id="cellbaseXrefImport" class="container" items="{{vertices}}" columns="{{vertexColumns}}" on-add-columns="handleCellbaseAddColumns">
+                <nv-cellbase-xref-import id="cellbaseXrefImport" class="container" items="{{vertices}}" columns="{{vertexColumns}}" on-add-columns="handleCellbaseAddColumns" hide-external="{{hideExternal}}">
                 </nv-cellbase-xref-import>
             </stv-panel>
 
@@ -264,7 +264,7 @@
                 <div class="header">
                     Import functional annotations
                 </div>
-                <nv-cellbase-functionalities-import id="functionalities" class="container" items="{{vertices}}" columns="{{vertexColumns}}" on-add-columns="handleCellbaseAddColumns">
+                <nv-cellbase-functionalities-import id="functionalities" class="container" items="{{vertices}}" columns="{{vertexColumns}}" on-add-columns="handleCellbaseAddColumns" hide-external="{{hideExternal}}">
                 </nv-cellbase-functionalities-import>
             </stv-panel>
 
@@ -272,7 +272,7 @@
                 <div class="header">
                     Import drugs by gene
                 </div>
-                <nv-cellbase-drugs-import id="drugs" class="container" items="{{vertices}}" columns="{{vertexColumns}}" on-add-columns="handleCellbaseAddColumns" on-apply-color="handleApplyDrugsColor" on-apply-multicolor="handleApplyDrugsMulticolor">
+                <nv-cellbase-drugs-import id="drugs" class="container" items="{{vertices}}" columns="{{vertexColumns}}" on-add-columns="handleCellbaseAddColumns" on-apply-color="handleApplyDrugsColor" on-apply-multicolor="handleApplyDrugsMulticolor" hide-external="{{hideExternal}}">
                 </nv-cellbase-drugs-import>
             </stv-panel>
 
@@ -280,7 +280,7 @@
                 <div class="header">
                     Import diseases by gene
                 </div>
-                <nv-cellbase-diseases-import id="drugs" class="container" items="{{vertices}}" columns="{{vertexColumns}}" on-add-columns="handleCellbaseAddColumns" on-apply-multicolor="handleApplyDiseasesMulticolor">
+                <nv-cellbase-diseases-import id="drugs" class="container" items="{{vertices}}" columns="{{vertexColumns}}" on-add-columns="handleCellbaseAddColumns" on-apply-multicolor="handleApplyDiseasesMulticolor" hide-external="{{hideExternal}}">
                 </nv-cellbase-diseases-import>
             </stv-panel>
 
@@ -289,7 +289,7 @@
                 <div class="header">
                     Find interactions
                 </div>
-                <nv-intact-import id="intactImport" class="container" items="{{vertices}}" columns="{{vertexColumns}}" selected="{{selectedVertices}}" on-graph="handleIntactGraph">
+                <nv-intact-import id="intactImport" class="container" items="{{vertices}}" columns="{{vertexColumns}}" selected="{{selectedVertices}}" on-graph="handleIntactGraph" hide-external="{{hideExternal}}">
                 </nv-intact-import>
             </stv-panel>
 
