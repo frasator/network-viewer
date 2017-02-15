@@ -111,7 +111,7 @@
                         <i class="fa fa-text-height"></i>
                     </div>
                     <ul data-menu id="vertexLabelSizeMenu">
-                        <li on-mousedown="handleVertexLabelSize" data-value="0">None</li>
+                        <li on-mousedown="handleVertexLabelSize" data-value="0">Hide</li>
                         <li on-mousedown="handleVertexLabelSize" data-value="8">8</li>
                         <li on-mousedown="handleVertexLabelSize" data-value="10">10</li>
                         <li on-mousedown="handleVertexLabelSize" data-value="12">12</li>
@@ -147,7 +147,7 @@
             <div id="edgeToolbar" class="flex horizontal layout" hidden$="{{!isEdgeBarSelected(selectedBar)}}">
                 <input hidden id="edgeNameField" class="stv" type="text" placeholder="name" on-keypress="handleEdgeNameField" style="width: 70px;margin-left: 5px;">
 
-                <stv-dropdown title="Change the shape of the selected edge(s)" style="margin-left: 5px">
+                <stv-dropdown title="Change the head shape of the selected edge(s)" style="margin-left: 5px">
                     <div data-button id="edgeShapeButton" class="stv-btn">
                         <i class="fa fa-location-arrow"></i>
                     </div>
@@ -157,6 +157,39 @@
                         <li on-mousedown="handleEdgeShape" data-value="inhibited">Inhibited</li>
                         <li on-mousedown="handleEdgeShape" data-value="dot">Dot</li>
                         <li on-mousedown="handleEdgeShape" data-value="odot">Dot o</li>
+                    </ul>
+                </stv-dropdown>
+
+                <stv-dropdown title="Change the opacity of the selected edge(s)">
+                    <div data-button id="edgeOpacityButton" class="stv-btn">
+                        <i class="fa fa-adjust"></i>
+                    </div>
+                    <ul data-menu id="edgeOpacityMenu">
+                        <li on-mousedown="handleEdgeOpacity" data-value="1">None</li>
+                        <li on-mousedown="handleEdgeOpacity" data-value="0.75">Low</li>
+                        <li on-mousedown="handleEdgeOpacity" data-value="0.5">Medium</li>
+                        <li on-mousedown="handleEdgeOpacity" data-value="0.25">High</li>
+                        <li on-mousedown="handleEdgeOpacity" data-value="0">Invisible</li>
+                    </ul>
+                </stv-dropdown>
+
+                <stv-dropdown title="Change the edge shaft of the selected edge(s)" style="margin-left: 5px">
+                    <div data-button id="edgeShaftButton" class="stv-btn">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </div>
+                    <ul data-menu id="edgeShaftMenu">
+                        <li on-mousedown="handleEdgeShaft" data-value="solid">Solid</li>
+                        <li on-mousedown="handleEdgeShaft" data-value="dashed">Dashed</li>
+                    </ul>
+                </stv-dropdown>
+
+                <stv-dropdown title="Change the edge bidirectionality of the selected edge(s)" style="margin-left: 5px">
+                    <div data-button id="edgeBidirectionalButton" class="stv-btn">
+                        <i class="fa fa-expand"></i>
+                    </div>
+                    <ul data-menu id="edgeBidirectionalMenu">
+                        <li on-mousedown="handleEdgeBidirectional" data-value="true">true</li>
+                        <li on-mousedown="handleEdgeBidirectional" data-value="false">false</li>
                     </ul>
                 </stv-dropdown>
 
@@ -187,7 +220,7 @@
                         <i class="fa fa-text-height"></i>
                     </div>
                     <ul data-menu id="edgeLabelSizeMenu">
-                        <li on-mousedown="handleEdgeLabelSize" data-value="0">None</li>
+                        <li on-mousedown="handleEdgeLabelSize" data-value="0">Hide</li>
                         <li on-mousedown="handleEdgeLabelSize" data-value="8">8</li>
                         <li on-mousedown="handleEdgeLabelSize" data-value="10">10</li>
                         <li on-mousedown="handleEdgeLabelSize" data-value="12">12</li>
@@ -275,53 +308,62 @@
             this.selectedBar = e.currentTarget.dataset.bar;
         },
         handleVertexShape: function(e) {
-            this.fire('vertexshape', {
+            this.fire('vertexeditionbar', {
+                displayProperty: 'shape',
                 value: e.currentTarget.dataset.value
             });
         },
         handleVertexOpacity: function(e) {
-            this.fire('vertexopacity', {
+            this.fire('vertexeditionbar', {
+                displayProperty: 'opacity',
                 value: e.currentTarget.dataset.value
             });
         },
         handleVertexSize: function(e) {
             var v = e.currentTarget.dataset.value;
             this.set('vertexSizeField', v)
-            this.fire('vertexsize', {
+            this.fire('vertexeditionbar', {
+                displayProperty: 'size',
                 value: v
             });
         },
         handleVertexSizeField: function(e) {
             var v = e.currentTarget.value;
-            this.fire('vertexsize', {
+            this.fire('vertexeditionbar', {
+                displayProperty: 'size',
                 value: v
             });
         },
         handleVertexColor: function(e) {
-            this.fire('vertexcolor', {
+            this.fire('vertexeditionbar', {
+                displayProperty: 'color',
                 value: e.detail.color
             });
         },
         handleVertexStrokeSize: function(e) {
             var v = e.currentTarget.dataset.value;
             this.set('vertexStrokeSizeField', v)
-            this.fire('vertexstrokesize', {
+            this.fire('vertexeditionbar', {
+                displayProperty: 'strokeSize',
                 value: v
             });
         },
         handleVertexStrokeSizeField: function(e) {
             var v = e.currentTarget.value;
-            this.fire('vertexstrokesize', {
+            this.fire('vertexeditionbar', {
+                displayProperty: 'strokeSize',
                 value: v
             });
         },
         handleVertexStrokeColor: function(e) {
-            this.fire('vertexstrokecolor', {
+            this.fire('vertexeditionbar', {
+                displayProperty: 'strokeColor',
                 value: e.detail.color
             });
         },
         handleVertexLabelSize: function(e) {
-            this.fire('vertexlabelsize', {
+            this.fire('vertexeditionbar', {
+                displayProperty: 'labelSize',
                 value: e.currentTarget.dataset.value
             });
         },
@@ -345,30 +387,55 @@
         },
 
         handleEdgeShape: function(e) {
-            this.fire('edgeshape', {
+            this.fire('edgeeditionbar', {
+                displayProperty: 'shape',
                 value: e.currentTarget.dataset.value
             });
         },
         handleEdgeSize: function(e) {
             var v = e.currentTarget.dataset.value;
             this.set('edgeSizeField', v);
-            this.fire('edgesize', {
+            this.fire('edgeeditionbar', {
+                displayProperty: 'size',
                 value: v
             });
         },
         handleEdgeSizeField: function(e) {
             var v = e.currentTarget.value;
-            this.fire('edgesize', {
+            this.fire('edgeeditionbar', {
+                displayProperty: 'size',
                 value: v
             });
         },
+        handleEdgeOpacity: function(e) {
+            this.fire('edgeeditionbar', {
+                displayProperty: 'opacity',
+                value: e.currentTarget.dataset.value
+            });
+        },
+        handleEdgeBidirectional: function(e) {
+            this.fire('edgeeditionbar', {
+                displayProperty: 'bidirectional',
+                value: e.currentTarget.dataset.value
+            });
+        },
+        handleEdgeShaft: function(e) {
+            this.fire('edgeeditionbar', {
+                displayProperty: 'shaft',
+                value: e.currentTarget.dataset.value
+            });
+        },
+
+
         handleEdgeColor: function(e) {
-            this.fire('edgecolor', {
+            this.fire('edgeeditionbar', {
+                displayProperty: 'color',
                 value: e.detail.color
             });
         },
         handleEdgeLabelSize: function(e) {
-            this.fire('edgelabelsize', {
+            this.fire('edgeeditionbar', {
+                displayProperty: 'labelSize',
                 value: e.currentTarget.dataset.value
             });
         },

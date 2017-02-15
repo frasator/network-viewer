@@ -177,7 +177,7 @@
         <nv-tool-bar lite="{{lite}}" hidden$="{{hideToolBar}}" background-color="{{backgroundColor}}" mode="{{mode}}" zoom="{{zoom}}" on-layoutchange="handleLayoutChange" on-selectchange="handleSelectChange" on-rotatechange="handleRotateChange" on-reset-zoom="handleResetZoom" on-center-network="handleCenterNetwork" on-undo="undoAction" on-redo="redoAction">
         </nv-tool-bar>
 
-        <nv-edition-bar id="editionBar" hidden$="{{isEditionBarHidden(hideEditionBar, mode)}}" selection-color="{{vertexDefaults.selectionColor}}" vertex-columns="{{vertexColumns}}" edge-columns="{{edgeColumns}}" on-vertexshape="handleVertexShape" on-vertexopacity="handleVertexOpacity" on-vertexsize="handleVertexSize" on-vertexcolor="handleVertexColor" on-vertexstrokesize="handleVertexStrokeSize" on-vertexstrokecolor="handleVertexStrokeColor" on-vertexlabelsize="handleVertexLabelSize" on-vertexsearch="handleVertexSearch" on-vertexnamefield="handleVertexNameField" on-edgeshape="handleEdgeShape" on-edgesize="handleEdgeSize" on-edgecolor="handleEdgeColor" on-edgelabelsize="handleEdgeLabelSize" on-edgesearch="handleEdgeSearch" on-edgenamefield="handleEdgeNameField">
+        <nv-edition-bar id="editionBar" hidden$="{{isEditionBarHidden(hideEditionBar, mode)}}" selection-color="{{vertexDefaults.selectionColor}}" vertex-columns="{{vertexColumns}}" edge-columns="{{edgeColumns}}" on-vertexeditionbar="handleVertexEditionBar" on-edgeeditionbar="handleEdgeEditionBar" on-vertexsearch="handleVertexSearch" on-vertexnamefield="handleVertexNameField" on-edgesearch="handleEdgeSearch" on-edgenamefield="handleEdgeNameField">
         </nv-edition-bar>
 
         <nv-background-bar id="backgroundBar" back-canvas="{{backCanvas}}" hidden$="{{isBackgroundBarHidden(hideEditionBar, mode)}}">
@@ -1720,26 +1720,17 @@
             }
         },
         /* editionbar Handlers*/
-        handleVertexShape: function(e) {
-            this.setSelectedVerticesDisplayAttr('shape', e.detail.value, true);
-        },
-        handleVertexOpacity: function(e) {
-            this.setSelectedVerticesDisplayAttr('opacity', e.detail.value);
-        },
-        handleVertexSize: function(e) {
-            this.setSelectedVerticesDisplayAttr('size', parseInt(e.detail.value), true);
-        },
-        handleVertexColor: function(e) {
-            this.setSelectedVerticesDisplayAttr('color', e.detail.value);
-        },
-        handleVertexStrokeSize: function(e) {
-            this.setSelectedVerticesDisplayAttr('strokeSize', parseInt(e.detail.value), true);
-        },
-        handleVertexStrokeColor: function(e) {
-            this.setSelectedVerticesDisplayAttr('strokeColor', e.detail.value);
-        },
-        handleVertexLabelSize: function(e) {
-            this.setSelectedVerticesDisplayAttr('labelSize', e.detail.value);
+        handleVertexEditionBar: function(e) {
+            var dp = e.detail.displayProperty;
+            var v = e.detail.value;
+            if (!isNaN(v)) {
+                v = parseFloat(v);
+            }
+            var updateEdges = false;
+            if (dp == 'shape' || dp == 'size' || dp == 'strokeSize') {
+                updateEdges = true;
+            }
+            this.setSelectedVerticesDisplayAttr(dp, v, updateEdges);
         },
         handleVertexSearch: function(e) {
             var str = e.detail.columnName;
@@ -1761,25 +1752,21 @@
                 this.selectVerticesByAttribute(e.detail.columnName, e.detail.value);
             }
             if (this.selectedVertices.length == 0) {
-                Utils.msg('Search results', 'Your search using ' + str + ' "' + e.detail.value + '" using did not match any node.');
+                stv.utils.msg('Search results', 'Your search using ' + str + ' "' + e.detail.value + '" using did not match any node.');
             } else {
-                Utils.msg('Search results', this.selectedVertices.length + ' nodes found using ' + str + '. The found nodes has been selected.');
+                stv.utils.msg('Search results', this.selectedVertices.length + ' nodes found using ' + str + '. The found nodes has been selected.');
             }
         },
         handleVertexNameField: function(e) {
             this.setVertexLabel(e.detail.value);
         },
-        handleEdgeShape: function(e) {
-            this.setSelectedEdgesDisplayAttr('shape', e.detail.value);
-        },
-        handleEdgeSize: function(e) {
-            this.setSelectedEdgesDisplayAttr('size', parseInt(e.detail.value));
-        },
-        handleEdgeColor: function(e) {
-            this.setSelectedEdgesDisplayAttr('color', e.detail.value);
-        },
-        handleEdgeLabelSize: function(e) {
-            this.setSelectedEdgesDisplayAttr('labelSize', e.detail.value);
+        handleEdgeEditionBar: function(e) {
+            var dp = e.detail.displayProperty;
+            var v = e.detail.value;
+            if (!isNaN(v)) {
+                v = parseFloat(v);
+            }
+            this.setSelectedEdgesDisplayAttr(dp, v);
         },
         handleEdgeSearch: function(e) {
             this.selectEdgesByAttribute(e.detail.columnName, e.detail.value);
