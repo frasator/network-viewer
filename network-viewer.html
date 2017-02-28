@@ -3163,6 +3163,7 @@
                 this.centerNetwork();
             }
 
+            this.fire('importnodeattr');
             //            this.$.nodeRender.refreshAttributes();
 
             // this.handleVertexDefaultXAttribute();
@@ -3221,7 +3222,7 @@
                 }
             }
             this._addColumns(columns, 'edgeColumns');
-
+            this.fire('importedgeattr');
             //            this.$.edgeRender.refreshAttributes();
         },
         __iliketomoveit: function() {
