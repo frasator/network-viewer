@@ -262,6 +262,23 @@
                 return false;
             }
         },
+        getNextVertexId: function() {
+            var ids = Object.keys(this.verticesIndex);
+            var reg = new RegExp('^[0-9]+$');
+            var max = -1,
+                id;
+            for (var i = 0; i < ids.length; i++) {
+                id = ids[i];
+                if (reg.test(id)) {
+                    var parsedId = parseFloat(id);
+                    if (parsedId > max) {
+                        max = parsedId;
+                    }
+                }
+            }
+            var n = Math.max(max, ids.length);
+            return n + 1;
+        },
         /**/
         getVertexById: function(vertexId) {
             return this.vertices[this.verticesIndex[vertexId]];

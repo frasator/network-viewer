@@ -2532,7 +2532,8 @@
                 y /= this.scale;
             }
             if (id == null) {
-                id = 'n' + Math.floor(Math.random() * (999999 - 100000 + 1));
+                id = this.graph.getNextVertexId();
+                // id = 'n' + Math.floor(Math.random() * (999999 - 100000 + 1));
             }
             /* vertex graph */
             var vertex = new Vertex({
