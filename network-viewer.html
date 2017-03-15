@@ -1776,8 +1776,12 @@
         },
         /** Layout Handlers **/
         handleCreateVertex: function(e) {
-            this.createVertex(e.detail.x, e.detail.y);
+            e.stopPropagation();
+            var v = this.createVertex(e.detail.x, e.detail.y);
             this.addActionStack();
+            this.fire('createvertex', {
+                vertex: v
+            });
         },
         handleSelectVertex: function(e) {
             var vertex = this.graph.getVertexById(e.detail.vertexId);
@@ -1794,10 +1798,14 @@
             this.selectByArea(e.detail.x, e.detail.y, e.detail.width, e.detail.height);
         },
         handleCreateEdge: function(e) {
+            e.stopPropagation();
             var source = this.graph.getVertexById(e.detail.sourceId);
             var target = this.graph.getVertexById(e.detail.targetId);
-            this.createEdge(source, target);
+            var e = this.createEdge(source, target);
             this.addActionStack();
+            this.fire('createedge', {
+                edge: e
+            });
         },
         handleRemoveVertex: function(e) {
             var vertex = this.graph.getVertexById(e.detail.vertexId);
@@ -2563,7 +2571,8 @@
         },
         createEdge: function(vertexSource, vertexTarget, relation) {
             if (relation == null) {
-                relation = 'e' + Math.floor(Math.random() * (999999 - 100000 + 1));
+                // relation = 'e' + Math.floor(Math.random() * (999999 - 100000 + 1));
+                relation = this.graph.getNextEdgeRelation();
             }
             var id = vertexSource.id + '_' + relation + '_' + vertexTarget.id
                 /* edge graph */

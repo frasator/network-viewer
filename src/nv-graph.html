@@ -279,6 +279,24 @@
             var n = Math.max(max, ids.length);
             return n + 1;
         },
+        getNextEdgeRelation: function() {
+            var ids = Object.keys(this.edgesIndex);
+            var reg = new RegExp('^[0-9]+$');
+            var max = -1,
+                id, r;
+            for (var i = 0; i < ids.length; i++) {
+                id = ids[i];
+                r = id.split('_')[1];
+                if (reg.test(r)) {
+                    var parsedR = parseFloat(r);
+                    if (parsedR > max) {
+                        max = parsedR;
+                    }
+                }
+            }
+            var n = Math.max(max, ids.length);
+            return n + 1;
+        },
         /**/
         getVertexById: function(vertexId) {
             return this.vertices[this.verticesIndex[vertexId]];
