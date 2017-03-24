@@ -1,18 +1,5 @@
 {
   "name": "network-viewer",
-  "description": "",
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "main": [
-    "network-viewer.html"
-  ],
-  "authors": [
-    "Francisco Salavert Torres <frasator@gmail.com>"
-  ],
-  "license": "GPL-3.0",
-  "keywords": [],
   "ignore": [
     "**/.*",
     "node_modules",

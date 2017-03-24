@@ -3,7 +3,7 @@
 
 <dom-module id="nv-communities-structure-detection">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-        :host {
+         :host {
             display: block;
             box-sizing: border-box;
             position: relative;
@@ -29,7 +29,7 @@
             background-color: var(--light-secondary-color);
         }
 
-        .footer > * {
+        .footer>* {
             margin-left: 5px;
         }
     </style>
@@ -305,7 +305,7 @@
                                     });
                                     me.message = "Done";
                                 } else {
-                                    me.message = "Server error, try again later.";
+                                    me.message = response.response[0].error;
                                 }
                                 me.loading = false;
                             },
