@@ -183,7 +183,7 @@
         <nv-background-bar id="backgroundBar" back-canvas="{{backCanvas}}" hidden$="{{isBackgroundBarHidden(hideEditionBar, mode)}}">
         </nv-background-bar>
 
-        <nv-layout id="networkLayout" back-canvas="{{backCanvas}}" hide-mini-map="{{hideMiniMap}}" mode="{{mode}}" scale="{{scale}}" tx="{{center.x}}" ty="{{center.y}}" zoom="{{zoom}}" graph="{{graph}}" background-color="{{backgroundColor}}" on-createvertex="handleCreateVertex" on-selectvertex="handleSelectVertex" on-moveselectedvertices="handleMoveSelectedVertices" on-selectarea="handleSelectArea" on-createedge="handleCreateEdge" on-removevertex="handleRemoveVertex" on-removeedge="handleRemoveEdge" on-leftclickvertex="handleLeftClickVertex" on-selectedge="handleSelectEdge" on-leftclickedge="handleLeftClickEdge" on-rightclickvertex="handleRightClickVertex" on-rightclickedge="handleRightClickEdge" on-rightclickbackgroundimage="handleRightClickBackgroundImage">
+        <nv-layout id="networkLayout" back-canvas="{{backCanvas}}" hide-mini-map="{{hideMiniMap}}" mode="{{mode}}" scale="{{scale}}" tx="{{center.x}}" ty="{{center.y}}" zoom="{{zoom}}" graph="{{graph}}" background-color="{{backgroundColor}}" on-createvertex="handleCreateVertex" on-selectvertex="handleSelectVertex" on-moveselectedvertices="handleMoveSelectedVertices" on-selectarea="handleSelectArea" on-createedge="handleCreateEdge" on-removevertex="handleRemoveVertex" on-removeedge="handleRemoveEdge" on-leftclickvertex="handleLeftClickVertex" on-selectedge="handleSelectEdge" on-leftclickedge="handleLeftClickEdge" on-rightclickvertex="handleRightClickVertex" on-rightclickedge="handleRightClickEdge" on-rightclickbackgroundimage="handleRightClickBackgroundImage" on-hoververtex="handleHoverVertex" on-hoveredge="handleHoverEdge">
         </nv-layout>
 
         <nv-status-bar hidden$="{{hideStatusBar}}" last-loaded-file-name="{{lastLoadedFileName}}" vertices="{{vertices}}" edges="{{edges}}" selected-vertices="{{selectedVertices}}" selected-edges="{{selectedEdges}}" selection-color="{{vertexDefaults.selectionColor}}">
@@ -1928,6 +1928,30 @@
             }
             var bcr = this.getBoundingClientRect();
             this.fire('rightclickedge', {
+                x: e.detail.x + bcr.left + 15,
+                y: e.detail.y + bcr.top + 15,
+                edge: edge,
+                e: e.detail.e,
+                nv: this
+            });
+        },
+        handleHoverVertex: function(e) {
+            e.stopPropagation();
+            var vertex = this.graph.getVertexById(e.detail.vertexId);
+            var bcr = this.getBoundingClientRect();
+            this.fire('hoververtex', {
+                x: e.detail.x + bcr.left + 15,
+                y: e.detail.y + bcr.top + 15,
+                vertex: vertex,
+                e: e.detail.e,
+                nv: this
+            });
+        },
+        handleHoverEdge: function(e) {
+            e.stopPropagation();
+            var edge = this.graph.getEdgeById(e.detail.edgeId);
+            var bcr = this.getBoundingClientRect();
+            this.fire('hoveredge', {
                 x: e.detail.x + bcr.left + 15,
                 y: e.detail.y + bcr.top + 15,
                 edge: edge,
