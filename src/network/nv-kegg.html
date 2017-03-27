@@ -70,6 +70,10 @@
                 },
                 loading: {
                     type: Boolean
+                },
+                hideExternal: {
+                    type: Boolean,
+                    value: false
                 }
             },
             shapeConvert: {
@@ -79,7 +83,9 @@
                 square: 'square'
             },
             ready: function() {
-                this.getPathwayList();
+                if (this.hideExternal != true) {
+                    this.getPathwayList();
+                }
             },
             handleItemSelect: function(e) {
                 console.log(this.loading);
