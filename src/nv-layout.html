@@ -411,6 +411,7 @@
             var x = e.clientX - br.left;
             var y = e.clientY - br.top;
             switch (targetElNetworkType) {
+                case 'vertex-g':
                 case 'vertex':
                 case 'vertex-label':
                     this.fire('hoververtex', {

@@ -1936,12 +1936,29 @@
             });
         },
         handleHoverVertex: function(e) {
+            var me = this;
             e.stopPropagation();
             var vertex = this.graph.getVertexById(e.detail.vertexId);
             var bcr = this.getBoundingClientRect();
+            var bcr = this.getBoundingClientRect();
+
+            var coX = function(x) {
+                x += (me.center.x / me.scale);
+                x *= me.scale;
+                return x;
+            }
+            var coY = function(y) {
+                y += (me.center.y / me.scale);
+                y *= me.scale;
+                return y;
+            }
+            var s2 = vertex.renderer.getSize() / 2
+
             this.fire('hoververtex', {
                 x: e.detail.x + bcr.left + 15,
                 y: e.detail.y + bcr.top + 15,
+                tipX: coX(vertex.position.x + s2) + bcr.left,
+                tipY: coY(vertex.position.y + s2) + bcr.top,
                 vertex: vertex,
                 e: e.detail.e,
                 nv: this
@@ -2599,7 +2616,7 @@
                 relation = this.graph.getNextEdgeRelation();
             }
             var id = vertexSource.id + '_' + relation + '_' + vertexTarget.id
-                /* edge graph */
+            /* edge graph */
             var edge = new Edge({
                 id: id,
                 relation: relation,
