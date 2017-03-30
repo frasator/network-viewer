@@ -1948,13 +1948,21 @@
             var coY = function(y) {
                 return (y + (me.center.y / me.scale)) * me.scale;
             }
-            var s2 = vertex.renderer.getSize() / 2
-
+            var w2, h2;
+            if (vertex.renderer.size < 0) {
+                var vbcr = vertex.renderer.groupEl.getBoundingClientRect();
+                w2 = (vbcr.width / 2);
+                h2 = (vbcr.height / 2);
+            } else {
+                s2 = vertex.renderer.getSize() / 2;
+                w2 = s2 * me.scale;
+                h2 = s2 * me.scale;
+            }
             this.fire('hoververtex', {
                 x: e.detail.x + bcr.left + 15,
                 y: e.detail.y + bcr.top + 15,
-                tipX: coX(vertex.position.x + s2) + bcr.left,
-                tipY: coY(vertex.position.y + s2) + bcr.top,
+                tipX: coX(vertex.position.x) + w2 + bcr.left,
+                tipY: coY(vertex.position.y) + h2 + bcr.top,
                 vertex: vertex,
                 e: e.detail.e,
                 nv: this
