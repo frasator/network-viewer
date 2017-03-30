@@ -1943,14 +1943,10 @@
             var bcr = this.getBoundingClientRect();
 
             var coX = function(x) {
-                x += (me.center.x / me.scale);
-                x *= me.scale;
-                return x;
+                return (x + (me.center.x / me.scale)) * me.scale;
             }
             var coY = function(y) {
-                y += (me.center.y / me.scale);
-                y *= me.scale;
-                return y;
+                return (y + (me.center.y / me.scale)) * me.scale;
             }
             var s2 = vertex.renderer.getSize() / 2
 
