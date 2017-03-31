@@ -354,7 +354,7 @@ CircosVertexRenderer.prototype = {
         }
     },
     _textWidthBySize: function (text, pixelFontSize) {
-        return ((text.length * pixelFontSize / 2) + (text.length * pixelFontSize / 10)); //round up
+        return parseInt(text.length * pixelFontSize * 0.6);
     },
     _renderLabelEl: function () {
         var mid = this._getMidSize();
@@ -457,7 +457,7 @@ CircosVertexRenderer.prototype = {
         var w = mid * 3 * 1.3;
         var h = mid * 2 * 1.3;
         if (this.size < 0) {
-            w = (this._textWidth + this.strokeSize) * 1.2 * 1.3;
+            w = (this._textWidth + this.strokeSize) * 1.0 * 1.3;
             h = (this._textHeight + this.strokeSize) * 1.2 * 1.3;
         }
         this.selectEl = SVG.create("rect", {
@@ -553,7 +553,7 @@ CircosVertexRenderer.prototype = {
                 var w = mid * 3;
                 var h = mid * 2;
                 if (this.size < 0) {
-                    w = this._textWidth * 1.2;
+                    w = this._textWidth * 1.0;
                     h = this._textHeight * 1.2;
                 }
                 figure = SVG.create("rect", {
@@ -577,7 +577,7 @@ CircosVertexRenderer.prototype = {
     },
     _renderSlices: function () {
         maxPieSize = this._slicesMax(this.pieSlices);
-        if(maxPieSize < 0){
+        if (maxPieSize < 0) {
             maxPieSize = Math.max(this._textWidth, this._textHeight);
         }
         maxDonutSize = this._slicesMax(this.donutSlices);

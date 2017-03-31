@@ -460,6 +460,12 @@
         </ul>
 
         <nv-graph id="graph" vertices="{{vertices}}" edges="{{edges}}"></nv-graph>
+        <stv-dropdown id="nodeTooltip" no-min-width>
+            <ul data-menu>
+                <div id="nodeTooltipContent" data-nohide style="padding:10px;">
+                </div>
+            </ul>
+        </stv-dropdown>
     </template>
 </dom-module>
 <script>
@@ -517,6 +523,11 @@
                 value: false
             },
             disableContextMenu: {
+                type: Boolean,
+                reflectToAttribute: true,
+                value: false,
+            },
+            disableTooltip: {
                 type: Boolean,
                 reflectToAttribute: true,
                 value: false,
@@ -609,10 +620,13 @@
                 value: 0
             },
             lastContextVertex: {
-                type: Object,
+                type: Object
             },
             lastContextEdge: {
-                type: Object,
+                type: Object
+            },
+            lastHoverVertex: {
+                type: Object
             }
         },
         _computingHeigth: false,
@@ -1793,6 +1807,7 @@
         },
         handleMoveSelectedVertices: function(e) {
             this.moveSelectedVertices(e.detail.dispX, e.detail.dispY);
+            this.$.nodeTooltip.hideMenu();
         },
         handleSelectArea: function(e) {
             this.selectByArea(e.detail.x, e.detail.y, e.detail.width, e.detail.height);
@@ -1939,8 +1954,7 @@
             var me = this;
             e.stopPropagation();
             var vertex = this.graph.getVertexById(e.detail.vertexId);
-            var bcr = this.getBoundingClientRect();
-            var bcr = this.getBoundingClientRect();
+            var nlbcr = this.$.networkLayout.getBoundingClientRect();
 
             var coX = function(x) {
                 return (x + (me.center.x / me.scale)) * me.scale;
@@ -1958,15 +1972,35 @@
                 w2 = s2 * me.scale;
                 h2 = s2 * me.scale;
             }
+            var tipX = coX(vertex.position.x) + w2 + nlbcr.left;
+            var tipY = coY(vertex.position.y) + h2 + nlbcr.top;
             this.fire('hoververtex', {
-                x: e.detail.x + bcr.left + 15,
-                y: e.detail.y + bcr.top + 15,
-                tipX: coX(vertex.position.x) + w2 + bcr.left,
-                tipY: coY(vertex.position.y) + h2 + bcr.top,
+                x: e.detail.x + nlbcr.left + 15,
+                y: e.detail.y + nlbcr.top + 15,
+                tipX: tipX,
+                tipY: tipY,
                 vertex: vertex,
                 e: e.detail.e,
                 nv: this
             });
+
+            if (this.disableTooltip != true) {
+                if (this.$.nodeTooltip.isMenuHidden()) {
+                    this.lastHoverVertex = null;
+                }
+                if (this.lastHoverVertex != vertex) {
+                    this.$.nodeTooltip.hideMenu();
+                    this.lastHoverVertex = vertex;
+                    this.debounce('showMenu', function() {
+                        if (vertex != null && vertex.attributes.tooltip != null && vertex.attributes.tooltip.toString().trim() != "") {
+                            var html = vertex.attributes.tooltip.replace(/\\n/, '<br>');
+                            Polymer.dom(this.$.nodeTooltipContent).innerHTML = html;
+                            this.$.nodeTooltip.showMenu(tipX, tipY);
+                        }
+                    }, 600)
+                }
+            }
+
         },
         handleHoverEdge: function(e) {
             e.stopPropagation();
