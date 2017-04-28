@@ -900,6 +900,16 @@
             }
             this.addActionStack();
         },
+        adjustWidthNetwork: function() {
+            this.$.networkLayout.adjustWidthNetwork();
+            this.addActionStack();
+        },
+        adjustHeightNetwork: function() {
+            this.$.networkLayout.adjustHeightNetwork();
+            this.addActionStack();
+        },
+
+
         loadLocalStorage: function() {
             var item = localStorage.getItem(this.serializeKey);
             if (item !== null && item !== "null") {

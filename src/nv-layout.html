@@ -384,7 +384,7 @@
             this.zoom = Math.min(Math.floor(finalScale * 25), 25);
             scalebcr = this.$.scaleFrontGroup.getBoundingClientRect();
             this.tx += -(scalebcr.left - lbcr.left) + ((lbcr.width - scalebcr.width) / 2);
-            this.ty += -(scalebcr.top - lbcr.top - 10);
+            this.ty += -(scalebcr.top - lbcr.top - 50);
 
             this.updateBack();
             this.updateMini();
