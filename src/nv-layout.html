@@ -291,7 +291,7 @@
         },
         modeChanged: function(neo, old) {
             if (this.backCanvas) {
-                this.backCanvas.deactivateAll().renderAll();
+                this.backCanvas.discardActiveObject().renderAll();
             }
             switch (neo) {
                 case "add":

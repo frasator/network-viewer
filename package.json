@@ -7,5 +7,13 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/frasator/network-viewer.git"
+    },
+    "dependencies": {
+        "cytoscape": "~2.5.4",
+        "d3": "^3.5.17",
+        "fabric": "^2.3.3",
+        "highcharts-release": "^4.2.5",
+        "js-xlsx": "~0.8.22",
+        "stevia-elements": "git://github.com/frasator/stevia-elements.git#master"
     }
 }
