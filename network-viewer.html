@@ -1491,7 +1491,8 @@
                 var initialFileName = 'network.json.gz';
             }
             new StvDialog({
-                defaultText: initialFileName
+                defaultText: initialFileName,
+                titleText: 'Download session'
             }).prompt('Please enter file name:', function(res, text) {
                 if (res) {
                     var fileName = text;
