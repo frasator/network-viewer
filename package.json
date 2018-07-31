@@ -12,8 +12,9 @@
         "cytoscape": "~2.5.4",
         "d3": "^3.5.17",
         "fabric": "^2.3.3",
-        "highcharts-release": "^4.2.5",
+        "highcharts-release": "github:highcharts/highcharts-dist#v4.2.7",
         "js-xlsx": "~0.8.22",
+        "pixi.js": "^4.8.1",
         "stevia-elements": "git://github.com/frasator/stevia-elements.git#master"
     }
 }

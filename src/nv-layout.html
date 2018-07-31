@@ -1,9 +1,11 @@
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../../iron-flex-layout/iron-flex-layout-classes.html">
 
+<script src="../../pixi.js/dist/pixi.min.js"></script>
+
 <dom-module id="nv-layout">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-         :host {
+        :host {
             display: block;
             position: relative;
             -webkit-touch-callout: none;
@@ -45,6 +47,15 @@
             background-color: rgba(125, 125, 125, 0.3);
             border: 1px solid rgba(125, 125, 125, 0.5);
         }
+
+        #webgl {
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            /* pointer-events: none; */
+        }
     </style>
     <template>
         <div id="svgDiv" style="height:100%;width:100%;background-color:{{backgroundColor}};">
@@ -69,6 +80,7 @@
                 </svg>
             </svg>
         </div>
+        <div id="webgl" style="height:100%;width:100%;background-color:{{backgroundColor}};"></div>
     </template>
 </dom-module>
 <script>
@@ -169,7 +181,26 @@
                 var vRect = this.getBoundingClientRect();
                 canvas.setWidth(vRect.width);
                 canvas.setHeight(vRect.height);
+                /**/
+                if (this.$.webgl != null) {
+                    this.pixi(vRect);
+                }
             }, 60);
+        },
+        pixi: function(vRect) {
+            this.pixi = new PIXI.Application(vRect.width, vRect.height, {
+                antialias: true,
+                transparent:true
+            });
+            this.$.webgl.appendChild(this.pixi.view);
+            this.container = new PIXI.Container();
+            this.container.interactive = true;
+            this.container.__networkType = 'container';
+            this.container.containsPoint = () => true;
+            this.container.on('click', (e) => {
+                this.mouseDownHandler(e);
+            });
+            this.pixi.stage.addChild(this.container);
         },
         exportSVG: function() {
             var bcrLayout = this.$.svgDiv.getBoundingClientRect();
@@ -406,11 +437,11 @@
         },
         mouseHoverHandler: function(e) {
             var targetEl = e.target;
-            var targetElNetworkType = targetEl.getAttribute('network-type');
+            var targetNetworkType = targetEl.getAttribute('network-type');
             var br = this.getBoundingClientRect();
             var x = e.clientX - br.left;
             var y = e.clientY - br.top;
-            switch (targetElNetworkType) {
+            switch (targetNetworkType) {
                 case 'vertex-g':
                 case 'vertex':
                 case 'vertex-label':
@@ -429,9 +460,10 @@
             }
         },
         mouseDownHandler: function(e) {
-            switch (e.which) {
+            var oe = e.data.originalEvent;
+            switch (oe.which) {
                 case 1: //left click
-                    if (e.shiftKey == true && e.ctrlKey == true) {
+                    if (oe.shiftKey == true && oe.ctrlKey == true) {
                         this._handleDownMoveCanvas(e);
                     } else {
                         this.leftMouseDown(e);
@@ -469,16 +501,15 @@
             }
         },
         leftMouseDown: function(e) {
-            var me = this;
-            var targetEl = e.target;
-            var targetElNetworkType = targetEl.getAttribute('network-type');
+            var targetNetworkType = e.target.__networkType;
+            var oe = e.data.originalEvent;
             var br = this.getBoundingClientRect();
-            var downX = e.clientX - br.left;
-            var downY = e.clientY - br.top;
+            var downX = oe.clientX - br.left;
+            var downY = oe.clientY - br.top;
             switch (this.mode) {
                 case "add":
                     /* event coordinates */
-                    if (targetElNetworkType !== 'vertex' && targetElNetworkType !== 'vertex-label') {
+                    if (targetNetworkType !== 'vertex' && targetNetworkType !== 'vertex-label') {
                         this.fire('createvertex', {
                             x: downX,
                             y: downY
@@ -486,7 +517,7 @@
                     }
                     break;
                 case "move":
-                    switch (targetElNetworkType) {
+                    switch (targetNetworkType) {
                         case 'vertex':
                         case 'vertex-label':
                             this._handleDownSelectVertex(e);
@@ -499,7 +530,7 @@
                     }
                     break;
                 case "select":
-                    switch (targetElNetworkType) {
+                    switch (targetNetworkType) {
                         case 'vertex':
                         case 'vertex-label':
                             this._handleDownSelectVertex(e);
@@ -533,7 +564,7 @@
                     break;
                 case "join":
                     /* vertex clicked */
-                    if (targetElNetworkType === 'vertex' || targetElNetworkType === 'vertex-label') {
+                    if (targetNetworkType === 'vertex' || targetNetworkType === 'vertex-label') {
                         var vertexId = this.getVertexId(targetEl);
                         // first time vertex click
                         if (this.joinSourceVertex == null) {
@@ -562,13 +593,13 @@
                     }
                     break;
                 case "delete":
-                    if (targetElNetworkType === 'vertex' || targetElNetworkType === 'vertex-label') {
+                    if (targetNetworkType === 'vertex' || targetNetworkType === 'vertex-label') {
                         var vertexId = this.getVertexId(targetEl);
                         this.fire('removevertex', {
                             vertexId: vertexId
                         });
                     }
-                    if (targetElNetworkType === 'edge' || targetElNetworkType === 'edge-label') {
+                    if (targetNetworkType === 'edge' || targetNetworkType === 'edge-label') {
                         var edgeId = this.getEdgeId(targetEl);
                         this.fire('removeedge', {
                             edgeId: edgeId
@@ -576,7 +607,7 @@
                     }
                     break;
                 case "selectbackground":
-                    if (targetElNetworkType === 'background-image') {
+                    if (targetNetworkType === 'background-image') {
                         targetEl.parentNode.appendChild(targetEl);
                         var lastX = downX;
                         var lastY = downY;
@@ -612,7 +643,7 @@
             this.style.cursor = "";
             var me = this;
             var targetEl = event.target;
-            var targetElNetworkType = targetEl.getAttribute('network-type');
+            var targetNetworkType = targetEl.getAttribute('network-type');
 
             switch (this.mode) {
                 case "add":
@@ -637,7 +668,7 @@
                         });
                         this.selectArea = false;
                     } else {
-                        switch (targetElNetworkType) {
+                        switch (targetNetworkType) {
                             case 'vertex':
                             case 'vertex-label':
                                 this._handleUpSelectVertex(event);
@@ -655,7 +686,7 @@
                     this._removeMouseMoveHandlers();
                     break;
                 case "join":
-                    if (!(targetElNetworkType === 'vertex' || targetElNetworkType === 'vertex-label')) {
+                    if (!(targetNetworkType === 'vertex' || targetNetworkType === 'vertex-label')) {
                         this.joinSourceVertex = null;
                     }
                     if (this.joinSourceVertex == null) {
@@ -668,7 +699,7 @@
 
                     break;
                 case "delete":
-                    if (targetElNetworkType !== 'vertex') {
+                    if (targetNetworkType !== 'vertex') {
 
                     }
                     this._removeMouseMoveHandlers();
@@ -714,7 +745,7 @@
 
             var me = this;
             var targetEl = e.target;
-            var targetElNetworkType = targetEl.getAttribute('network-type');
+            var targetNetworkType = targetEl.getAttribute('network-type');
             var br = this.getBoundingClientRect();
             var downX = e.clientX - br.left;
             var downY = e.clientY - br.top;
@@ -724,7 +755,7 @@
                 case "join":
                 case "delete":
                 case "select":
-                    if (targetElNetworkType === 'vertex' || targetElNetworkType === 'vertex-label') {
+                    if (targetNetworkType === 'vertex' || targetNetworkType === 'vertex-label') {
                         var vertexId = this.getVertexId(targetEl);
                         this.fire('rightclickvertex', {
                             vertexId: vertexId,
@@ -733,7 +764,7 @@
                             e: e
                         });
                     }
-                    if (targetElNetworkType === 'edge' || targetElNetworkType === 'edge-label') {
+                    if (targetNetworkType === 'edge' || targetNetworkType === 'edge-label') {
                         var edgeId = this.getEdgeId(targetEl);
                         this.fire('rightclickedge', {
                             edgeId: edgeId,
@@ -744,7 +775,7 @@
                     }
                     break;
                 case "selectbackground":
-                    if (targetElNetworkType === 'background-image') {
+                    if (targetNetworkType === 'background-image') {
                         this.fire('rightclickbackgroundimage', {
                             targetEl: targetEl,
                             x: downX,
@@ -771,7 +802,7 @@
         _handleDownMoveCanvas: function(e) {
             var me = this;
             // var targetEl = e.target;
-            // var targetElNetworkType = targetEl.getAttribute('network-type');
+            // var targetNetworkType = targetEl.getAttribute('network-type');
             var br = this.getBoundingClientRect();
             var downX = e.clientX - br.left;
             var downY = e.clientY - br.top;
@@ -802,28 +833,27 @@
         },
 
         _handleDownSelectVertex: function(e) {
-            var me = this;
-            var targetEl = e.target;
-            var targetElNetworkType = targetEl.getAttribute('network-type');
+            var targetNetworkType = e.target.__networkType;
+            var oe = e.data.originalEvent;
             var br = this.getBoundingClientRect();
-            var downX = e.clientX - br.left;
-            var downY = e.clientY - br.top;
+            var downX = oe.clientX - br.left;
+            var downY = oe.clientY - br.top;
 
-            var vertexId = this.getVertexId(targetEl);
+            var vertexId = e.target.__vertex.id;
             this.fire('selectvertex', {
                 vertexId: vertexId,
-                addToSelection: e.ctrlKey
+                addToSelection: oe.ctrlKey
             });
             var lastX = downX;
             var lastY = downY;
-            var handler = function(moveEvent) {
-                moveEvent.preventDefault();
-                var moveX = moveEvent.clientX - br.left;
-                var moveY = moveEvent.clientY - br.top;
+            var handler = (me) =>  {
+                me.preventDefault();
+                var moveX = me.clientX - br.left;
+                var moveY = me.clientY - br.top;
                 var dispX = moveX - lastX;
                 var dispY = moveY - lastY;
 
-                me.fire('moveselectedvertices', {
+                this.fire('moveselectedvertices', {
                     dispX: dispX,
                     dispY: dispY
                 });

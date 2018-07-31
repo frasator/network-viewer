@@ -5,7 +5,7 @@
 
 <dom-module id="nv-tool-bar">
     <style is="custom-style" include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning">
-         :host {
+        :host {
             display: block;
             position: relative;
             box-sizing: border-box;
@@ -39,7 +39,7 @@
     </style>
     <template>
         <div id="bar" class="horizontal layout center">
-            <div style="border-right: none" class="stv-btn" title="Select any element (node /edge)" data-checked data-mode="select" on-click="handleMode">
+            <div style="border-right: none" class="stv-btn" title="Select any element (node /edge)" data-mode="select" on-click="handleMode">
                 <i class="fa fa-hand-o-up"></i>
             </div>
             <div style="border-right: none" class="stv-btn" title="Allows to move the whole network along the canvas" data-mode="move" on-click="handleMode">
@@ -174,7 +174,11 @@
             }
         },
         created: function() {},
-        ready: function() {},
+        ready: function() {
+            this.async(() => {
+                this._updateMode();
+            }, 60);
+        },
 
         handleLayoutMenu: function(e) {
             this.fire('layoutchange', {
@@ -221,6 +225,9 @@
         },
         handleMode: function(e) {
             this.mode = e.currentTarget.dataset.mode;
+            this._updateMode();
+        },
+        _updateMode() {
             var els = Polymer.dom(this.root).querySelectorAll('[data-mode]');
             for (var i = 0; i < els.length; i++) {
                 var el = els[i];

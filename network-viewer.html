@@ -29,6 +29,7 @@
 <script src="src/js/graph/vertex.js"></script>
 <!--<script src="src/js/graph/default-vertex-renderer.js"></script>-->
 <script src="src/js/graph/circos-vertex-renderer.js"></script>
+<script src="src/js/graph/webgl-vertex-renderer.js"></script>
 <script src="src/js/graph/default-edge-renderer.js"></script>
 <script src="src/js/graph/graph-layout.js"></script>
 
@@ -2637,14 +2638,14 @@
             var vertex = new Vertex({
                 id: id,
                 position: new Point(x, y),
-                renderer: new CircosVertexRenderer(this.vertexDefaults)
+                renderer: new WebglVertexRenderer(this.vertexDefaults)
             });
             vertex.attributes.id = vertex.id;
             vertex.attributes.name = vertex.id;
             var added = this.graph.addVertex(vertex);
             if (added) {
                 vertex.render({
-                    target: this.$.networkLayout.$.scaleFrontGroup
+                    target: this.$.networkLayout.pixi
                 });
             } else {
                 vertex = this.graph.getVertexById(id);
