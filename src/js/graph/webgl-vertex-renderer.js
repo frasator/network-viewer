@@ -38,6 +38,7 @@ class WebglVertexRenderer {
         this.parentContainer;
         this.stage;
         this.pixi;
+        this.networkLayout;
 
         this.vertex;
 
@@ -77,23 +78,9 @@ class WebglVertexRenderer {
             this.update();
         }
     }
-    update() {
-        this.remove();
-        this._render();
-        // console.log("update")
-    }
-    remove() {
-        if (this.graphics != null) {
-            this.group.removeChild(this.graphics);
-            this.graphics.destroy();
-        }
-        if (this.selectGraphics != null) {
-            this.group.removeChild(this.selectGraphics);
-            this.selectGraphics.destroy();
-        }
-    }
     render(args) {
-        this.pixi = args.target;
+        this.networkLayout = args.target;
+        this.pixi = this.networkLayout.pixi;
         this.stage = this.pixi.stage;
         this.parentContainer = this.stage.children[0];
         this._setLabelText(this.vertex.id);
@@ -105,12 +92,63 @@ class WebglVertexRenderer {
             this.update();
         }
     }
+    remove() {
+        if (this.group != null) {
+            var childs = this.group.removeChildren();
+            for (var i = 0; i < childs.length; i++) {
+                var child = childs[i];
+                child.destroy();
+            }
+        }
+    }
+    update() {
+        this.remove();
+        this._render();
+    }
+    select(color) {
+        if (color) {
+            this.selectColor = this.cc(color);
+            this.selectGraphics.tint = this.selectColor;
+        }
+        this.selectGraphics.visible = true;
+        this.selected = true;
+
+        this.parentContainer.setChildIndex(this.group, this.parentContainer.children.length - 1);
+    }
+    deselect() {
+        this._removeSelect();
+        this.selected = false;
+    }
+    _removeSelect() {
+        this.selectGraphics.visible = false;
+    }
+    move() {
+        this.group.position.set(this.coords.x, this.coords.y);
+        console.log('move')
+    }
+    setLabelContent(text) {
+        if (text == null) {
+            text = '';
+        }
+        this._setLabelText(text);
+        this.update();
+    }
+    getSize() {
+        return this._getFigureSize();
+    }
     _render() {
         if (this.group == null) {
             this.group = new PIXI.Container();
             this.group.interactive = true;
-            this.group.__networkType = 'vertex';
-            this.group.__vertex = this.vertex;
+            this.group.position = new PIXI.Point(this.coords.x, this.coords.y);
+            this.group.on('mousedown', (e) => {
+                e.stopPropagation();
+                this.networkLayout.handleVertexMouseDown(e, this.vertex);
+            });
+            this.group.on('mouseup', (e) => {
+                e.stopPropagation();
+                this.networkLayout.handleVertexMouseUp(e, this.vertex);
+            });
         }
         if (this.complex === true) {
             //TODO
@@ -119,6 +157,7 @@ class WebglVertexRenderer {
             var figureSize = this._getFigureSize();
             this._drawSelectShape();
             this._drawSimpleShape();
+            this._renderLabelEl();
         }
 
         if (this.selected) {
@@ -147,7 +186,7 @@ class WebglVertexRenderer {
         this.graphics = new PIXI.Graphics();
         this.graphics.lineStyle(this.strokeSize, this.cc(this.strokeColor), this.opacity, 1);
         this.graphics.beginFill(this.cc(this.color), this.opacity);
-        this.graphics.drawCircle(this.coords.x, this.coords.y, mid);
+        this.graphics.drawCircle(0, 0, mid);
         this.graphics.endFill();
         // this.graphics.setTransform(this.coords.x - mid, this.coords.y - mid);
     }
@@ -182,7 +221,7 @@ class WebglVertexRenderer {
         this.selectGraphics = new PIXI.Graphics();
         this.selectGraphics.tint = this.selectColor;
         this.selectGraphics.beginFill(0xFFFFFF, 0.5 * this.opacity);
-        this.selectGraphics.drawCircle(this.coords.x, this.coords.y, figureSize / 2 * 1.30);
+        this.selectGraphics.drawCircle(0, 0, figureSize / 2 * 1.30);
         this.selectGraphics.endFill();
     }
     _drawSelectEllipseShape() {
@@ -235,34 +274,44 @@ class WebglVertexRenderer {
             'network-type': 'select-vertex'
         });
     }
-    setLabelContent() {
-        console.info("TODO: setLabelContent")
-    }
-    setLabelText(text) {
-        console.info("TODO: setLabelText")
+    _renderLabelEl() {
+        var linesCount = this.labelLines.length;
+        var yStart = this.labelPositionY - (linesCount * this.labelSize / 2);
+        for (var i = 0; i < linesCount; i++) {
+            var line = this.labelLines[i];
+            var textWidth = this._textWidthBySize(line, this.labelSize);
+            var x = this.labelPositionX - (textWidth / 2);
+            var y = yStart + (i * this.labelSize);
+            var pixiText = new PIXI.Text(line, {
+                fontFamily: 'Monospace',
+                fontSize: this.labelSize,
+                fill: this.cc(this.labelColor),
+                align: 'left' //??
+            });
+            pixiText.position.set(x, y);
+            // pixiText.resolution = 2; //??
+
+            this.group.addChild(pixiText);
+        }
     }
     _setLabelText(text) {
-        console.info("TODO: _setLabelText")
-    }
-    select(color) {
-        if (color) {
-            this.selectColor = this.cc(color);
-            this.selectGraphics.tint = this.selectColor;
+        this.labelText = text.toString();
+        this.labelLines = this.labelText.split(/\\n/);
+        this.labelLinesLength = this.labelLines.length;
+        var maxLabelWidth = 0;
+        for (var i = 0; i < this.labelLinesLength; i++) {
+            var line = this.labelLines[i];
+            var textWidth = this._textWidthBySize(line, this.labelSize);
+            if (textWidth > maxLabelWidth) {
+                maxLabelWidth = textWidth;
+            }
         }
-        this.selectGraphics.visible = true;
-        this.selected = true;
-
-        this.parentContainer.setChildIndex(this.group, this.parentContainer.children.length - 1);
+        this._textWidth = maxLabelWidth * 1.2;
+        this._textHeight = this.labelLinesLength * this.labelSize * 1.2;
     }
-
-    deselect() {
-        this._removeSelect();
-        this.selected = false;
+    _textWidthBySize(text, pixelFontSize) {
+        return parseInt(text.length * pixelFontSize * 0.6);
     }
-    _removeSelect() {
-        this.selectGraphics.visible = false;
-    }
-
     _getMidSize() {
         var size = (Array.isArray(this.size)) ? this._slicesMax(this.pieSlices) : this.size;
         var strokeSize = (Array.isArray(this.strokeSize)) ? this._slicesMax(this.donutSlices) : this.strokeSize;

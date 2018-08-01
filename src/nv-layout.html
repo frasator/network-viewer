@@ -54,15 +54,38 @@
             left: 0;
             overflow-x: hidden;
             overflow-y: hidden;
+            height: 100%;
+            width: 100%;
             /* pointer-events: none; */
+        }
+
+        #selectHelp {
+            position: absolute;
+            display: none;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 0;
+            border: 2px solid #ff6500;
+            opacity: 0.5;
+            background-color: #fff0e7;
+            pointer-events: none;
+        }
+
+        #linkHelpDiv {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
     </style>
     <template>
-        <div id="svgDiv" style="height:100%;width:100%;background-color:{{backgroundColor}};">
+        <div id="svgDiv" hidden style="height:100%;width:100%;background-color:{{backgroundColor}};">
             <div id="mini1" hidden="{{hideMiniMap}}">
                 <div id="mini2"></div>
             </div>
-            <canvas id="canvas"></canvas>
             <svg xmlns="http://www.w3.org/2000/svg" id="svg" width="100%" height="100%" on-wheel="handleWheel" on-mousedown="mouseDownHandler" on-mouseup="mouseUpHandler" on-mouseover="mouseHoverHandler" on-contextmenu="mouseContextMenuHandler">
                 <rect id="backgroundColorRect" x="0" y="0"></rect>
                 <svg id="drawArea">
@@ -70,8 +93,8 @@
                         <g id="scaleBackGroup" transform$="{{computeTransform(tx,ty,scale)}}"></g>
                     </svg>
                     <svg id="frontSvg" x="0" y="0">
-                        <line id="linkHelp" x1="0" y1="0" x2="0" y2="0" stroke="slategray" opacity="1" stroke-width="2" cursor="pointer"></line>
-                        <rect id="selectHelp" x="0" y="0" width="0" height="0" stroke-width="2" stroke="#ff6500" opacity="0.5" fill="#fff0e7"></rect>
+                        <line id="linkHelpoff" x1="0" y1="0" x2="0" y2="0" stroke="slategray" opacity="1" stroke-width="2" cursor="pointer"></line>
+                        <rect id="selectHelpOff" x="0" y="0" width="0" height="0" stroke-width="2" stroke="#ff6500" opacity="0.5" fill="#fff0e7"></rect>
 
                         <g id="scaleFrontGroup" font-family$="{{computeFontFamily()}}" transform$="{{computeTransform(tx,ty,scale)}}">
                             <!--<g id="scaleFrontGroup" font-family="Ubuntu Mono">-->
@@ -80,7 +103,14 @@
                 </svg>
             </svg>
         </div>
-        <div id="webgl" style="height:100%;width:100%;background-color:{{backgroundColor}};"></div>
+        <canvas id="canvas"></canvas>
+        <div id="webgl"></div>
+        <div id="selectHelp"></div>
+        <div id="linkHelpDiv">
+            <svg style="overflow: visible;" width="100%" height="100%">
+                <line id="linkHelp" x1="0" y1="0" x2="0" y2="0" stroke="slategray" opacity="1" stroke-width="2" cursor="pointer"></line>
+            </svg>
+        </div>
     </template>
 </dom-module>
 <script>
@@ -88,7 +118,8 @@
         is: 'nv-layout',
         properties: {
             backgroundColor: {
-                type: String
+                type: String,
+                observer: 'backgroundColorChanged'
             },
             backCanvas: {
                 type: Object,
@@ -170,6 +201,9 @@
             'mouseleave': 'handleMouseLeave',
             'mouseenter': 'handleMouseEnter',
         },
+        backgroundColorChanged: function(neo, old) {
+            this.style.backgroundColor = this.backgroundColor;
+        },
         created: function() {},
         ready: function() {
             var me = this;
@@ -177,6 +211,7 @@
             var canvas = new fabric.Canvas(this.$.canvas);
             this.set('backCanvas', canvas);
             var canvasContainer = this.$.canvas.parentNode;
+            canvasContainer.classList.add('style-scope', 'nv-layout');
             this.async(function() {
                 var vRect = this.getBoundingClientRect();
                 canvas.setWidth(vRect.width);
@@ -188,18 +223,30 @@
             }, 60);
         },
         pixi: function(vRect) {
+            PIXI.settings.PRECISION_FRAGMENT;
             this.pixi = new PIXI.Application(vRect.width, vRect.height, {
+                resolution: 1,
                 antialias: true,
-                transparent:true
+                transparent: true
             });
             this.$.webgl.appendChild(this.pixi.view);
             this.container = new PIXI.Container();
             this.container.interactive = true;
             this.container.__networkType = 'container';
             this.container.containsPoint = () => true;
-            this.container.on('click', (e) => {
-                this.mouseDownHandler(e);
+            this.container.on('mousedown', (e) => {
+                this.handleContainerMouseDown(e);
             });
+            this.container.on('mouseup', (e) => {
+                this.handleContainerMouseUp(e);
+            });
+            // this.container.on('mouseover', (e) => {
+            //     this.mouseHoverHandler(e);
+            // });
+            // this.container.on('rightclick', (e) => {
+            //     this.mouseContextMenuHandler(e);
+            // });
+            // TODO mouse wheel
             this.pixi.stage.addChild(this.container);
         },
         exportSVG: function() {
@@ -326,28 +373,23 @@
             }
             switch (neo) {
                 case "add":
-                    this.$.svgDiv.appendChild(this.$.svg);
-                    // this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.insertBefore(this.$.webgl, this.$.selectHelp);
                     break;
                 case "join":
-                    this.$.svgDiv.appendChild(this.$.svg);
-                    // this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.insertBefore(this.$.webgl, this.$.selectHelp);
                     break;
                 case "delete":
-                    this.$.svgDiv.appendChild(this.$.svg);
-                    // this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.insertBefore(this.$.webgl, this.$.selectHelp);
                     break;
                 case "selectbackground":
-                    this.$.svgDiv.appendChild(this.$.canvas.parentNode);
-                    // this.$.drawArea.appendChild(this.$.backSvg);
+                    var cavasContainer = this.querySelector('.canvas-container');
+                    this.insertBefore(cavasContainer, this.$.selectHelp);
                     break;
                 case "select":
-                    this.$.svgDiv.appendChild(this.$.svg);
-                    // this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.insertBefore(this.$.webgl, this.$.selectHelp);
                     break;
                 case "move":
-                    this.$.svgDiv.appendChild(this.$.svg);
-                    // this.$.drawArea.appendChild(this.$.frontSvg);
+                    this.insertBefore(this.$.webgl, this.$.selectHelp);
                     break;
                 default:
                     break;
@@ -436,11 +478,13 @@
             this.updateMini();
         },
         mouseHoverHandler: function(e) {
-            var targetEl = e.target;
-            var targetNetworkType = targetEl.getAttribute('network-type');
+            var targetNetworkType = e.target.__networkType;
+            var oe = e.data.originalEvent;
             var br = this.getBoundingClientRect();
-            var x = e.clientX - br.left;
-            var y = e.clientY - br.top;
+            var x = oe.clientX - br.left;
+            var y = oe.clientY - br.top;
+            console.log(targetNetworkType);
+            console.log(e.target);
             switch (targetNetworkType) {
                 case 'vertex-g':
                 case 'vertex':
@@ -508,135 +552,136 @@
             var downY = oe.clientY - br.top;
             switch (this.mode) {
                 case "add":
-                    /* event coordinates */
-                    if (targetNetworkType !== 'vertex' && targetNetworkType !== 'vertex-label') {
-                        this.fire('createvertex', {
-                            x: downX,
-                            y: downY
-                        });
-                    }
+                    // /* event coordinates */
+                    // if (targetNetworkType !== 'vertex' && targetNetworkType !== 'vertex-label') {
+                    //     this.fire('createvertex', {
+                    //         x: downX,
+                    //         y: downY
+                    //     });
+                    // }
                     break;
                 case "move":
                     switch (targetNetworkType) {
-                        case 'vertex':
-                        case 'vertex-label':
-                            this._handleDownSelectVertex(e);
-                            break;
-                        case 'edge':
-                        case 'edge-label':
-                            break;
-                        default:
-                            this._handleDownMoveCanvas(e);
+                        // case 'vertex':
+                        // case 'vertex-label':
+                        //     this._handleDownSelectVertex(e);
+                        //     break;
+                        // case 'edge':
+                        // case 'edge-label':
+                        //     break;
+                        default: this._handleDownMoveCanvas(e);
                     }
                     break;
                 case "select":
                     switch (targetNetworkType) {
-                        case 'vertex':
-                        case 'vertex-label':
-                            this._handleDownSelectVertex(e);
-                            break;
+                        // case 'vertex':
+                        // case 'vertex-label':
+                        //     this._handleDownSelectVertex(e);
+                        //     break;
                         case 'edge':
                         case 'edge-label':
                             this._handleDownSelectEdge(e);
                             break;
                         default:
-                            this.selectArea = true;
-                            /* background clicked */
-                            var lastX = 0,
-                                lastY = 0;
-                            var handler = function(moveEvent) {
-                                moveEvent.preventDefault();
-                                var moveX = moveEvent.clientX - br.left;
-                                var moveY = moveEvent.clientY - br.top;
-                                var dispX = moveX - downX;
-                                var dispY = moveY - downY;
-                                var x = (dispX >= 0) ? downX : downX - Math.abs(dispX);
-                                var y = (dispY >= 0) ? downY : downY - Math.abs(dispY);
-                                // Update selectRect size and position
-                                me.$.selectHelp.setAttribute('x', x);
-                                me.$.selectHelp.setAttribute('y', y);
-                                me.$.selectHelp.setAttribute('width', Math.abs(dispX));
-                                me.$.selectHelp.setAttribute('height', Math.abs(dispY));
-                            };
-                            this.$.svg.addEventListener('mousemove', handler);
-                            this.moveHandlers.push(handler);
+                            // this.selectArea = true;
+                            // /* background clicked */
+                            // var lastX = 0,
+                            //     lastY = 0;
+                            // var handler = (me) => {
+                            //     me.preventDefault();
+                            //     var moveX = me.clientX - br.left;
+                            //     var moveY = me.clientY - br.top;
+                            //     var dispX = moveX - downX;
+                            //     var dispY = moveY - downY;
+                            //     var x = (dispX >= 0) ? downX : downX - Math.abs(dispX);
+                            //     var y = (dispY >= 0) ? downY : downY - Math.abs(dispY);
+                            //     // Update selectRect size and position
+                            //     this.$.selectHelp.setAttribute('x', x);
+                            //     this.$.selectHelp.setAttribute('y', y);
+                            //     this.$.selectHelp.setAttribute('width', Math.abs(dispX));
+                            //     this.$.selectHelp.setAttribute('height', Math.abs(dispY));
+                            // };
+                            // this.$.webgl.addEventListener('mousemove', handler);
+                            // this.moveHandlers.push(handler);
                     }
                     break;
                 case "join":
                     /* vertex clicked */
                     if (targetNetworkType === 'vertex' || targetNetworkType === 'vertex-label') {
-                        var vertexId = this.getVertexId(targetEl);
-                        // first time vertex click
-                        if (this.joinSourceVertex == null) {
-                            this.joinSourceVertex = vertexId;
-                            this.$.linkHelp.setAttribute('x1', downX);
-                            this.$.linkHelp.setAttribute('y1', downY);
-                            this.$.linkHelp.setAttribute('x2', downX);
-                            this.$.linkHelp.setAttribute('y2', downY);
-                            var handler = function(moveEvent) {
-                                moveEvent.preventDefault();
-                                var moveX = moveEvent.clientX - br.left;
-                                var moveY = moveEvent.clientY - br.top;
-                                me.$.linkHelp.setAttribute('x2', moveX);
-                                me.$.linkHelp.setAttribute('y2', moveY);
-                            };
-                            this.$.svg.addEventListener('mousemove', handler);
-                            this.moveHandlers.push(handler);
-                            // second vertex click
-                        } else if (this.joinSourceVertex !== vertexId) {
-                            this.fire('createedge', {
-                                sourceId: this.joinSourceVertex,
-                                targetId: vertexId
-                            });
-                            this.joinSourceVertex = null;
-                        }
+                        // var vertexId = e.target.__vertex.id;
+                        // // first time vertex click
+                        // if (this.joinSourceVertex == null) {
+                        //     this.joinSourceVertex = vertexId;
+                        //     this.$.linkHelp.setAttribute('x1', downX);
+                        //     this.$.linkHelp.setAttribute('y1', downY);
+                        //     this.$.linkHelp.setAttribute('x2', downX);
+                        //     this.$.linkHelp.setAttribute('y2', downY);
+                        //     var handler = (me) => {
+                        //         me.preventDefault();
+                        //         var moveX = me.clientX - br.left;
+                        //         var moveY = me.clientY - br.top;
+                        //         this.$.linkHelp.setAttribute('x2', moveX);
+                        //         this.$.linkHelp.setAttribute('y2', moveY);
+                        //     };
+                        //     this.$.webgl.addEventListener('mousemove', handler);
+                        //     this.moveHandlers.push(handler);
+                        //     // second vertex click
+                        // } else if (this.joinSourceVertex !== vertexId) {
+                        //     this.fire('createedge', {
+                        //         sourceId: this.joinSourceVertex,
+                        //         targetId: vertexId
+                        //     });
+                        //     this.joinSourceVertex = null;
+                        // }
                     }
                     break;
                 case "delete":
-                    if (targetNetworkType === 'vertex' || targetNetworkType === 'vertex-label') {
-                        var vertexId = this.getVertexId(targetEl);
-                        this.fire('removevertex', {
-                            vertexId: vertexId
-                        });
-                    }
+                    // if (targetNetworkType === 'vertex' || targetNetworkType === 'vertex-label') {
+                    //     var vertexId = e.target.__vertex.id;
+                    //     this.fire('removevertex', {
+                    //         vertexId: vertexId
+                    //     });
+                    // }
                     if (targetNetworkType === 'edge' || targetNetworkType === 'edge-label') {
-                        var edgeId = this.getEdgeId(targetEl);
+                        var edgeId = e.target.__edge.id;
                         this.fire('removeedge', {
                             edgeId: edgeId
                         });
                     }
                     break;
                 case "selectbackground":
-                    if (targetNetworkType === 'background-image') {
-                        targetEl.parentNode.appendChild(targetEl);
-                        var lastX = downX;
-                        var lastY = downY;
-                        var handler = function(moveEvent) {
-                            moveEvent.preventDefault();
-                            var moveX = moveEvent.clientX - br.left;
-                            var moveY = moveEvent.clientY - br.top;
-                            var dispX = moveX - lastX;
-                            var dispY = moveY - lastY;
-
-                            dispX /= me.scale;
-                            dispY /= me.scale;
-
-                            var x = parseInt(targetEl.getAttribute('x'));
-                            var y = parseInt(targetEl.getAttribute('y'));
-
-                            x += dispX;
-                            y += dispY;
-
-                            targetEl.setAttribute('x', x);
-                            targetEl.setAttribute('y', y);
-
-                            lastX = moveX;
-                            lastY = moveY;
-                        };
-                        this.$.svg.addEventListener('mousemove', handler);
-                        this.moveHandlers.push(handler);
-                    }
-                    break;
+                    // OLD CODE NO USED?
+                    // if (targetNetworkType === 'background-image') {
+                    //     debugger //TODO
+                    //     targetEl.parentNode.appendChild(targetEl);
+                    //     var lastX = downX;
+                    //     var lastY = downY;
+                    //     var handler = (me) => {
+                    //         me.preventDefault();
+                    //         var moveX = me.clientX - br.left;
+                    //         var moveY = me.clientY - br.top;
+                    //         var dispX = moveX - lastX;
+                    //         var dispY = moveY - lastY;
+                    //
+                    //         dispX /= this.scale;
+                    //         dispY /= this.scale;
+                    //
+                    //         var x = parseInt(target.getAttribute('x'));
+                    //         var y = parseInt(targetEl.getAttribute('y'));
+                    //
+                    //         x += dispX;
+                    //         y += dispY;
+                    //
+                    //         targetEl.setAttribute('x', x);
+                    //         targetEl.setAttribute('y', y);
+                    //
+                    //         lastX = moveX;
+                    //         lastY = moveY;
+                    //     };
+                    //     this.$.svg.addEventListener('mousemove', handler);
+                    //     this.moveHandlers.push(handler);
+                    // }
+                    // break;
             }
         },
         leftMouseUp: function(event) {
@@ -652,27 +697,27 @@
                 case "move":
                 case "select":
                     if (this.selectArea && !event.ctrlKey) {
-                        var x = parseFloat(this.$.selectHelp.getAttribute('x'));
-                        var y = parseFloat(this.$.selectHelp.getAttribute('y'));
-                        var width = parseFloat(this.$.selectHelp.getAttribute('width'));
-                        var height = parseFloat(this.$.selectHelp.getAttribute('height'));
-
-                        if (width == 0 && height == 0) {
-                            this.fire('selectback');
-                        }
-                        this.fire('selectarea', {
-                            x: x,
-                            y: y,
-                            width: width,
-                            height: height
-                        });
-                        this.selectArea = false;
+                        //     var x = parseFloat(this.$.selectHelp.getAttribute('x'));
+                        //     var y = parseFloat(this.$.selectHelp.getAttribute('y'));
+                        //     var width = parseFloat(this.$.selectHelp.getAttribute('width'));
+                        //     var height = parseFloat(this.$.selectHelp.getAttribute('height'));
+                        //
+                        //     if (width == 0 && height == 0) {
+                        //         this.fire('selectback');
+                        //     }
+                        //     this.fire('selectarea', {
+                        //         x: x,
+                        //         y: y,
+                        //         width: width,
+                        //         height: height
+                        //     });
+                        //     this.selectArea = false;
                     } else {
                         switch (targetNetworkType) {
-                            case 'vertex':
-                            case 'vertex-label':
-                                this._handleUpSelectVertex(event);
-                                break;
+                            // case 'vertex':
+                            // case 'vertex-label':
+                                // this._handleUpSelectVertex(event);
+                                // break;
                             case 'edge':
                             case 'edge-label':
                                 this._handleUpSelectEdge(event);
@@ -686,16 +731,16 @@
                     this._removeMouseMoveHandlers();
                     break;
                 case "join":
-                    if (!(targetNetworkType === 'vertex' || targetNetworkType === 'vertex-label')) {
-                        this.joinSourceVertex = null;
-                    }
-                    if (this.joinSourceVertex == null) {
-                        this.$.linkHelp.setAttribute('x1', 0);
-                        this.$.linkHelp.setAttribute('y1', 0);
-                        this.$.linkHelp.setAttribute('x2', 0);
-                        this.$.linkHelp.setAttribute('y2', 0);
-                        this._removeMouseMoveHandlers();
-                    }
+                    // if (!(targetNetworkType === 'vertex' || targetNetworkType === 'vertex-label')) {
+                    //     this.joinSourceVertex = null;
+                    // }
+                    // if (this.joinSourceVertex == null) {
+                    //     this.$.linkHelp.setAttribute('x1', 0);
+                    //     this.$.linkHelp.setAttribute('y1', 0);
+                    //     this.$.linkHelp.setAttribute('x2', 0);
+                    //     this.$.linkHelp.setAttribute('y2', 0);
+                    //     this._removeMouseMoveHandlers();
+                    // }
 
                     break;
                 case "delete":
@@ -786,110 +831,13 @@
                 default:
             }
         },
-        _removeMouseMoveHandlers: function() {
-            for (var i = 0; i < this.moveHandlers.length; i++) {
-                this.$.svg.removeEventListener('mousemove', this.moveHandlers[i]);
-            }
-            this.moveHandlers = [];
-        },
-
-        /* NEW HANDLERS */
-        /**/
-        _handleUp: function(e) {
-            this.style.cursor = "";
-            this._removeMouseMoveHandlers();
-        },
-        _handleDownMoveCanvas: function(e) {
-            var me = this;
-            // var targetEl = e.target;
-            // var targetNetworkType = targetEl.getAttribute('network-type');
-            var br = this.getBoundingClientRect();
-            var downX = e.clientX - br.left;
-            var downY = e.clientY - br.top;
-
-            this.style.cursor = "all-scroll";
-            var lastX = downX;
-            var lastY = downY;
-            var handler = function(moveEvent) {
-                moveEvent.preventDefault();
-                var moveX = moveEvent.clientX - br.left;
-                var moveY = moveEvent.clientY - br.top;
-                var dispX = moveX - lastX;
-                var dispY = moveY - lastY;
-
-                me.tx += dispX;
-                me.ty += dispY;
-                me.x += dispX;
-                me.y += dispY;
-
-                lastX = moveX;
-                lastY = moveY;
-
-                me.updateBack();
-                me.updateMini();
-            };
-            this.$.svg.addEventListener('mousemove', handler);
-            this.moveHandlers.push(handler);
-        },
-
-        _handleDownSelectVertex: function(e) {
-            var targetNetworkType = e.target.__networkType;
-            var oe = e.data.originalEvent;
-            var br = this.getBoundingClientRect();
-            var downX = oe.clientX - br.left;
-            var downY = oe.clientY - br.top;
-
-            var vertexId = e.target.__vertex.id;
-            this.fire('selectvertex', {
-                vertexId: vertexId,
-                addToSelection: oe.ctrlKey
-            });
-            var lastX = downX;
-            var lastY = downY;
-            var handler = (me) =>  {
-                me.preventDefault();
-                var moveX = me.clientX - br.left;
-                var moveY = me.clientY - br.top;
-                var dispX = moveX - lastX;
-                var dispY = moveY - lastY;
-
-                this.fire('moveselectedvertices', {
-                    dispX: dispX,
-                    dispY: dispY
-                });
-
-                lastX = moveX;
-                lastY = moveY;
-
-                me.updateMini();
-            };
-            this.$.svg.addEventListener('mousemove', handler);
-            this.moveHandlers.push(handler);
-        },
         _handleDownSelectEdge: function(e) {
-            var targetEl = e.target;
-            var edgeId = this.getEdgeId(targetEl);
-            var edgeId = this.getEdgeId(targetEl);
+            var oe = e.data.originalEvent;
+            var edgeId = e.target.__edge.id;
             this.fire('selectedge', {
                 edgeId: edgeId,
-                addToSelection: e.ctrlKey
+                addToSelection: oe.ctrlKey
             });
-        },
-        _handleUpSelectVertex: function(e) {
-            var me = this;
-            var targetEl = e.target;
-            var br = this.getBoundingClientRect();
-            var downX = e.clientX - br.left;
-            var downY = e.clientY - br.top;
-
-            var vertexId = this.getVertexId(targetEl);
-
-            this.fire('leftclickvertex', {
-                vertexId: vertexId,
-                x: downX,
-                y: downY
-            });
-            this._handleUp();
         },
         _handleUpSelectEdge: function(e) {
             var me = this;
@@ -930,5 +878,243 @@
         //     }
         //     return images;
         // }
+
+        /**************/
+        /**************/
+        /**************/
+        /**************/
+        /**************/
+
+        handleContainerMouseDown: function(e) {
+            var oe = e.data.originalEvent;
+            var br = this.getBoundingClientRect();
+            var downX = oe.clientX - br.left;
+            var downY = oe.clientY - br.top;
+            if (oe.shiftKey == true && oe.ctrlKey == true) {
+                this.style.cursor = "all-scroll";
+                var lastX = downX;
+                var lastY = downY;
+                var handler = function(me) {
+                    me.preventDefault();
+                    var moveX = me.clientX - br.left;
+                    var moveY = me.clientY - br.top;
+                    var dispX = moveX - lastX;
+                    var dispY = moveY - lastY;
+
+                    this.tx += dispX;
+                    this.ty += dispY;
+                    this.x += dispX;
+                    this.y += dispY;
+
+                    lastX = moveX;
+                    lastY = moveY;
+
+                    this.updateBack();
+                    this.updateMini();
+                };
+                this.$.webgl.addEventListener('mousemove', handler);
+                this.moveHandlers.push(handler);
+            } else {
+                switch (this.mode) {
+                    case "add":
+                        this.fire('createvertex', {
+                            x: downX,
+                            y: downY
+                        });
+                        break;
+                    case "select":
+                        /* Container clicked */
+                        this.selectArea = true;
+                        var lastX = 0,
+                            lastY = 0;
+                        var handler = (me) => {
+                            me.preventDefault();
+                            var moveX = me.clientX - br.left;
+                            var moveY = me.clientY - br.top;
+                            var dispX = moveX - downX;
+                            var dispY = moveY - downY;
+                            var x = (dispX >= 0) ? downX : downX - Math.abs(dispX);
+                            var y = (dispY >= 0) ? downY : downY - Math.abs(dispY);
+                            // Update selectRect size and position
+                            this._updateSelectHelp(x, y, dispX, dispY);
+                        };
+                        this.$.webgl.addEventListener('mousemove', handler);
+                        this.moveHandlers.push(handler);
+                        break;
+                    default:
+                }
+            }
+        },
+        handleContainerMouseUp: function(e) {
+            var oe = e.data.originalEvent;
+            var br = this.getBoundingClientRect();
+            var downX = oe.clientX - br.left;
+            var downY = oe.clientY - br.top;
+            switch (this.mode) {
+                case "select":
+                    if (this.selectArea && !oe.ctrlKey) {
+                        var x = parseFloat(this.$.selectHelp.style.left);
+                        var y = parseFloat(this.$.selectHelp.style.top);
+                        var width = parseFloat(this.$.selectHelp.style.width);
+                        var height = parseFloat(this.$.selectHelp.style.height);
+
+                        if (width == 0 && height == 0) {
+                            this.fire('selectback');
+                        }
+                        this.fire('selectarea', {
+                            x: x,
+                            y: y,
+                            width: width,
+                            height: height
+                        });
+                        this.selectArea = false;
+                    }
+                case "join":
+                    this._hideLinkHelp();
+                    break;
+                default:
+            }
+            this._handleUp();
+        },
+        handleVertexMouseDown: function(e, vertex) {
+            switch (this.mode) {
+                case "select":
+                case "move":
+                    this._downVertex(e, vertex);
+                    break;
+                case "join":
+                    // first time vertex click
+                    var oe = e.data.originalEvent;
+                    var br = this.getBoundingClientRect();
+                    var downX = oe.clientX - br.left;
+                    var downY = oe.clientY - br.top;
+                    if (this.joinSourceVertex == null) {
+                        this.joinSourceVertex = vertex.id;
+                        this.$.linkHelp.setAttribute('x1', downX);
+                        this.$.linkHelp.setAttribute('y1', downY);
+                        this.$.linkHelp.setAttribute('x2', downX);
+                        this.$.linkHelp.setAttribute('y2', downY);
+                        var handler = (me) => {
+                            me.preventDefault();
+                            var moveX = me.clientX - br.left;
+                            var moveY = me.clientY - br.top;
+                            this.$.linkHelp.setAttribute('x2', moveX);
+                            this.$.linkHelp.setAttribute('y2', moveY);
+                        };
+                        this.$.webgl.addEventListener('mousemove', handler);
+                        this.moveHandlers.push(handler);
+                        // second vertex click
+                    } else if (this.joinSourceVertex !== vertex.id) {
+                        this.fire('createedge', {
+                            sourceId: this.joinSourceVertex,
+                            targetId: vertex.id
+                        });
+                        this.joinSourceVertex = null;
+                    }
+                    break;
+                case "delete":
+                    this.fire('removevertex', {
+                        vertexId: vertex.id
+                    });
+                    break;
+                default:
+            }
+        },
+        handleVertexMouseUp: function(e, vertex) {
+            switch (this.mode) {
+                case 'select':
+                    this._upVertex(e, vertex);
+                    this._handleUp();
+                    break;
+                case 'join':
+                    if (this.joinSourceVertex == null) {
+                        this._hideLinkHelp();
+                        this._handleUp();
+                    }
+                    break;
+                default:
+                    this._handleUp();
+            }
+        },
+        /*****/
+        _downVertex: function(e, vertex) {
+            var oe = e.data.originalEvent;
+            var br = this.getBoundingClientRect();
+            var downX = oe.clientX - br.left;
+            var downY = oe.clientY - br.top;
+
+            this.fire('selectvertex', {
+                vertexId: vertex.id,
+                addToSelection: oe.ctrlKey
+            });
+            var lastX = downX;
+            var lastY = downY;
+            var handler = (me) => {
+                me.preventDefault();
+                var moveX = me.clientX - br.left;
+                var moveY = me.clientY - br.top;
+                var dispX = moveX - lastX;
+                var dispY = moveY - lastY;
+
+                this.fire('moveselectedvertices', {
+                    dispX: dispX,
+                    dispY: dispY
+                });
+
+                lastX = moveX;
+                lastY = moveY;
+
+                this.updateMini();
+            };
+            this.$.webgl.addEventListener('mousemove', handler);
+            this.moveHandlers.push(handler);
+        },
+        _upVertex: function(e, vertex) {
+            var oe = e.data.originalEvent;
+            var br = this.getBoundingClientRect();
+            var downX = oe.clientX - br.left;
+            var downY = oe.clientY - br.top;
+
+            this.fire('leftclickvertex', {
+                vertexId: vertex.id,
+                x: downX,
+                y: downY
+            });
+        },
+
+        /** General up **/
+        _removeMouseMoveHandlers: function() {
+            for (var i = 0; i < this.moveHandlers.length; i++) {
+                this.$.webgl.removeEventListener('mousemove', this.moveHandlers[i]);
+            }
+            this.moveHandlers = [];
+        },
+        _handleUp: function(e) {
+            this.style.cursor = "";
+
+            this._hideSelectHelp();
+            this._removeMouseMoveHandlers();
+        },
+        _updateSelectHelp: function(x, y, width, height) {
+            this.$.selectHelp.style.display = 'block';
+            this.$.selectHelp.style.left = x + 'px';
+            this.$.selectHelp.style.top = y + 'px';
+            this.$.selectHelp.style.width = Math.abs(width) + 'px';
+            this.$.selectHelp.style.height = Math.abs(height) + 'px';
+        },
+        _hideSelectHelp: function() {
+            this.$.selectHelp.style.display = '';
+            this.$.selectHelp.style.left = '';
+            this.$.selectHelp.style.top = '';
+            this.$.selectHelp.style.width = '';
+            this.$.selectHelp.style.height = '';
+        },
+        _hideLinkHelp: function() {
+            this.$.linkHelp.setAttribute('x1', 0);
+            this.$.linkHelp.setAttribute('y1', 0);
+            this.$.linkHelp.setAttribute('x2', 0);
+            this.$.linkHelp.setAttribute('y2', 0);
+            this.joinSourceVertex = null;
+        }
     });
 </script>

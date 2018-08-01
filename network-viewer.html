@@ -2645,7 +2645,7 @@
             var added = this.graph.addVertex(vertex);
             if (added) {
                 vertex.render({
-                    target: this.$.networkLayout.pixi
+                    target: this.$.networkLayout
                 });
             } else {
                 vertex = this.graph.getVertexById(id);
