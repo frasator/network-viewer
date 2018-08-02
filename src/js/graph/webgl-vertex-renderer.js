@@ -165,114 +165,63 @@ class WebglVertexRenderer {
         }
     }
     _drawSimpleShape() {
+        var mid = this._getMidSize();
+        var midl2 = mid / 2;
+        this.graphics = new PIXI.Graphics();
+        this.graphics.lineStyle(this.strokeSize, this.cc(this.strokeColor), this.opacity, 1);
+        this.graphics.beginFill(this.cc(this.color), this.opacity);
         switch (this.shape) {
         case "circle":
-            this._drawCircleShape();
+            this.graphics.drawCircle(0, 0, mid);
             break;
         case "ellipse":
+            this.graphics.drawEllipse(0, 0, mid * 1.5, mid);
             break;
         case "square":
+            this.graphics.drawRect(-mid, -mid, mid * 2, mid * 2);
             break;
         case "rectangle":
+            this.graphics.drawRect(-mid * 3 / 2, -mid, mid * 3, mid * 2);
             break;
         case "textfit":
             break;
         }
+        this.graphics.endFill();
         this.group.addChild(this.graphics);
         this.parentContainer.addChild(this.group);
-    }
-    _drawCircleShape() {
-        var mid = this._getMidSize();
-        this.graphics = new PIXI.Graphics();
-        this.graphics.lineStyle(this.strokeSize, this.cc(this.strokeColor), this.opacity, 1);
-        this.graphics.beginFill(this.cc(this.color), this.opacity);
-        this.graphics.drawCircle(0, 0, mid);
-        this.graphics.endFill();
         // this.graphics.setTransform(this.coords.x - mid, this.coords.y - mid);
     }
-
     _drawSelectShape() {
-        if (this.complex === true) {
-            this._drawSelectCircleShape();
-        } else {
-            switch (this.shape) {
-            case "circle":
-                this._drawSelectCircleShape();
-                break;
-            case "ellipse":
-                this._drawSelectEllipseShape();
-                break;
-            case "square":
-                this._drawSelectSquareShape();
-                break;
-            case "rectangle":
-                this._drawSelectRectangleShape();
-                break;
-            case "textfit":
-                this._drawSelectRectangleShape();
-                break;
-            }
-        }
-        this.selectGraphics.visible = false;
-        this.group.addChild(this.selectGraphics);
-    }
-    _drawSelectCircleShape() {
         var figureSize = this._getFigureSize();
+        var mid = this._getMidSize();
+        var midl2 = mid / 2;
         this.selectGraphics = new PIXI.Graphics();
         this.selectGraphics.tint = this.selectColor;
         this.selectGraphics.beginFill(0xFFFFFF, 0.5 * this.opacity);
-        this.selectGraphics.drawCircle(0, 0, figureSize / 2 * 1.30);
+        if (this.complex === true) {
+            this.selectGraphics.drawCircle(0, 0, figureSize / 2 * 1.30);
+        } else {
+            switch (this.shape) {
+            case "circle":
+                this.selectGraphics.drawCircle(0, 0, figureSize / 2 * 1.30);
+                break;
+            case "ellipse":
+                this.selectGraphics.drawEllipse(0, 0, figureSize, figureSize / 1.45);
+                break;
+            case "square":
+                this.selectGraphics.drawRect(-midl2, -midl2, mid * 2 * 1.3, mid * 2 * 1.3);
+                break;
+            case "rectangle":
+                this.selectGraphics.drawRect(-midl2, -midl2, mid * 3 * 1.3, mid * 2 * 1.3);
+                break;
+            case "textfit":
+                this.selectGraphics.drawRect(-midl2, -midl2, mid * 3 * 1.3, mid * 2 * 1.3);
+                break;
+            }
+        }
         this.selectGraphics.endFill();
-    }
-    _drawSelectEllipseShape() {
-        var mid = this._getMidSize();
-        var figureSize = this._getFigureSize();
-        var rx = figureSize;
-        var ry = figureSize * 0.65;
-        if (this.size < 0) {
-            rx = this._textWidth + this.strokeSize;
-            ry = this._textHeight + this.strokeSize;
-        }
-        this.selectEl = SVG.create("ellipse", {
-            cx: mid,
-            cy: mid,
-            rx: rx,
-            ry: ry,
-            opacity: '0.5',
-            fill: '#999999',
-            'network-type': 'select-vertex'
-        });
-    }
-    _drawSelectSquareShape() {
-        var mid = this._getMidSize();
-        var figureSize = this._getFigureSize();
-        this.selectEl = SVG.create("rect", {
-            x: mid - (mid * 2.6 / 2),
-            y: mid - (mid * 2.6 / 2),
-            width: mid * 2.6,
-            height: mid * 2.6,
-            opacity: '0.5',
-            fill: '#999999',
-            'network-type': 'select-vertex'
-        });
-    }
-    _drawSelectRectangleShape() {
-        var mid = this._getMidSize();
-        var w = mid * 3 * 1.3;
-        var h = mid * 2 * 1.3;
-        if (this.size < 0) {
-            w = (this._textWidth + this.strokeSize) * 1.0 * 1.3;
-            h = (this._textHeight + this.strokeSize) * 1.2 * 1.3;
-        }
-        this.selectEl = SVG.create("rect", {
-            x: mid - (w / 2),
-            y: mid - (h / 2),
-            width: w,
-            height: h,
-            opacity: '0.5',
-            fill: '#999999',
-            'network-type': 'select-vertex'
-        });
+        this.selectGraphics.visible = false;
+        this.group.addChild(this.selectGraphics);
     }
     _renderLabelEl() {
         var linesCount = this.labelLines.length;
